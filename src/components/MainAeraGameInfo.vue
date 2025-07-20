@@ -1,0 +1,329 @@
+<template>
+  <el-scrollbar>
+  <!-- Background & Title Container-->
+  <div class="background-title-container">
+    <img :src="gameInfo.backgroundImage" alt="Game Background" class="game-background" />
+    <!-- Icon & Title Container -->
+    <div class="icon-title-container">
+      <img src="/images/icon.ico" alt="Game Icon" class="game-icon" />
+      <span class="game-title">{{ gameInfo.title }}</span>
+    </div>
+  </div>
+  <!-- Main Info & Actions Container  -->
+  <div class="main-info-action-container">
+    <!-- Action Button Container -->
+    <div class="action-button-container">
+      <div class="button-group">
+        <el-button type="primary" size="large" style="margin: 10px 5px; padding: 0 40px;">Play</el-button>
+        <el-button type="primary" size="large" style="margin: 10px 5px;">...</el-button>
+        <el-button type="primary" size="large" style="margin: 10px 5px;">Edit</el-button>
+        <div class="game-playtime-text">
+          <p>Time Played: {{ gameInfo.timePlayed }}</p>
+          <p>Last Played: {{ gameInfo.lastPlayed }}</p>
+        </div>
+      </div>
+    </div>
+    <!-- Cover Container -->
+    <div class="game-cover">
+      <img :src="gameInfo.coverImage" alt="Game Cover">
+    </div>
+  </div>
+  <!-- Detail Info & Description container -->
+  <div class="info-row-container">
+    <div class="detail-info-container">
+      <div class="custom-info-table">
+        <div class="info-row">
+          <div class="info-label">Install Path</div>
+          <div class="info-content">{{ gameInfo.installPath }}</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Install Size</div>
+          <div class="info-content">{{ gameInfo.installSize }}</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Genre</div>
+          <div class="info-content">{{ gameInfo.genre }}</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Developer</div>
+          <div class="info-content">{{ gameInfo.developer }}</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Publisher</div>
+          <div class="info-content">{{ gameInfo.publisher }}</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Release Date</div>
+          <div class="info-content">{{ gameInfo.releaseDate }}</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Tags</div>
+          <div class="info-content">
+            <div class="tags-flex-wrap">
+              <el-tag v-for="(tag, index) in gameInfo.tags" :key="index" style="margin: 2px 6px 2px 0;">{{ tag }}</el-tag>
+            </div>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Links</div>
+          <div class="info-content">
+            <div v-for="(link, name) in gameInfo.Link" :key="name">
+              <a :href="link" target="_blank" class="game-link">{{ name }}</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="description-container">
+      <el-card style="margin:10px;">
+        <template #header>
+          <span style="font-size: 1.5em; color: #409eff; font-weight: bold;">Description</span>
+        </template>
+        <p v-for="(line, index) in gameInfo.description" :key="index" class="description-text">{{ line }}</p>
+      </el-card>
+    </div>
+  </div>
+  </el-scrollbar>
+</template>
+
+<script setup lang="ts">
+  import { ref } from 'vue'
+
+  const gameInfo = ref({
+    title: 'WHITE ALBUM 2',
+    coverImage: '/images/cover.jpg',
+    backgroundImage: '/images/background.png',
+    lastPlayed: '2025-02-08',
+    timePlayed: '77h 50m',
+    installPath: 'C:\\Amusement\\WHITE ALBUM 2',
+    installSize: '11.709 GB',
+    genre: 'Visual Novel',
+    developer: 'Leaf',
+    publisher: 'AQUAPLUS',
+    releaseDate: '2010-03-26',
+    tags: [
+      'Romance', 'University', 'Relationship Problems', 'Dramatic Love Triangle', 'Winter', 'Drama', 'Musical Themes',
+      'University Student Protagonist', 'Adult Heroine', 'Instrumentalist Heroine', 'Sex with Protagonist Only',
+      'Protagonist with Voice Acting', 'Multiple Endings',' High School', 'High School Student Protagonist', 'Male Protagonist',
+      'University Student Heroine', 'High School Student Heroine', 'Journalist Protagonist', 'More Than Seven Endings', 'Nakige',
+      'Music Club', 'Musician Heroine', 'ADV', 'Insert Songs', 'Female Friend', 'Singer Heroine'
+    ],
+    Link: {
+      '批評空間': 'https://erogamescape.dyndns.org/~ap2/ero/toukei_kaiseki/game.php?game=13255',
+      'VNDB': 'https://vndb.org/v7771',
+      'Bangumi': 'https://bgm.tv/subject/22290',
+      'WikiPedia': 'https://wikipedia.org/wiki/White_Album_2',
+      'WikiData': 'https://www.wikidata.org/wiki/Q5960516'
+    },
+    description: [
+      '~ Introductory Chapter ~',
+      'Shivering from the cold wind, when the song was heard ......',
+      'It\'s like it\'s trying to match the guitar melody I\'m playing in the classroom at sunset.' ,
+      'It\'s like it\'s trying to match the piano melody played by someone I\'ve never met in the classroom next door.',
+      'From the rooftop rings that voice as loud and clear as a bell, linking the scattered melodies of the three of us together.',
+      'It started, it was in the late fall like that.' ,
+      'Back then, someone was in love with someone.' ,
+      'Whoever it is is fighting hard. Whoever is going forward with a strong heart. Whoever is single-minded, very purely and honestly ......',
+      'Wanting to bond from the bottom of my heart and capture this irreplaceable moment.',
+      'So at that point, someone fell in love with someone. It\'s a love affair that can\'t be one step too late.',
+      'Then came the winter - the snow that fell from the sky and covered all sin.' ,
+      'Soon spring arrives - along with the melting snow, all the punishments are coming. ',
+      '',
+      '--------- ---------- ---------',
+      '~ Closing Chapter ~',
+      'The cold wind blows and shivers, the song reaches the ears -',
+      'The song that froze three years ago ......',
+      'Had echoed in the sunset-stained campus, in the empty cafeteria, by the windows of the silent schoolhouse ......',
+      'Sprouted in passion, sublimated in sheer longing, only to dissipate in the end as a song of deception.' ,
+      'That winter of three men walking together is far away, but the winter of one man and one man goes on week after week.',
+      'The season comes to late fall.',
+      'The ugly wounds caused by that year\'s broken bonds had not yet dried up, but the premonition of change to come was already upon us.',
+      'Two lonely melodies attract and hurt each other, and brand new melodies will be called.',
+      'A new winter will come soon.',
+      'A winter without that person\'s company, a winter without her.',
+      'Long ago I didn\'t know what a white album was. Because, I can no longer sing.',
+      'Long ago there will be no more love that cannot be conveyed. For, I will no longer be in love.',
+    ],
+  })
+</script>
+
+<style scoped>
+  .background-title-container {
+    position: relative;
+    width: 100%;
+    max-height: 70%;
+    overflow: hidden;
+  }
+
+  .icon-title-container {
+    position: absolute;
+    height: 4em;
+    width: auto;
+    left: 9px;
+    bottom: 9px;
+    display: flex;
+    align-items: center;
+    z-index: 3;
+  }
+
+  .game-title {
+    font-size: 2em;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: 1px;
+    text-shadow:
+      4px 4px 16px rgba(34,34,34,0.40),
+      2px 2px 4px rgba(34,34,34,0.28);
+  }
+
+  .game-icon {
+    width: auto;
+    height: 50px;
+    vertical-align: middle;
+  }
+
+  .game-background {
+    width: 100%;
+    object-fit: cover;
+    object-position: center center;
+  }
+
+  .main-info-action-container {
+    position: relative;
+    width: auto;
+    height: auto;
+    border-top: none;
+    padding: 0
+  }
+
+  .action-button-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    bottom: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.10);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    background: rgba(255,255,255,0.92);
+    z-index: 1;
+  }
+
+  .button-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-left: 10px;
+  }
+
+  .game-playtime-text {
+    width: auto;
+    height: 100%;
+    font-size: 0.85em;
+    margin-left: 18px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .game-cover {
+    position: absolute;
+    right: 10px;
+    bottom: 0;
+    width: 25%;
+    height: auto;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    pointer-events: none;
+  }
+
+  .game-cover img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 4px;
+    display: block;
+    pointer-events: auto;
+  }
+
+  .info-row-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .detail-info-container{
+    width: 400px;
+    height: auto;
+    margin: 0 5px;
+  }
+
+  .description-container {
+    width: auto;
+    height: auto;
+    margin: 0 5px;
+  }
+
+  .description-text {
+    word-break: break-all;
+    text-align: justify;
+    margin: 2px 0;
+    line-height: 1.7;
+  }
+
+  .tags-flex-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 6px;
+    align-items: flex-start;
+    margin: 2px 0;
+  }
+
+  .game-link {
+    color: #409eff;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .custom-info-table {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px 0 rgba(0,0,0,0.12);
+    margin: 10px 0 10px 10px;
+  }
+  
+  .info-row {
+    display: flex;
+    border-bottom: 1px solid #ebeef5;
+  }
+  
+  .info-row:last-child {
+    border-bottom: none;
+  }
+
+  .info-label {
+    width: 100px;
+    min-width: 100px;
+    padding: 12px;
+    background-color: #fafafa;
+    border-right: 1px solid #ebeef5;
+    font: 1em;
+    font-weight: 520;
+    color: #4080ff;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  .info-content {
+    flex: 1;
+    padding: 12px;
+    background-color: #ffffff;
+    font-size: 0.8em;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+</style>
