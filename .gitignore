@@ -13,6 +13,9 @@ dist-ssr
 dist-electron
 *.local
 
+# files created while running the app
+library
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
