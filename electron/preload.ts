@@ -22,3 +22,10 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
   // You can expose other APTs you need here.
   // ...
 })
+
+// -------- Expose Electron API to Renderer process ---------
+contextBridge.exposeInMainWorld('electronAPI', {
+  // game database operations
+  getGameById: (gameid:string) => ipcRenderer.invoke('get-game-by-id', gameid),
+  addGame: (game:any) => ipcRenderer.invoke('add-game', game)  // TODO: define the game type
+});

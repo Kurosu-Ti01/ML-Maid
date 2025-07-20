@@ -1,10 +1,21 @@
 import { app, BrowserWindow } from 'electron'
-// import { createRequire } from 'node:module'
+import { createRequire } from 'node:module'
+const require = createRequire(import.meta.url)
+import { ipcMain } from 'electron'
 import { fileURLToPath } from 'node:url'
+import { v4 as uuidv4 } from 'uuid'
 import path from 'node:path'
+import fs from 'node:fs'
 
-// const require = createRequire(import.meta.url)
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+// To avoid the "ReferenceError: __filename is not defined" error in ESM
+// See 👉 https://github.com/TooTallNate/node-bindings/issues/81
+// better-sqlite3 uses bindings internally, so we need to use createRequire to load it
+// u may need to rebuild it with `npx electron-rebuild -f -w better-sqlite3`
+// import Database from 'better-sqlite3'
+const Database = require('better-sqlite3')
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 process.env.APP_ROOT = path.join(__dirname, '..')
 
@@ -16,6 +27,67 @@ export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist')
 process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 'public') : RENDERER_DIST
 
 let win: BrowserWindow | null
+
+// Database and images paths
+const libPath = path.join(process.env.APP_ROOT, 'library')
+if (!fs.existsSync(libPath)) {
+  fs.mkdirSync(libPath, { recursive: true })
+}
+const dbPath_game = path.join(libPath, 'metadata.db');
+// const imgPath_game = path.join(libPath, 'images');
+
+const db = new Database(dbPath_game);
+
+// 初始化表
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS games (
+    uuid TEXT PRIMARY KEY,
+    title TEXT,
+    coverImage TEXT,
+    backgroundImage TEXT,
+    lastPlayed TEXT,
+    timePlayed TEXT,
+    installPath TEXT,
+    installSize TEXT,
+    genre TEXT,
+    developer TEXT,
+    publisher TEXT,
+    releaseDate TEXT,
+    tags TEXT,         -- use JSON.stringify to store, use JSON.parse to retrieve
+    links TEXT,        -- use JSON.stringify to store, use JSON.parse to retrieve
+    description TEXT   -- use JSON.stringify to store, use JSON.parse to retrieve
+  )
+`).run();
+
+ipcMain.handle('get-game-by-id', (_, gameid) => {
+  return db.prepare('SELECT * FROM games WHERE uuid = ?').get(gameid);
+});
+
+ipcMain.handle('add-game', (_, game) => {
+  const uuid = uuidv4();
+  const stmt = db.prepare(
+  `INSERT INTO games (
+    uuid, title, coverImage, backgroundImage, lastPlayed, timePlayed, installPath, installSize, genre, developer, publisher, releaseDate, tags, links, description
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  );
+  stmt.run(
+    uuid,
+    game.title,
+    game.coverImage,
+    game.backgroundImage,
+    game.lastPlayed,
+    game.timePlayed,
+    game.installPath,
+    game.installSize,
+    game.genre,
+    game.developer,
+    game.publisher,
+    game.releaseDate,
+    game.tags,        // may use JSON.stringify(game.tags)
+    game.links,       // may use JSON.stringify(game.links)
+    game.description  // may use JSON.stringify(game.description)
+  );
+});
 
 function createWindow() {
   win = new BrowserWindow({

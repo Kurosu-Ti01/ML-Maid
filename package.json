@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "better-sqlite3": "^12.2.0",
+    "bindings": "^1.5.0",
     "element-plus": "^2.10.4",
     "mitt": "^3.0.1",
     "pinia": "^3.0.3",
@@ -17,11 +19,13 @@
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.1",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.14.0",
     "@vitejs/plugin-vue": "^5.2.3",
     "@vue/tsconfig": "^0.7.0",
     "electron": "^30.0.1",
     "electron-builder": "^24.13.3",
+    "electron-rebuild": "^3.2.9",
     "npm-run-all2": "^7.0.2",
     "typescript": "~5.8.0",
     "unplugin-auto-import": "^19.3.0",
