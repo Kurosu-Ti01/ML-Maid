@@ -27,5 +27,14 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
 contextBridge.exposeInMainWorld('electronAPI', {
   // game database operations
   getGameById: (gameid:string) => ipcRenderer.invoke('get-game-by-id', gameid),
-  addGame: (game:any) => ipcRenderer.invoke('add-game', game)  // TODO: define the game type
+  addGame: (game:gameData) => ipcRenderer.invoke('add-game', game),
+  updateGame: (game:gameData) => ipcRenderer.invoke('update-game', game),
+  
+  // window operations
+  createEditWindow: (gameData:gameData) => ipcRenderer.invoke('create-edit-window', gameData),
+  
+  // load game data into edit window
+  onEditGameData: (callback: (data: gameData) => void) => {
+    ipcRenderer.on('load-edit-game-data', (_, data) => callback(data));
+  }
 });

@@ -4,34 +4,63 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'"> -->
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; media-src 'self'; connect-src 'self' https:;"> -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ML-Maid</title>
   </head>
   <body>
     <!-- mount your title bar at the top of you application's body tag -->
-    <div class="titlebar">ML-Maid</div>
+    <div id="titlebar" class="titlebar"></div>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
 
 <style>
-  button {
-  app-region: no-drag;
+html, body {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
-  .titlebar {
-    background: #F2F6FC;
-    color: #4080ff;
-    font-size: 1.5rem;
-    font-weight: bold;
-    letter-spacing: 2px;
-    display: flex;
-    align-items: center;
-    height: 50px;
-    border-bottom: 1px solid #dcdfe6;
-    padding: 0 20px;
-    user-select: none;
-    app-region: drag;
-  }
+#app {
+  width: 100vw;
+  /* Adjust height to account for the title bar */
+  /* This ensures the app fills the remaining space below the title bar */
+  height: calc(100vh - 50px);
+  overflow: hidden;
+}
+
+button {
+  -webkit-app-region: no-drag;
+}
+
+.titlebar {
+  background: #F2F6FC;
+  color: #4080ff;
+  font-size: 1.5rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  display: flex;
+  align-items: center;
+  height: 50px;
+  border-bottom: 1px solid #dcdfe6;
+  padding: 0 20px;
+  user-select: none;
+  -webkit-app-region: drag;
+}
+
+/* main-window title */
+.main-titlebar {
+  background: #F2F6FC;
+  color: #4080ff;
+}
+
+/* edit-window title */
+.edit-titlebar {
+  background: #FFF7E6;
+  color: #E6A23C;
+  font-size: 1.2rem;
+}
 </style>

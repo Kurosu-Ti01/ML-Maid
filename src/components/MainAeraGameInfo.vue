@@ -1,114 +1,127 @@
 <template>
   <el-scrollbar>
-  <!-- Background & Title Container-->
-  <div class="background-title-container">
-    <img :src="gameInfo.backgroundImage" alt="Game Background" class="game-background" />
-    <!-- Icon & Title Container -->
-    <div class="icon-title-container">
-      <img src="/images/icon.ico" alt="Game Icon" class="game-icon" />
-      <span class="game-title">{{ gameInfo.title }}</span>
-    </div>
-  </div>
-  <!-- Main Info & Actions Container  -->
-  <div class="main-info-action-container">
-    <!-- Action Button Container -->
-    <div class="action-button-container">
-      <div class="button-group">
-        <el-button type="primary" size="large" style="margin: 10px 5px; padding: 0 40px;">Play</el-button>
-        <el-button type="primary" size="large" style="margin: 10px 5px;">...</el-button>
-        <el-button type="primary" size="large" style="margin: 10px 5px;">Edit</el-button>
-        <div class="game-playtime-text">
-          <p>Time Played: {{ gameInfo.timePlayed }}</p>
-          <p>Last Played: {{ gameInfo.lastPlayed }}</p>
-        </div>
+    <!-- Background & Title Container-->
+    <div class="background-title-container">
+      <img :src="gameData.backgroundImage" alt="Game Background" class="game-background" />
+      <!-- Icon & Title Container -->
+      <div class="icon-title-container">
+        <img src="/images/icon.ico" alt="Game Icon" class="game-icon" />
+        <span class="game-title">{{ gameData.title }}</span>
       </div>
     </div>
-    <!-- Cover Container -->
-    <div class="game-cover">
-      <img :src="gameInfo.coverImage" alt="Game Cover">
-    </div>
-  </div>
-  <!-- Detail Info & Description container -->
-  <div class="info-row-container">
-    <div class="detail-info-container">
-      <div class="custom-info-table">
-        <div class="info-row">
-          <div class="info-label">Install Path</div>
-          <div class="info-content">{{ gameInfo.installPath }}</div>
-        </div>
-        <div class="info-row">
-          <div class="info-label">Install Size</div>
-          <div class="info-content">{{ gameInfo.installSize }}</div>
-        </div>
-        <div class="info-row">
-          <div class="info-label">Genre</div>
-          <div class="info-content">{{ gameInfo.genre }}</div>
-        </div>
-        <div class="info-row">
-          <div class="info-label">Developer</div>
-          <div class="info-content">{{ gameInfo.developer }}</div>
-        </div>
-        <div class="info-row">
-          <div class="info-label">Publisher</div>
-          <div class="info-content">{{ gameInfo.publisher }}</div>
-        </div>
-        <div class="info-row">
-          <div class="info-label">Release Date</div>
-          <div class="info-content">{{ gameInfo.releaseDate }}</div>
-        </div>
-        <div class="info-row">
-          <div class="info-label">Tags</div>
-          <div class="info-content">
-            <div class="tags-flex-wrap">
-              <el-tag v-for="(tag, index) in gameInfo.tags" :key="index" style="margin: 2px 6px 2px 0;">{{ tag }}</el-tag>
-            </div>
-          </div>
-        </div>
-        <div class="info-row">
-          <div class="info-label">Links</div>
-          <div class="info-content">
-            <div v-for="(link, name) in gameInfo.Link" :key="name">
-              <a :href="link" target="_blank" class="game-link">{{ name }}</a>
-            </div>
+    <!-- Main Info & Actions Container  -->
+    <div class="main-info-action-container">
+      <!-- Action Button Container -->
+      <div class="action-button-container">
+        <div class="button-group">
+          <el-button type="primary" size="large" style="margin: 10px 5px; padding: 0 40px;">Play</el-button>
+          <el-button type="primary" size="large" style="margin: 10px 5px;">...</el-button>
+          <el-button type="primary" size="large" style="margin: 10px 5px;" @click="openEditWindow">Edit</el-button>
+          <div class="game-playtime-text">
+            <p>Time Played: {{ gameData.timePlayed }}</p>
+            <p>Last Played: {{ gameData.lastPlayed }}</p>
           </div>
         </div>
       </div>
+      <!-- Cover Container -->
+      <div class="game-cover">
+        <img :src="gameData.coverImage" alt="Game Cover">
+      </div>
     </div>
-    <div class="description-container">
-      <el-card style="margin:10px;">
-        <template #header>
-          <span style="font-size: 1.5em; color: #409eff; font-weight: bold;">Description</span>
-        </template>
-        <p v-for="(line, index) in gameInfo.description" :key="index" class="description-text">{{ line }}</p>
-      </el-card>
+    <!-- Detail Info & Description container -->
+    <div class="info-row-container">
+      <div class="detail-info-container">
+        <div class="custom-info-table">
+          <div class="info-row">
+            <div class="info-label">Install Path</div>
+            <div class="info-content">{{ gameData.installPath }}</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Install Size</div>
+            <div class="info-content">{{ gameData.installSize }}</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Genre</div>
+            <div class="info-content">{{ gameData.genre }}</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Developer</div>
+            <div class="info-content">{{ gameData.developer }}</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Publisher</div>
+            <div class="info-content">{{ gameData.publisher }}</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Release Date</div>
+            <div class="info-content">{{ gameData.releaseDate }}</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Community Score</div>
+            <div class="info-content">{{ gameData.communityScore }}</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">User Score</div>
+            <div class="info-content">{{ gameData.personalScore }}</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Tags</div>
+            <div class="info-content">
+              <div class="tags-flex-wrap">
+                <el-tag v-for="(tag, index) in gameData.tags" :key="index" style="margin: 2px 6px 2px 0;">{{ tag
+                }}</el-tag>
+              </div>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Links</div>
+            <div class="info-content">
+              <div v-for="(link, name) in gameData.links" :key="name">
+                <a :href="link" target="_blank" class="game-link">{{ name }}</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="description-container">
+        <el-card style="margin:10px;">
+          <template #header>
+            <span style="font-size: 1.5em; color: #409eff; font-weight: bold;">Description</span>
+          </template>
+          <p v-for="(line, index) in gameData.description" :key="index" class="description-text">{{ line }}</p>
+        </el-card>
+      </div>
     </div>
-  </div>
   </el-scrollbar>
 </template>
 
 <script setup lang="ts">
   import { ref } from 'vue'
 
-  const gameInfo = ref({
+  const gameData = ref<gameData>({
+    uuid: 'c32503c7-039a-4d7d-a8e6-bd9ee030fb3d',
     title: 'WHITE ALBUM 2',
     coverImage: '/images/cover.jpg',
     backgroundImage: '/images/background.png',
+    iconImage: '/images/icon.ico',
     lastPlayed: '2025-02-08',
-    timePlayed: '77h 50m',
+    timePlayed: 192312412,
     installPath: 'C:\\Amusement\\WHITE ALBUM 2',
-    installSize: '11.709 GB',
+    installSize: 124164828731,
     genre: 'Visual Novel',
     developer: 'Leaf',
     publisher: 'AQUAPLUS',
     releaseDate: '2010-03-26',
+    communityScore: 95,
+    personalScore: 92,
     tags: [
       'Romance', 'University', 'Relationship Problems', 'Dramatic Love Triangle', 'Winter', 'Drama', 'Musical Themes',
       'University Student Protagonist', 'Adult Heroine', 'Instrumentalist Heroine', 'Sex with Protagonist Only',
-      'Protagonist with Voice Acting', 'Multiple Endings',' High School', 'High School Student Protagonist', 'Male Protagonist',
+      'Protagonist with Voice Acting', 'Multiple Endings', ' High School', 'High School Student Protagonist', 'Male Protagonist',
       'University Student Heroine', 'High School Student Heroine', 'Journalist Protagonist', 'More Than Seven Endings', 'Nakige',
       'Music Club', 'Musician Heroine', 'ADV', 'Insert Songs', 'Female Friend', 'Singer Heroine'
     ],
-    Link: {
+    links: {
       '批評空間': 'https://erogamescape.dyndns.org/~ap2/ero/toukei_kaiseki/game.php?game=13255',
       'VNDB': 'https://vndb.org/v7771',
       'Bangumi': 'https://bgm.tv/subject/22290',
@@ -118,15 +131,15 @@
     description: [
       '~ Introductory Chapter ~',
       'Shivering from the cold wind, when the song was heard ......',
-      'It\'s like it\'s trying to match the guitar melody I\'m playing in the classroom at sunset.' ,
+      'It\'s like it\'s trying to match the guitar melody I\'m playing in the classroom at sunset.',
       'It\'s like it\'s trying to match the piano melody played by someone I\'ve never met in the classroom next door.',
       'From the rooftop rings that voice as loud and clear as a bell, linking the scattered melodies of the three of us together.',
-      'It started, it was in the late fall like that.' ,
-      'Back then, someone was in love with someone.' ,
+      'It started, it was in the late fall like that.',
+      'Back then, someone was in love with someone.',
       'Whoever it is is fighting hard. Whoever is going forward with a strong heart. Whoever is single-minded, very purely and honestly ......',
       'Wanting to bond from the bottom of my heart and capture this irreplaceable moment.',
       'So at that point, someone fell in love with someone. It\'s a love affair that can\'t be one step too late.',
-      'Then came the winter - the snow that fell from the sky and covered all sin.' ,
+      'Then came the winter - the snow that fell from the sky and covered all sin.',
       'Soon spring arrives - along with the melting snow, all the punishments are coming. ',
       '',
       '--------- ---------- ---------',
@@ -134,7 +147,7 @@
       'The cold wind blows and shivers, the song reaches the ears -',
       'The song that froze three years ago ......',
       'Had echoed in the sunset-stained campus, in the empty cafeteria, by the windows of the silent schoolhouse ......',
-      'Sprouted in passion, sublimated in sheer longing, only to dissipate in the end as a song of deception.' ,
+      'Sprouted in passion, sublimated in sheer longing, only to dissipate in the end as a song of deception.',
       'That winter of three men walking together is far away, but the winter of one man and one man goes on week after week.',
       'The season comes to late fall.',
       'The ugly wounds caused by that year\'s broken bonds had not yet dried up, but the premonition of change to come was already upon us.',
@@ -145,6 +158,20 @@
       'Long ago there will be no more love that cannot be conveyed. For, I will no longer be in love.',
     ],
   })
+
+  // open edit window function
+  async function openEditWindow() {
+    if (window.electronAPI?.createEditWindow) {
+      try {
+        // Pass a plain object to avoid IPC clone errors
+        await window.electronAPI.createEditWindow(JSON.parse(JSON.stringify(gameData.value)))
+      } catch (error) {
+        console.error('Failed to open edit window:', error)
+      }
+    } else {
+      console.error('electronAPI not available')
+    }
+  }
 </script>
 
 <style scoped>
@@ -172,8 +199,8 @@
     color: #ffffff;
     letter-spacing: 1px;
     text-shadow:
-      4px 4px 16px rgba(34,34,34,0.40),
-      2px 2px 4px rgba(34,34,34,0.28);
+      4px 4px 16px rgba(34, 34, 34, 0.40),
+      2px 2px 4px rgba(34, 34, 34, 0.28);
   }
 
   .game-icon {
@@ -201,11 +228,11 @@
     width: 100%;
     height: 100%;
     bottom: 0;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.10);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.10);
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    background: rgba(255,255,255,0.92);
+    background: rgba(255, 255, 255, 0.92);
     z-index: 1;
   }
 
@@ -256,7 +283,7 @@
     margin-top: 10px;
   }
 
-  .detail-info-container{
+  .detail-info-container {
     width: 400px;
     height: auto;
     margin: 0 5px;
@@ -292,15 +319,15 @@
   .custom-info-table {
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 2px 12px 0 rgba(0,0,0,0.12);
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.12);
     margin: 10px 0 10px 10px;
   }
-  
+
   .info-row {
     display: flex;
     border-bottom: 1px solid #ebeef5;
   }
-  
+
   .info-row:last-child {
     border-bottom: none;
   }
@@ -317,7 +344,7 @@
     word-break: break-word;
     overflow-wrap: break-word;
   }
-  
+
   .info-content {
     flex: 1;
     padding: 12px;
