@@ -38,36 +38,43 @@ const dbPath_game = path.join(libPath, 'metadata.db');
 
 const db = new Database(dbPath_game);
 
-// 初始化表
+// initialize the database
 db.prepare(`
   CREATE TABLE IF NOT EXISTS games (
     uuid TEXT PRIMARY KEY,
     title TEXT,
     coverImage TEXT,
     backgroundImage TEXT,
+    iconImage TEXT,
     lastPlayed TEXT,
-    timePlayed TEXT,
+    timePlayed  NUMERIC DEFAULT 0,
     installPath TEXT,
     installSize TEXT,
     genre TEXT,
     developer TEXT,
     publisher TEXT,
     releaseDate TEXT,
+    communityScore NUMERIC DEFAULT 0,
+    personalScore NUMERIC DEFAULT 0,
     tags TEXT,         -- use JSON.stringify to store, use JSON.parse to retrieve
     links TEXT,        -- use JSON.stringify to store, use JSON.parse to retrieve
     description TEXT   -- use JSON.stringify to store, use JSON.parse to retrieve
   )
 `).run();
 
+// pick a game by uuid
 ipcMain.handle('get-game-by-id', (_, gameid) => {
   return db.prepare('SELECT * FROM games WHERE uuid = ?').get(gameid);
 });
 
-ipcMain.handle('add-game', (_, game) => {
+// Add a new game
+ipcMain.handle('add-game', (_, game:gameData) => {
   const uuid = uuidv4();
   const stmt = db.prepare(
   `INSERT INTO games (
-    uuid, title, coverImage, backgroundImage, lastPlayed, timePlayed, installPath, installSize, genre, developer, publisher, releaseDate, tags, links, description
+    uuid, title, coverImage, backgroundImage, iconImage, lastPlayed, timePlayed,
+    installPath, installSize, genre, developer, publisher, releaseDate,
+    communityScore, personalScore, tags, links, description
   ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
   stmt.run(
@@ -75,6 +82,7 @@ ipcMain.handle('add-game', (_, game) => {
     game.title,
     game.coverImage,
     game.backgroundImage,
+    game.iconImage,
     game.lastPlayed,
     game.timePlayed,
     game.installPath,
@@ -83,10 +91,84 @@ ipcMain.handle('add-game', (_, game) => {
     game.developer,
     game.publisher,
     game.releaseDate,
+    game.communityScore,
+    game.personalScore,
     game.tags,        // may use JSON.stringify(game.tags)
     game.links,       // may use JSON.stringify(game.links)
     game.description  // may use JSON.stringify(game.description)
   );
+});
+
+// Update game data
+ipcMain.handle('update-game', (_, game:gameData) => {
+  const stmt = db.prepare(
+  `UPDATE games SET 
+    title = ?, coverImage = ?, backgroundImage = ?, iconImage = ?, lastPlayed = ?,
+    timePlayed = ?, installPath = ?, installSize = ?, genre = ?, developer = ?,
+    publisher = ?, releaseDate = ?, communityScore = ?, personalScore = ?, tags = ?,
+    links = ?, description = ? 
+  WHERE uuid = ?`
+  );
+  
+  const result = stmt.run(
+    game.title,
+    game.coverImage,
+    game.backgroundImage,
+    game.iconImage,
+    game.lastPlayed,
+    game.timePlayed,
+    game.installPath,
+    game.installSize,
+    game.genre,
+    game.developer,
+    game.publisher,
+    game.releaseDate,
+    game.communityScore,
+    game.personalScore,
+    JSON.stringify(game.tags),
+    JSON.stringify(game.links),
+    JSON.stringify(game.description),
+    game.uuid
+  );
+  
+  return result.changes > 0;
+});
+
+// create EditWindow
+ipcMain.handle('create-edit-window', (_, gameData) => {
+  const editWindow = new BrowserWindow({
+    width: 900,
+    height: 700,
+    minWidth: 700,
+    minHeight: 500,
+    parent: win || undefined,
+    modal: true,
+    titleBarStyle: 'hidden',
+    ...(process.platform !== 'darwin' ? {
+      titleBarOverlay: {
+        color: '#FFF7E6',
+        height: 50
+      }
+    } : {}),
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.mjs'),
+    },
+  });
+
+  // sent the game data to the edit window
+  editWindow.webContents.once('did-finish-load', () => {
+    editWindow.webContents.send('load-edit-game-data', gameData);
+  });
+
+  if (VITE_DEV_SERVER_URL) {
+    editWindow.loadURL(`${VITE_DEV_SERVER_URL}#/edit`);
+  } else {
+    editWindow.loadFile(path.join(RENDERER_DIST, 'index.html'), {
+      hash: '/edit'
+    });
+  }
+
+  return editWindow.id;
 });
 
 function createWindow() {

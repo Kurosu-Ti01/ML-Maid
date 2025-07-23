@@ -15,7 +15,8 @@
     "mitt": "^3.0.1",
     "pinia": "^3.0.3",
     "uuid": "^11.1.0",
-    "vue": "^3.4.21"
+    "vue": "^3.4.21",
+    "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.1",
