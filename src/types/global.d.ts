@@ -9,6 +9,29 @@ interface Window {
     // window operations
     createEditWindow: (gameData: gameData) => Promise<number>
     createAddGameWindow: () => Promise<number>
+    // image operations
+    selectImageFile: () => Promise<{ canceled: boolean; filePaths: string[] }>
+    processGameImage: (params: { 
+      sourcePath: string; 
+      gameUuid: string; 
+      imageType: string 
+    }) => Promise<{ 
+      success: boolean; 
+      tempPath?: string; 
+      previewUrl?: string; 
+      error?: string 
+    }>
+    finalizeGameImages: (gameUuid: string) => Promise<{
+      success: boolean;
+      movedFiles?: any[];
+      message?: string;
+      error?: string;
+    }>
+    cleanupTempImages: (gameUuid: string) => Promise<{
+      success: boolean;
+      message?: string;
+      error?: string;
+    }>
     // event listeners
     onEditGameData: (callback: (data: gameData) => void) => void
   }

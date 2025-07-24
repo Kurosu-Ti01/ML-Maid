@@ -34,6 +34,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   createEditWindow: (gameData:gameData) => ipcRenderer.invoke('create-edit-window', gameData),
   createAddGameWindow: () => ipcRenderer.invoke('create-add-game-window'),
   
+  // image operations
+  selectImageFile: () => ipcRenderer.invoke('select-image-file'),
+  processGameImage: (params: { sourcePath: string, gameUuid: string, imageType: string }) => 
+    ipcRenderer.invoke('process-game-image', params),
+  finalizeGameImages: (gameUuid: string) => ipcRenderer.invoke('finalize-game-images', gameUuid),
+  cleanupTempImages: (gameUuid: string) => ipcRenderer.invoke('cleanup-temp-images', gameUuid),
+  
   // load game data into edit window
   onEditGameData: (callback: (data: gameData) => void) => {
     ipcRenderer.on('load-edit-game-data', (_, data) => callback(data));
