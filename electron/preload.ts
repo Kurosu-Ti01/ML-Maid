@@ -32,6 +32,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   
   // window operations
   createEditWindow: (gameData:gameData) => ipcRenderer.invoke('create-edit-window', gameData),
+  createAddGameWindow: () => ipcRenderer.invoke('create-add-game-window'),
   
   // load game data into edit window
   onEditGameData: (callback: (data: gameData) => void) => {

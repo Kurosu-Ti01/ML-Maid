@@ -57,8 +57,49 @@ button {
   color: #4080ff;
 }
 
+.titlebar-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 30px;
+  -webkit-app-region: no-drag;
+}
+
+.titlebar-button {
+  background: #4080ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  -webkit-app-region: no-drag;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.titlebar-button:hover {
+  background: #337ecc;
+}
+
+.titlebar-button:active {
+  background: #2968a3;
+}
+
+
 /* edit-window title */
 .edit-titlebar {
+  background: #FFF7E6;
+  color: #E6A23C;
+  font-size: 1.2rem;
+}
+
+/* add-window title */
+.add-titlebar {
   background: #FFF7E6;
   color: #E6A23C;
   font-size: 1.2rem;

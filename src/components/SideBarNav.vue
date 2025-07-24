@@ -16,7 +16,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" name="SideBarNav">
 
 </script>
 
@@ -30,17 +30,20 @@
     align-items: center;
     box-sizing: border-box;
   }
+
   .top-buttons {
     display: flex;
     flex-direction: column;
     gap: 20px;
     align-items: center;
   }
+
   .bottom-button {
     display: flex;
     flex-direction: column;
     align-items: center;
   }
+
   .icon-btn {
     width: 40px;
     height: 40px;
@@ -53,9 +56,11 @@
     border-radius: 12px;
     transition: background 0.2s;
   }
+
   .icon-btn:hover {
     background: #72aaff;
   }
+
   .icon-btn img {
     width: 28px;
     height: 28px;

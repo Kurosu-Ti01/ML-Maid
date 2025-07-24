@@ -95,7 +95,7 @@
   </el-scrollbar>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" name="MainAeraGameInfo">
   import { ref } from 'vue'
 
   const gameData = ref<gameData>({
