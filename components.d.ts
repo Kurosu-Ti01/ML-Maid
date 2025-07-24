@@ -30,6 +30,8 @@ declare module 'vue' {
     ElTabPane: typeof import('element-plus/es')['ElTabPane']
     ElTabs: typeof import('element-plus/es')['ElTabs']
     ElTag: typeof import('element-plus/es')['ElTag']
+    GamAddForm: typeof import('./src/components/GamAddForm.vue')['default']
+    GameAddForm: typeof import('./src/components/GameAddForm.vue')['default']
     GameEditForm: typeof import('./src/components/GameEditForm.vue')['default']
     MainAeraGameInfo: typeof import('./src/components/MainAeraGameInfo.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

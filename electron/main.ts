@@ -3,7 +3,6 @@ import { createRequire } from 'node:module'
 const require = createRequire(import.meta.url)
 import { ipcMain } from 'electron'
 import { fileURLToPath } from 'node:url'
-import { v4 as uuidv4 } from 'uuid'
 import path from 'node:path'
 import fs from 'node:fs'
 
@@ -63,22 +62,21 @@ db.prepare(`
 `).run();
 
 // pick a game by uuid
-ipcMain.handle('get-game-by-id', (_, gameid) => {
+ipcMain.handle('get-game-by-id', (_, gameid:string) => {
   return db.prepare('SELECT * FROM games WHERE uuid = ?').get(gameid);
 });
 
 // Add a new game
 ipcMain.handle('add-game', (_, game:gameData) => {
-  const uuid = uuidv4();
   const stmt = db.prepare(
   `INSERT INTO games (
     uuid, title, coverImage, backgroundImage, iconImage, lastPlayed, timePlayed,
     installPath, installSize, genre, developer, publisher, releaseDate,
     communityScore, personalScore, tags, links, description
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
   stmt.run(
-    uuid,
+    game.uuid,
     game.title,
     game.coverImage,
     game.backgroundImage,
@@ -93,9 +91,9 @@ ipcMain.handle('add-game', (_, game:gameData) => {
     game.releaseDate,
     game.communityScore,
     game.personalScore,
-    game.tags,        // may use JSON.stringify(game.tags)
-    game.links,       // may use JSON.stringify(game.links)
-    game.description  // may use JSON.stringify(game.description)
+    JSON.stringify(game.tags),
+    JSON.stringify(game.links),
+    JSON.stringify(game.description)
   );
 });
 
@@ -169,6 +167,38 @@ ipcMain.handle('create-edit-window', (_, gameData) => {
   }
 
   return editWindow.id;
+});
+
+// create Add Game Window
+ipcMain.handle('create-add-game-window', () => {
+  const addGameWindow = new BrowserWindow({
+    width: 900,
+    height: 700,
+    minWidth: 700,
+    minHeight: 500,
+    parent: win || undefined,
+    modal: true,
+    titleBarStyle: 'hidden',
+    ...(process.platform !== 'darwin' ? {
+      titleBarOverlay: {
+        color: '#FFF7E6',
+        height: 50
+      }
+    } : {}),
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.mjs'),
+    },
+  });
+
+  if (VITE_DEV_SERVER_URL) {
+    addGameWindow.loadURL(`${VITE_DEV_SERVER_URL}#/add`);
+  } else {
+    addGameWindow.loadFile(path.join(RENDERER_DIST, 'index.html'), {
+      hash: '/add'
+    });
+  }
+
+  return addGameWindow.id;
 });
 
 function createWindow() {

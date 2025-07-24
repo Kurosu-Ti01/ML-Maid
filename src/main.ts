@@ -16,9 +16,36 @@ function initTitlebar() {
       case '':
       case '#':
       case '#/':
-        // main-window titlebar (root path)
-        titlebar.textContent = 'ML-Maid'
+        // Main-window titlebar
+        titlebar.innerHTML = ''
         titlebar.className = 'titlebar main-titlebar'
+        
+        // Create title element
+        const titleElement = document.createElement('div')
+        titleElement.className = 'titlebar-title'
+        titleElement.textContent = 'ML-Maid'
+        
+        // Create buttons container
+        const buttonsContainer = document.createElement('div')
+        buttonsContainer.className = 'titlebar-buttons'
+        
+        // Add "Add Game" button
+        const addGameButton = document.createElement('button')
+        addGameButton.className = 'titlebar-button'
+        addGameButton.title = 'Add Game' // tooltip
+        addGameButton.innerHTML = `
+          <img src="icons/plus-square.svg" width="20" height="20" alt="Add Game" style="filter: brightness(0) invert(1);">
+        `
+        addGameButton.onclick = () => {
+          if (window.electronAPI) {
+            window.electronAPI.createAddGameWindow();
+          }
+        }
+        buttonsContainer.appendChild(addGameButton)
+        
+        // Append title and buttons to titlebar
+        titlebar.appendChild(titleElement)
+        titlebar.appendChild(buttonsContainer)
         break
       
       case '#/edit':
@@ -26,7 +53,13 @@ function initTitlebar() {
         titlebar.textContent = 'Edit Game'
         titlebar.className = 'titlebar edit-titlebar'
         break
-      
+
+      case '#/add':
+        // add-game-window titlebar
+        titlebar.textContent = 'Add Game'
+        titlebar.className = 'titlebar add-titlebar'
+        break
+        
       default:
         // fallback for other routes
         titlebar.textContent = 'ML-Maid'
@@ -38,5 +71,8 @@ function initTitlebar() {
 
 // initialize the title bar
 initTitlebar()
+
+// Listen for hash changes to update titlebar when navigating
+window.addEventListener('hashchange', initTitlebar)
 
 createApp(App).use(router).mount('#app')

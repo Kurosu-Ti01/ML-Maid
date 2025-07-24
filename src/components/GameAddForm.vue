@@ -128,7 +128,7 @@
         <el-scrollbar class="tab-scrollbar">
           <el-form :model="gameForm" label-width="120px" class="tab-form">
             <el-form-item label="批評空間">
-              <el-input v-model="gameForm.links.批評空間" placeholder="批評空間 URL" />
+              <el-input v-model="gameForm.links['批評空間']" placeholder="批評空間 URL" />
             </el-form-item>
 
             <el-form-item label="VNDB">
@@ -177,15 +177,21 @@
   </div>
 </template>
 
-<script setup lang="ts" name="GameEditForm">
-  import { ref, onMounted, computed, toRaw } from 'vue'
+<script setup lang="ts" name="GameAddForm">
+  import { ref, computed, toRaw } from 'vue'
   import { ElMessage } from 'element-plus'
+  import { v4 as uuidv4 } from 'uuid'
 
   // Active tab
   const activeTab = ref('general')
 
+  // Generate a new UUID for the game
+  const uuid = uuidv4();
+  console.log('Generated UUID:', uuid)
+
+  // Initialize gameForm
   const gameForm = ref<gameData>({
-    uuid: '',
+    uuid: uuid,
     title: '',
     coverImage: '',
     backgroundImage: '',
@@ -230,17 +236,17 @@
   })
 
   // save game information
-  const saveGame = async () => {
+  async function saveGame() {
     saving.value = true
     try {
       console.log('Saving game info:', gameForm.value)
 
       // Call electron API to save to database
-      if (window.electronAPI?.updateGame && gameForm.value.uuid) {
+      if (window.electronAPI?.addGame && gameForm.value.uuid) {
         // Convert reactive object to plain object to avoid cloning issues
         const plainGameData = toRaw(gameForm.value)
         console.log('Plain game data:', plainGameData)
-        await window.electronAPI.updateGame(plainGameData)
+        await window.electronAPI.addGame(plainGameData)
         ElMessage.success('Game information saved successfully!')
 
         // delay close window
@@ -248,12 +254,12 @@
           closeWindow()
         }, 1000)
       } else {
-        console.error('electronAPI updateGame not available or game UUID missing')
-        ElMessage.error('Unable to save: API not available or game ID missing')
+        console.error('electronAPI addGame not available')
+        ElMessage.error('Unable to save: API not available')
       }
     } catch (error) {
       console.error('Save Error:', error)
-      ElMessage.error('Failed to save game information')
+      ElMessage.error('Failed to add game')
     } finally {
       saving.value = false
     }
@@ -263,40 +269,6 @@
   const closeWindow = () => {
     window.close()
   }
-
-  // listen for game data from the main process
-  onMounted(() => {
-    if (window.electronAPI?.onEditGameData) {
-      window.electronAPI.onEditGameData((data: gameData) => {
-        console.log('Received game data:', data)
-
-        gameForm.value.uuid = data.uuid || ''
-        gameForm.value.title = data.title || ''
-        gameForm.value.coverImage = data.coverImage || ''
-        gameForm.value.backgroundImage = data.backgroundImage || ''
-        gameForm.value.iconImage = data.iconImage || ''
-        gameForm.value.lastPlayed = data.lastPlayed || ''
-        gameForm.value.timePlayed = data.timePlayed || 0
-        gameForm.value.installPath = data.installPath || ''
-        gameForm.value.installSize = data.installSize || 0
-        gameForm.value.genre = data.genre || ''
-        gameForm.value.developer = data.developer || ''
-        gameForm.value.publisher = data.publisher || ''
-        gameForm.value.releaseDate = data.releaseDate || ''
-        gameForm.value.communityScore = data.communityScore || 0
-        gameForm.value.personalScore = data.personalScore || 0
-        gameForm.value.tags = Array.isArray(data.tags) ? data.tags : []
-        gameForm.value.description = Array.isArray(data.description) ? data.description : []
-        gameForm.value.links = {
-          '批評空間': data.links?.['批評空間'] || '',
-          'VNDB': data.links?.VNDB || '',
-          'Bangumi': data.links?.Bangumi || '',
-          'WikiPedia': data.links?.WikiPedia || '',
-          'WikiData': data.links?.WikiData || ''
-        }
-      })
-    }
-  })
 </script>
 
 <style scoped>

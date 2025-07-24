@@ -8,6 +8,7 @@ interface Window {
     updateGame: (game: gameData) => Promise<void>
     // window operations
     createEditWindow: (gameData: gameData) => Promise<number>
+    createAddGameWindow: () => Promise<number>
     // event listeners
     onEditGameData: (callback: (data: gameData) => void) => void
   }
