@@ -101,9 +101,9 @@
   const gameData = ref<gameData>({
     uuid: 'c32503c7-039a-4d7d-a8e6-bd9ee030fb3d',
     title: 'WHITE ALBUM 2',
-    coverImage: '/images/cover.jpg',
-    backgroundImage: '/images/background.png',
-    iconImage: '/images/icon.ico',
+    coverImage: 'library/images/c32503c7-039a-4d7d-a8e6-bd9ee030fb3d/cover.jpg',
+    backgroundImage: 'library/images/c32503c7-039a-4d7d-a8e6-bd9ee030fb3d/background.png',
+    iconImage: 'library/images/c32503c7-039a-4d7d-a8e6-bd9ee030fb3d/icon.ico',
     lastPlayed: '2025-02-08',
     timePlayed: 192312412,
     installPath: 'C:\\Amusement\\WHITE ALBUM 2',

@@ -104,22 +104,84 @@
       <!-- Media Tab -->
       <el-tab-pane label="Media" name="media">
         <el-scrollbar class="tab-scrollbar">
-          <el-form :model="gameForm" label-width="120px" class="tab-form">
-            <el-form-item label="Cover Image">
-              <el-input v-model="gameForm.coverImage" placeholder="Path to cover image" />
-              <div class="file-hint">Recommended size: 460x215</div>
-            </el-form-item>
+          <div class="media-container">
+            <!-- Left Column -->
+            <div class="media-column left-column">
+              <!-- Icon Section -->
+              <div class="media-section">
+                <div class="section-header">
+                  <span class="section-title">Icon</span>
+                  <div class="title-underline"></div>
+                </div>
+                <div class="image-display-area" :class="{ 'has-image': iconPreview }">
+                  <img v-if="iconPreview" :src="iconPreview" alt="Icon Preview" class="image-preview" />
+                  <span v-else class="placeholder-text">No icon selected</span>
+                </div>
+                <div class="action-buttons">
+                  <button class="action-btn" title="Select from path" @click="selectImageFromPath('icon')">
+                    <img src="/public/icons/plus.svg" alt="Path" class="btn-icon" />
+                  </button>
+                  <button class="action-btn" title="Add from URL">
+                    <img src="/public/icons/link.svg" alt="URL" class="btn-icon" />
+                  </button>
+                  <button class="action-btn" title="Remove" @click="removeImage('icon')">
+                    <img src="/public/icons/trash-2.svg" alt="Remove" class="btn-icon" />
+                  </button>
+                </div>
+              </div>
 
-            <el-form-item label="Background Image">
-              <el-input v-model="gameForm.backgroundImage" placeholder="Path to background image" />
-              <div class="file-hint">Recommended size: 1920x1080</div>
-            </el-form-item>
+              <!-- Background Section -->
+              <div class="media-section">
+                <div class="section-header">
+                  <span class="section-title">Background</span>
+                  <div class="title-underline"></div>
+                </div>
+                <div class="image-display-area" :class="{ 'has-image': backgroundPreview }">
+                  <img v-if="backgroundPreview" :src="backgroundPreview" alt="Background Preview"
+                    class="image-preview" />
+                  <span v-else class="placeholder-text">No background selected</span>
+                </div>
+                <div class="action-buttons">
+                  <button class="action-btn" title="Select from path" @click="selectImageFromPath('background')">
+                    <img src="/public/icons/plus.svg" alt="Path" class="btn-icon" />
+                  </button>
+                  <button class="action-btn" title="Add from URL">
+                    <img src="/public/icons/link.svg" alt="URL" class="btn-icon" />
+                  </button>
+                  <button class="action-btn" title="Remove" @click="removeImage('background')">
+                    <img src="/public/icons/trash-2.svg" alt="Remove" class="btn-icon" />
+                  </button>
+                </div>
+              </div>
+            </div>
 
-            <el-form-item label="Icon Image">
-              <el-input v-model="gameForm.iconImage" placeholder="Path to icon image" />
-              <div class="file-hint">Recommended size: 256x256</div>
-            </el-form-item>
-          </el-form>
+            <!-- Right Column -->
+            <div class="media-column right-column">
+              <!-- Cover Section -->
+              <div class="media-section full-height">
+                <div class="section-header">
+                  <span class="section-title">Cover</span>
+                  <div class="title-underline"></div>
+                </div>
+                <div class="image-display-area cover-area" :class="{ 'has-image': coverPreview }">
+                  <img v-if="coverPreview" :src="coverPreview" alt="Cover Preview"
+                    class="image-preview cover-preview" />
+                  <span v-else class="placeholder-text">No cover selected</span>
+                </div>
+                <div class="action-buttons">
+                  <button class="action-btn" title="Select from path" @click="selectImageFromPath('cover')">
+                    <img src="/public/icons/plus.svg" alt="Path" class="btn-icon" />
+                  </button>
+                  <button class="action-btn" title="Add from URL">
+                    <img src="/public/icons/link.svg" alt="URL" class="btn-icon" />
+                  </button>
+                  <button class="action-btn" title="Remove" @click="removeImage('cover')">
+                    <img src="/public/icons/trash-2.svg" alt="Remove" class="btn-icon" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </el-scrollbar>
       </el-tab-pane>
 
@@ -213,7 +275,132 @@
 
   const saving = ref(false)
 
-  // deal with tags input
+  // Image preview states
+  const iconPreview = ref('')
+  const backgroundPreview = ref('')
+  const coverPreview = ref('')
+
+  // Handle image selection from file system
+  async function selectImageFromPath(imageType: 'icon' | 'background' | 'cover') {
+    try {
+      // Call electron API to open file dialog
+      if (window.electronAPI?.selectImageFile) {
+        const result = await window.electronAPI.selectImageFile()
+
+        if (result && !result.canceled && result.filePaths.length > 0) {
+          const selectedPath = result.filePaths[0]
+          await processSelectedImage(selectedPath, imageType)
+        }
+      } else {
+        ElMessage.error('File selection API not available')
+      }
+    } catch (error) {
+      console.error('Error selecting image:', error)
+      ElMessage.error('Failed to select image')
+    }
+  }
+
+  // Process selected image (copy and rename)
+  async function processSelectedImage(sourcePath: string, imageType: 'icon' | 'background' | 'cover') {
+    try {
+      if (window.electronAPI?.processGameImage) {
+        const result = await window.electronAPI.processGameImage({
+          sourcePath,
+          gameUuid: gameForm.value.uuid,
+          imageType
+        })
+
+        if (result.success) {
+          // Update gameForm with temp image path
+          switch (imageType) {
+            case 'icon':
+              if (result.tempPath && result.previewUrl) {
+                gameForm.value.iconImage = result.tempPath
+                iconPreview.value = result.previewUrl
+              }
+              break
+            case 'background':
+              if (result.tempPath && result.previewUrl) {
+                gameForm.value.backgroundImage = result.tempPath
+                backgroundPreview.value = result.previewUrl
+              }
+              break
+            case 'cover':
+              if (result.tempPath && result.previewUrl) {
+                gameForm.value.coverImage = result.tempPath
+                coverPreview.value = result.previewUrl
+              }
+              break
+          }
+
+          ElMessage.success(`${imageType} image updated successfully!`)
+        } else {
+          ElMessage.error(result.error || 'Failed to process image')
+        }
+      } else {
+        ElMessage.error('Image processing API not available')
+      }
+    } catch (error) {
+      console.error('Error processing image:', error)
+      ElMessage.error('Failed to process image')
+    }
+  }
+
+  // Remove image
+  function removeImage(imageType: 'icon' | 'background' | 'cover') {
+    switch (imageType) {
+      case 'icon':
+        gameForm.value.iconImage = ''
+        iconPreview.value = ''
+        break
+      case 'background':
+        gameForm.value.backgroundImage = ''
+        backgroundPreview.value = ''
+        break
+      case 'cover':
+        gameForm.value.coverImage = ''
+        coverPreview.value = ''
+        break
+    }
+    ElMessage.success(`${imageType} image removed`)
+  }
+
+  // Load existing image preview
+  async function loadExistingImagePreview(imagePath: string, imageType: 'icon' | 'background' | 'cover') {
+    if (!imagePath || !window.electronAPI?.processGameImage) return
+
+    console.log(`Loading existing ${imageType} image:`, imagePath)
+
+    try {
+      // Convert file path to base64 for preview
+      const result = await window.electronAPI.processGameImage({
+        sourcePath: imagePath,
+        gameUuid: gameForm.value.uuid,
+        imageType: 'preview' // Special type for loading existing images
+      })
+
+      console.log(`Preview result for ${imageType}:`, result)
+
+      if (result.success && result.previewUrl) {
+        switch (imageType) {
+          case 'icon':
+            iconPreview.value = result.previewUrl
+            break
+          case 'background':
+            backgroundPreview.value = result.previewUrl
+            break
+          case 'cover':
+            coverPreview.value = result.previewUrl
+            break
+        }
+        console.log(`Successfully set ${imageType} preview`)
+      } else {
+        console.log(`Failed to load ${imageType} preview:`, result.error)
+      }
+    } catch (error) {
+      console.error(`Error loading ${imageType} preview:`, error)
+    }
+  }  // deal with tags input
   const tagsInput = computed({
     get: () => gameForm.value.tags.join(', '),
     set: (value: string) => {
@@ -260,7 +447,11 @@
   }
 
   // close the edit window
-  const closeWindow = () => {
+  const closeWindow = async () => {
+    // Clean up temporary images when closing without saving
+    if (window.electronAPI?.cleanupTempImages) {
+      await window.electronAPI.cleanupTempImages(gameForm.value.uuid)
+    }
     window.close()
   }
 
@@ -293,6 +484,17 @@
           'Bangumi': data.links?.Bangumi || '',
           'WikiPedia': data.links?.WikiPedia || '',
           'WikiData': data.links?.WikiData || ''
+        }
+
+        // Load existing image previews
+        if (data.iconImage) {
+          loadExistingImagePreview(data.iconImage, 'icon')
+        }
+        if (data.backgroundImage) {
+          loadExistingImagePreview(data.backgroundImage, 'background')
+        }
+        if (data.coverImage) {
+          loadExistingImagePreview(data.coverImage, 'cover')
         }
       })
     }
@@ -356,7 +558,6 @@
     display: flex;
     justify-content: center;
     gap: 15px;
-    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
     z-index: 100;
   }
 
@@ -437,6 +638,124 @@
     background-color: #f5f7fa;
   }
 
+  /* Media tab specific styles */
+  .media-container {
+    display: flex;
+    gap: 0;
+    padding: 0 10px;
+    height: 100%;
+  }
+
+  .media-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .media-section {
+    padding: 20px;
+    flex: 1;
+  }
+
+  .media-section.full-height {
+    /* Cover section takes full height of right column */
+    min-height: 400px;
+  }
+
+  .section-header {
+    margin-bottom: 15px;
+  }
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #303133;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .title-underline {
+    height: 2px;
+    background-color: #409eff;
+    border-radius: 1px;
+    margin-bottom: 15px;
+  }
+
+  .image-display-area {
+    min-height: 120px;
+    border: 2px dashed #d3d3d3;
+    border-radius: 6px;
+    background-color: #f8f9fa;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #909399;
+    font-size: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .image-display-area.has-image {
+    border: 2px solid #409eff;
+    background-color: #ffffff;
+  }
+
+  .image-preview {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 4px;
+  }
+
+  .cover-preview {
+    max-height: 280px;
+  }
+
+  .placeholder-text {
+    color: #c0c4cc;
+    font-style: italic;
+  }
+
+  .cover-area {
+    min-height: 300px;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .action-btn {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #dcdfe6;
+    border-radius: 6px;
+    background-color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .action-btn:hover {
+    border-color: #409eff;
+    background-color: #ecf5ff;
+  }
+
+  .btn-icon {
+    width: 20px;
+    height: 20px;
+    opacity: 0.7;
+  }
+
+  .action-btn:hover .btn-icon {
+    opacity: 1;
+  }
+
   /* Responsive Design */
   @media (max-width: 768px) {
     .edit-container {
@@ -458,6 +777,25 @@
 
     :deep(.el-form-item__label) {
       width: 100px !important;
+    }
+
+    /* Media tab responsive */
+    .media-container {
+      flex-direction: column;
+      padding: 20px;
+      gap: 20px;
+    }
+
+    .media-section {
+      padding: 15px;
+    }
+
+    .image-display-area {
+      min-height: 100px;
+    }
+
+    .cover-area {
+      min-height: 200px;
     }
   }
 </style>

@@ -15,6 +15,7 @@ dist-electron
 
 # files created while running the app
 library
+temp
 
 # Editor directories and files
 .vscode/*
