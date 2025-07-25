@@ -27,6 +27,7 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
 contextBridge.exposeInMainWorld('electronAPI', {
   // game database operations
   getGameById: (gameid:string) => ipcRenderer.invoke('get-game-by-id', gameid),
+  getAllGames: () => ipcRenderer.invoke('get-all-games'),
   addGame: (game:gameData) => ipcRenderer.invoke('add-game', game),
   updateGame: (game:gameData) => ipcRenderer.invoke('update-game', game),
   
