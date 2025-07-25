@@ -1,8 +1,8 @@
 <template>
   <el-scrollbar class="sidebar-container">
     <div class="sidebar-content">
-      <div v-for="game in games" :key="game.id" class="game-item">
-        <img :src="game.icon" class="game-icon" alt="icon" />
+      <div v-for="game in games" :key="game.uuid" class="game-item">
+        <img :src="getIconFin(game.iconImage)" class="game-icon" alt="icon" />
         <span class="game-title">{{ game.title }}</span>
       </div>
     </div>
@@ -10,32 +10,37 @@
 </template>
 
 <script setup lang="ts" name="SideBarGameList">
-  import { ref } from 'vue';
+  import { ref, onMounted } from 'vue';
 
-  const games = ref([
-    { id: 1, icon: 'https://cdn-icons-png.flaticon.com/512/616/616554.png', title: 'Game One' },
-    { id: 2, icon: 'https://cdn-icons-png.flaticon.com/512/616/616555.png', title: 'Game Two' },
-    { id: 3, icon: 'https://cdn-icons-png.flaticon.com/512/616/616556.png', title: 'Game Three' },
-    { id: 4, icon: 'https://cdn-icons-png.flaticon.com/512/616/616557.png', title: 'Game Four' },
-    { id: 5, icon: 'https://cdn-icons-png.flaticon.com/512/616/616558.png', title: 'Game Five' },
-    { id: 6, icon: 'https://cdn-icons-png.flaticon.com/512/616/616559.png', title: 'Game Six' },
-    { id: 7, icon: 'https://cdn-icons-png.flaticon.com/512/616/616560.png', title: 'Game Seven' },
-    { id: 8, icon: 'https://cdn-icons-png.flaticon.com/512/616/616561.png', title: 'Game Eight' },
-    { id: 9, icon: 'https://cdn-icons-png.flaticon.com/512/616/616562.png', title: 'Game Nine' },
-    { id: 10, icon: 'https://cdn-icons-png.flaticon.com/512/616/616563.png', title: 'Game Ten' },
-    { id: 11, icon: 'https://cdn-icons-png.flaticon.com/512/616/616564.png', title: 'Game Eleven' },
-    { id: 12, icon: 'https://cdn-icons-png.flaticon.com/512/616/616565.png', title: 'Game Twelve' },
-    { id: 13, icon: 'https://cdn-icons-png.flaticon.com/512/616/616566.png', title: 'Game Thirteen' },
-    { id: 14, icon: 'https://cdn-icons-png.flaticon.com/512/616/616567.png', title: 'Game Fourteen' },
-    { id: 15, icon: 'https://cdn-icons-png.flaticon.com/512/616/616568.png', title: 'Game Fifteen' },
-    { id: 16, icon: 'https://cdn-icons-png.flaticon.com/512/616/616569.png', title: 'Game Sixteen' },
-    { id: 17, icon: 'https://cdn-icons-png.flaticon.com/512/616/616570.png', title: 'Game Seventeen' },
-    { id: 18, icon: 'https://cdn-icons-png.flaticon.com/512/616/616571.png', title: 'Game Eighteen' },
-    { id: 19, icon: 'https://cdn-icons-png.flaticon.com/512/616/616572.png', title: 'Game Nineteen' },
-    { id: 20, icon: 'https://cdn-icons-png.flaticon.com/512/616/616574.png', title: 'Game Twenty' },
-    { id: 21, icon: 'https://cdn-icons-png.flaticon.com/512/616/616575.png', title: 'Game Twenty-One' },
-    // 可继续添加更多游戏
-  ]);
+  const games = ref<gameData[]>([]);
+
+  function getIconFin(imagePath: string) {
+    if (!imagePath) {
+      return '/images/icon.ico'; // default icon if no image path is provided
+    }
+    // Return cached 32x32 icon URL or default
+    return imagePath || '/images/icon.ico';
+  }
+
+  // load games from database
+  async function loadGamesFromDatabase() {
+    try {
+      if (window.electronAPI?.getAllGames) {
+        const gameData = await window.electronAPI.getAllGames();
+        games.value = gameData;
+        console.log('Loaded games from database:', gameData);
+
+      } else {
+        console.error('electronAPI.getAllGames not available');
+      }
+    } catch (error) {
+      console.error('Error loading games from database:', error);
+    }
+  };
+
+  onMounted(() => {
+    loadGamesFromDatabase();
+  });
 </script>
 
 <style scoped>

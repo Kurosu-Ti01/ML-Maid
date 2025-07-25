@@ -205,7 +205,7 @@
 
   .game-icon {
     width: auto;
-    height: 50px;
+    height: 48px;
     vertical-align: middle;
   }
 

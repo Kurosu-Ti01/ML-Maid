@@ -83,6 +83,18 @@ ipcMain.handle('get-game-by-id', (_, gameid:string) => {
   return db.prepare('SELECT * FROM games WHERE uuid = ?').get(gameid);
 });
 
+// get all games
+ipcMain.handle('get-all-games', () => {
+  const games = db.prepare('SELECT * FROM games').all();
+  // Parse JSON fields back to objects
+  return games.map((game: any) => ({
+    ...game,
+    tags: game.tags ? JSON.parse(game.tags) : [],
+    links: game.links ? JSON.parse(game.links) : {},
+    description: game.description ? JSON.parse(game.description) : []
+  }));
+});
+
 // Add a new game
 ipcMain.handle('add-game', async (_, game:gameData) => {
   try {
