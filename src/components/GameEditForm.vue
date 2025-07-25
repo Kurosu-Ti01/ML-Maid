@@ -113,19 +113,19 @@
                   <span class="section-title">Icon</span>
                   <div class="title-underline"></div>
                 </div>
-                <div class="image-display-area" :class="{ 'has-image': iconPreview }">
-                  <img v-if="iconPreview" :src="iconPreview" alt="Icon Preview" class="image-preview" />
+                <div class="image-display-area icon-area" :class="{ 'has-image': iconPreview }">
+                  <img v-if="iconPreview" :src="iconPreview" alt="Icon Preview" class="image-preview icon-preview" />
                   <span v-else class="placeholder-text">No icon selected</span>
                 </div>
                 <div class="action-buttons">
                   <button class="action-btn" title="Select from path" @click="selectImageFromPath('icon')">
-                    <img src="/public/icons/plus.svg" alt="Path" class="btn-icon" />
+                    <img src="/icons/plus.svg" alt="Path" class="btn-icon" />
                   </button>
                   <button class="action-btn" title="Add from URL">
-                    <img src="/public/icons/link.svg" alt="URL" class="btn-icon" />
+                    <img src="/icons/link.svg" alt="URL" class="btn-icon" />
                   </button>
                   <button class="action-btn" title="Remove" @click="removeImage('icon')">
-                    <img src="/public/icons/trash-2.svg" alt="Remove" class="btn-icon" />
+                    <img src="/icons/trash-2.svg" alt="Remove" class="btn-icon" />
                   </button>
                 </div>
               </div>
@@ -136,20 +136,20 @@
                   <span class="section-title">Background</span>
                   <div class="title-underline"></div>
                 </div>
-                <div class="image-display-area" :class="{ 'has-image': backgroundPreview }">
+                <div class="image-display-area background-area" :class="{ 'has-image': backgroundPreview }">
                   <img v-if="backgroundPreview" :src="backgroundPreview" alt="Background Preview"
-                    class="image-preview" />
+                    class="image-preview background-preview" />
                   <span v-else class="placeholder-text">No background selected</span>
                 </div>
                 <div class="action-buttons">
                   <button class="action-btn" title="Select from path" @click="selectImageFromPath('background')">
-                    <img src="/public/icons/plus.svg" alt="Path" class="btn-icon" />
+                    <img src="/icons/plus.svg" alt="Path" class="btn-icon" />
                   </button>
                   <button class="action-btn" title="Add from URL">
-                    <img src="/public/icons/link.svg" alt="URL" class="btn-icon" />
+                    <img src="/icons/link.svg" alt="URL" class="btn-icon" />
                   </button>
                   <button class="action-btn" title="Remove" @click="removeImage('background')">
-                    <img src="/public/icons/trash-2.svg" alt="Remove" class="btn-icon" />
+                    <img src="/icons/trash-2.svg" alt="Remove" class="btn-icon" />
                   </button>
                 </div>
               </div>
@@ -170,13 +170,13 @@
                 </div>
                 <div class="action-buttons">
                   <button class="action-btn" title="Select from path" @click="selectImageFromPath('cover')">
-                    <img src="/public/icons/plus.svg" alt="Path" class="btn-icon" />
+                    <img src="/icons/plus.svg" alt="Path" class="btn-icon" />
                   </button>
                   <button class="action-btn" title="Add from URL">
-                    <img src="/public/icons/link.svg" alt="URL" class="btn-icon" />
+                    <img src="/icons/link.svg" alt="URL" class="btn-icon" />
                   </button>
                   <button class="action-btn" title="Remove" @click="removeImage('cover')">
-                    <img src="/public/icons/trash-2.svg" alt="Remove" class="btn-icon" />
+                    <img src="/icons/trash-2.svg" alt="Remove" class="btn-icon" />
                   </button>
                 </div>
               </div>
@@ -650,16 +650,16 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 0;
   }
 
   .media-section {
-    padding: 20px;
-    flex: 1;
+    padding: 10px 20px;
   }
 
   .media-section.full-height {
     /* Cover section takes full height of right column */
+    flex: 1;
     min-height: 400px;
   }
 
@@ -683,7 +683,6 @@
   }
 
   .image-display-area {
-    min-height: 120px;
     border: 2px dashed #d3d3d3;
     border-radius: 6px;
     background-color: #f8f9fa;
@@ -697,29 +696,59 @@
     overflow: hidden;
   }
 
+  /* Icon area - square shape */
+  .icon-area {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 15px auto;
+  }
+
+  /* Background area - landscape rectangle */
+  .background-area {
+    width: 100%;
+    height: 200px;
+    max-width: 400px;
+    margin: 0 auto 15px auto;
+  }
+
+  /* Cover area - portrait rectangle */
+  .cover-area {
+    width: 240px;
+    height: 320px;
+    margin: 0 auto 15px auto;
+  }
+
   .image-display-area.has-image {
-    border: 2px solid #409eff;
+    border: 0;
+    border-radius: 0;
     background-color: #ffffff;
   }
 
   .image-preview {
-    max-width: 100%;
-    max-height: 100%;
+    width: 100%;
+    height: auto;
     object-fit: contain;
-    border-radius: 4px;
   }
 
+  /* Icon preview - maintain aspect ratio */
+  .icon-preview {
+    object-fit: contain;
+  }
+
+  /* Background preview - maintain aspect ratio */
+  .background-preview {
+    object-fit: contain;
+  }
+
+  /* Cover preview - maintain aspect ratio */
   .cover-preview {
-    max-height: 280px;
+    object-fit: contain;
   }
 
   .placeholder-text {
+    text-align: center;
     color: #c0c4cc;
     font-style: italic;
-  }
-
-  .cover-area {
-    min-height: 300px;
   }
 
   .action-buttons {
@@ -790,12 +819,22 @@
       padding: 15px;
     }
 
-    .image-display-area {
-      min-height: 100px;
+    /* Icon area - smaller on mobile */
+    .icon-area {
+      width: 80px;
+      height: 80px;
     }
 
+    /* Background area - smaller on mobile */
+    .background-area {
+      height: 90px;
+      max-width: 300px;
+    }
+
+    /* Cover area - smaller on mobile */
     .cover-area {
-      min-height: 200px;
+      width: 160px;
+      height: 240px;
     }
   }
 </style>

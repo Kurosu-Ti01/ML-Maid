@@ -46,7 +46,7 @@ interface gameData {
 	lastPlayed: string;     // ISO date format "YYYY-MM-DD"
   timePlayed: number;
   installPath: string;
-  installSize: number;
+  installSize: number;    // Size in bytes
   genre: string;
   developer: string;
   publisher: string;

@@ -17,6 +17,9 @@ dist-electron
 library
 temp
 
+# TODO
+TODO.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
