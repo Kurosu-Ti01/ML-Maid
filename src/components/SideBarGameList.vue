@@ -1,18 +1,26 @@
 <template>
   <el-scrollbar class="sidebar-container">
     <div class="sidebar-content">
-      <div v-for="game in games" :key="game.uuid" class="game-item">
-        <img :src="getIconFin(game.iconImage)" class="game-icon" alt="icon" />
-        <span class="game-title">{{ game.title }}</span>
+      <div v-if="gameStore.isLoadingList" class="loading-container">
+        <span>Loading games...</span>
+      </div>
+      <div v-else-if="gameStore.error" class="error-container">
+        <span>Error: {{ gameStore.error }}</span>
+      </div>
+      <div v-else>
+        <div v-for="game in gameStore.gamesForList" :key="game.uuid" class="game-item">
+          <img :src="getIconFin(game.iconImage)" class="game-icon" alt="icon" />
+          <span class="game-title">{{ game.title }}</span>
+        </div>
       </div>
     </div>
   </el-scrollbar>
 </template>
 
 <script setup lang="ts" name="SideBarGameList">
-  import { ref, onMounted } from 'vue';
+  import { useGameStore } from '../stores/game'
 
-  const games = ref<gameData[]>([]);
+  const gameStore = useGameStore()
 
   function getIconFin(imagePath: string) {
     if (!imagePath) {
@@ -21,26 +29,6 @@
     // Return cached 32x32 icon URL or default
     return imagePath || '/images/icon.ico';
   }
-
-  // load games from database
-  async function loadGamesFromDatabase() {
-    try {
-      if (window.electronAPI?.getAllGames) {
-        const gameData = await window.electronAPI.getAllGames();
-        games.value = gameData;
-        console.log('Loaded games from database:', gameData);
-
-      } else {
-        console.error('electronAPI.getAllGames not available');
-      }
-    } catch (error) {
-      console.error('Error loading games from database:', error);
-    }
-  };
-
-  onMounted(() => {
-    loadGamesFromDatabase();
-  });
 </script>
 
 <style scoped>
@@ -89,5 +77,19 @@
     background: linear-gradient(to left, #f7f8fa 60%, #e0e0e0 100%);
     height: 100%;
     user-select: none;
+  }
+
+  .loading-container,
+  .error-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    color: #666;
+    font-size: 14px;
+  }
+
+  .error-container {
+    color: #d32f2f;
   }
 </style>
