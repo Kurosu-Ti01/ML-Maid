@@ -4,7 +4,7 @@ interface Window {
   electronAPI?: {
     // game database operations
     getGameById: (gameid: string) => Promise<any>
-    getAllGames: () => Promise<gameData[]>
+    getGamesList: () => Promise<GameListItem[]>
     addGame: (game: gameData) => Promise<void>
     updateGame: (game: gameData) => Promise<void>
     // window operations
@@ -63,4 +63,13 @@ interface gameData {
     'WikiData'?: string;
   };
   description: string[];
+}
+
+// For lightweight game list items
+interface GameListItem {
+  uuid: string
+  title: string
+  iconImage: string
+  genre: string
+  lastPlayed: string
 }

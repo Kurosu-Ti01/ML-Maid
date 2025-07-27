@@ -1,6 +1,7 @@
 import { createApp } from "vue"
 import App from './App.vue'
 import router from './router'
+import pinia from './stores'
 import 'element-plus/dist/index.css'
 
 // initialize the title bar based on the current route
@@ -75,4 +76,4 @@ initTitlebar()
 // Listen for hash changes to update titlebar when navigating
 window.addEventListener('hashchange', initTitlebar)
 
-createApp(App).use(router).mount('#app')
+createApp(App).use(router).use(pinia).mount('#app')

@@ -242,6 +242,10 @@
 <script setup lang="ts" name="GameEditForm">
   import { ref, onMounted, computed, toRaw } from 'vue'
   import { ElMessage } from 'element-plus'
+  import { useGameStore } from '../stores/game'
+
+  // Use game store
+  const gameStore = useGameStore()
 
   // Active tab
   const activeTab = ref('general')
@@ -422,22 +426,18 @@
     try {
       console.log('Saving game info:', gameForm.value)
 
-      // Call electron API to save to database
-      if (window.electronAPI?.updateGame && gameForm.value.uuid) {
-        // Convert reactive object to plain object to avoid cloning issues
-        const plainGameData = toRaw(gameForm.value)
-        console.log('Plain game data:', plainGameData)
-        await window.electronAPI.updateGame(plainGameData)
-        ElMessage.success('Game information saved successfully!')
+      // Convert reactive object to plain object to avoid cloning issues
+      const plainGameData = toRaw(gameForm.value)
+      console.log('Plain game data:', plainGameData)
 
-        // delay close window
-        setTimeout(() => {
-          closeWindow()
-        }, 1000)
-      } else {
-        console.error('electronAPI updateGame not available or game UUID missing')
-        ElMessage.error('Unable to save: API not available or game ID missing')
-      }
+      // Use the store to update the game (which will also update the database)
+      await gameStore.updateGame(plainGameData)
+      ElMessage.success('Game information saved successfully!')
+
+      // delay close window
+      setTimeout(() => {
+        closeWindow()
+      }, 1000)
     } catch (error) {
       console.error('Save Error:', error)
       ElMessage.error('Failed to save game information')
