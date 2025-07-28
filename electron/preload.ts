@@ -45,5 +45,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // load game data into edit window
   onEditGameData: (callback: (data: gameData) => void) => {
     ipcRenderer.on('load-edit-game-data', (_, data) => callback(data));
+  },
+  
+  // listen for game list changes
+  onGameListChanged: (callback: (data: { action: string, game?: gameData }) => void) => {
+    ipcRenderer.on('game-list-changed', (_, data) => callback(data));
   }
 });

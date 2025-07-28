@@ -1,17 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
-// Lightweight game list item, only contains fields needed for list display
-interface GameListItem {
-  uuid: string
-  title: string
-  iconImage: string
-  genre: string
-  lastPlayed: string
-}
-
 export const useGameStore = defineStore('game', () => {
   // State - Only cache lightweight list data and a small amount of full data
+  // const currentGameUuid = ref<string | null>(null) // Currently selected game UUID
   const gamesList = ref<GameListItem[]>([]) // Lightweight list, used for sidebar, etc.
   const gameDetailsCache = ref<Map<string, gameData>>(new Map()) // Detailed data cache
   const isLoadingList = ref(false)
@@ -44,7 +36,6 @@ export const useGameStore = defineStore('game', () => {
 
     try {
       if (window.electronAPI?.getGamesList) {
-        // 使用新的轻量级 API，只查询需要的字段
         gamesList.value = await window.electronAPI.getGamesList()
         listLastUpdated.value = new Date()
         console.log('Games list loaded:', gamesList.value.length, 'games')
@@ -159,6 +150,31 @@ export const useGameStore = defineStore('game', () => {
     }
   }
 
+  async function deleteGame(uuid: string) {
+    try {
+      // TODO: electronAPI.deleteGame
+      // if (window.electronAPI?.deleteGame) {
+      //   await window.electronAPI.deleteGame(uuid)
+      // }
+      
+      // remove from lightweight list
+      const listIndex = gamesList.value.findIndex(game => game.uuid === uuid)
+      if (listIndex !== -1) {
+        gamesList.value.splice(listIndex, 1)
+      }
+      
+      // Remove from detailed data cache
+      gameDetailsCache.value.delete(uuid)
+      
+      listLastUpdated.value = new Date()
+      console.log('Game deleted from store:', uuid)
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to delete game'
+      console.error('Error deleting game:', err)
+      throw err
+    }
+  }
+
   function refreshGamesList() {
     return loadGamesList()
   }
@@ -174,10 +190,68 @@ export const useGameStore = defineStore('game', () => {
     console.log('Game details cache cleared')
   }
 
-  // Initialize (only load list)
+  // Initialize
   async function initialize() {
     if (gamesList.value.length === 0) {
       await loadGamesList()
+    }
+    
+    // Set up cross-window communication listeners
+    setupCrossWindowListeners()
+  }
+
+  // Set up cross-window communication listeners
+  function setupCrossWindowListeners() {
+    if (window.electronAPI?.onGameListChanged) {
+      console.log('🔧 Setting up cross-window listener')
+      
+      window.electronAPI.onGameListChanged((data) => {
+        console.log('📡 Received game list change notification:', data)
+        handleGameListChange(data)
+      })
+      
+      console.log('✅ Cross-window listener setup complete')
+    } else {
+      console.warn('❌ electronAPI.onGameListChanged not available')
+    }
+  }
+
+  // Logic to handle changes in the game list
+  function handleGameListChange(data: { action: string, game?: gameData }) {
+    console.log(`🎮 Processing ${data.action} action for game:`, data.game?.title || 'unknown')
+    
+    if (data.action === 'add' && data.game) {
+      // Check if the game already exists to avoid duplicate addition
+      const existingIndex = gamesList.value.findIndex(g => g.uuid === data.game!.uuid)
+      if (existingIndex === -1) {
+        gamesList.value.push({
+          uuid: data.game.uuid,
+          title: data.game.title,
+          iconImage: data.game.iconImage,
+          genre: data.game.genre,
+          lastPlayed: data.game.lastPlayed
+        })
+        console.log('✅ Added game to list via IPC:', data.game.title)
+        console.log('📊 New list length:', gamesList.value.length)
+      } else {
+        console.log('⚠️ Game already exists in list, skipping:', data.game.title)
+      }
+    } else if (data.action === 'update' && data.game) {
+      // Update existing game
+      const existingIndex = gamesList.value.findIndex(g => g.uuid === data.game!.uuid)
+      if (existingIndex !== -1) {
+        // Vue 3 支持直接索引赋值来触发响应式更新
+        gamesList.value[existingIndex] = {
+          uuid: data.game.uuid,
+          title: data.game.title,
+          iconImage: data.game.iconImage,
+          genre: data.game.genre,
+          lastPlayed: data.game.lastPlayed
+        }
+        console.log('✅ Updated game in list via IPC:', data.game.title)
+      } else {
+        console.log('❌ Game not found for update:', data.game.title)
+      }
     }
   }
 
@@ -201,6 +275,7 @@ export const useGameStore = defineStore('game', () => {
     loadGameDetail,
     addGame,
     updateGame,
+    deleteGame,
     refreshGamesList,
     clearError,
     clearDetailsCache,
