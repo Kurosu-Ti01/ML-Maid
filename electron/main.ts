@@ -185,6 +185,11 @@ ipcMain.handle('add-game', async (_, game:gameData) => {
       JSON.stringify(updatedGame.description || [])
     );
     
+    // Notify main window to refresh game list
+    if (win && !win.isDestroyed()) {
+      win.webContents.send('game-list-changed', { action: 'add', game: updatedGame });
+    }
+    
     return { success: true };
   } catch (error) {
     console.error('Error adding game:', error);
@@ -287,6 +292,11 @@ ipcMain.handle('update-game', async (_, game:gameData) => {
       JSON.stringify(updatedGame.description || []),
       updatedGame.uuid
     );
+    
+    // Notify main window to refresh game list
+    if (win && !win.isDestroyed()) {
+      win.webContents.send('game-list-changed', { action: 'update', game: updatedGame });
+    }
     
     return { success: true, changes: result.changes > 0 };
   } catch (error) {
