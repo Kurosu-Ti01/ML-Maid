@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 
 export const useGameStore = defineStore('game', () => {
   // State - Only cache lightweight list data and a small amount of full data
-  // const currentGameUuid = ref<string | null>(null) // Currently selected game UUID
+  const currentGameUuid = ref<string | null>(null) // Currently selected game UUID
   const gamesList = ref<GameListItem[]>([]) // Lightweight list, used for sidebar, etc.
   const gameDetailsCache = ref<Map<string, gameData>>(new Map()) // Detailed data cache
   const isLoadingList = ref(false)
@@ -257,6 +257,7 @@ export const useGameStore = defineStore('game', () => {
 
   return {
     // State
+    currentGameUuid,
     gamesList,
     gameDetailsCache,
     isLoadingList,

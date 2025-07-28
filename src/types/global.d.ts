@@ -3,7 +3,7 @@
 interface Window {
   electronAPI?: {
     // game database operations
-    getGameById: (gameid: string) => Promise<any>
+    getGameById: (gameId: string) => Promise<any>
     getGamesList: () => Promise<GameListItem[]>
     addGame: (game: gameData) => Promise<void>
     updateGame: (game: gameData) => Promise<void>

@@ -8,7 +8,7 @@
         <span>Error: {{ gameStore.error }}</span>
       </div>
       <div v-else>
-        <div v-for="game in gameStore.gamesForList" :key="game.uuid" class="game-item">
+        <div v-for="game in gameStore.gamesForList" :key="game.uuid" class="game-item" @click="selectGame(game.uuid)">
           <img :src="getIconFin(game.iconImage)" class="game-icon" alt="icon" />
           <span class="game-title">{{ game.title }}</span>
         </div>
@@ -28,6 +28,10 @@
     }
     // Return cached 32x32 icon URL or default
     return imagePath || '/images/icon.ico';
+  }
+
+  function selectGame(uuid: string) {
+    gameStore.currentGameUuid = uuid;
   }
 </script>
 
