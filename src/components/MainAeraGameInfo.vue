@@ -1,104 +1,121 @@
 <template>
   <el-scrollbar>
-    <!-- Background & Title Container-->
-    <div class="background-title-container">
-      <img :src="gameData.backgroundImage" alt="Game Background" class="game-background" />
-      <!-- Icon & Title Container -->
-      <div class="icon-title-container">
-        <img src="/images/icon.ico" alt="Game Icon" class="game-icon" />
-        <span class="game-title">{{ gameData.title }}</span>
+    <div v-if="isLoading" class="loading-container">
+      <el-loading :loading="true" text="Loading game data..." />
+    </div>
+    <div v-else-if="(!gameStore.currentGameUuid) || (!gameData)" class="no-game-container">
+      <div class="no-game-text">
+        <p>No game selected</p>
+        <span class="no-game-hint">Please select a game from the sidebar</span>
       </div>
     </div>
-    <!-- Main Info & Actions Container  -->
-    <div class="main-info-action-container">
-      <!-- Action Button Container -->
-      <div class="action-button-container">
-        <div class="button-group">
-          <el-button type="primary" size="large" style="margin: 10px 5px; padding: 0 40px;">Play</el-button>
-          <el-button type="primary" size="large" style="margin: 10px 5px;">...</el-button>
-          <el-button type="primary" size="large" style="margin: 10px 5px;" @click="openEditWindow">Edit</el-button>
-          <div class="game-playtime-text">
-            <p>Time Played: {{ gameData.timePlayed }}</p>
-            <p>Last Played: {{ gameData.lastPlayed }}</p>
-          </div>
+    <div v-else>
+      <!-- Background & Title Container-->
+      <div class="background-title-container">
+        <img :src="gameData.backgroundImage" alt="Game Background" class="game-background" />
+        <!-- Icon & Title Container -->
+        <div class="icon-title-container">
+          <img src="/images/icon.ico" alt="Game Icon" class="game-icon" />
+          <span class="game-title">{{ gameData.title }}</span>
         </div>
       </div>
-      <!-- Cover Container -->
-      <div class="game-cover">
-        <img :src="gameData.coverImage" alt="Game Cover">
-      </div>
-    </div>
-    <!-- Detail Info & Description container -->
-    <div class="info-row-container">
-      <div class="detail-info-container">
-        <div class="custom-info-table">
-          <div class="info-row">
-            <div class="info-label">Install Path</div>
-            <div class="info-content">{{ gameData.installPath }}</div>
-          </div>
-          <div class="info-row">
-            <div class="info-label">Install Size</div>
-            <div class="info-content">{{ gameData.installSize }}</div>
-          </div>
-          <div class="info-row">
-            <div class="info-label">Genre</div>
-            <div class="info-content">{{ gameData.genre }}</div>
-          </div>
-          <div class="info-row">
-            <div class="info-label">Developer</div>
-            <div class="info-content">{{ gameData.developer }}</div>
-          </div>
-          <div class="info-row">
-            <div class="info-label">Publisher</div>
-            <div class="info-content">{{ gameData.publisher }}</div>
-          </div>
-          <div class="info-row">
-            <div class="info-label">Release Date</div>
-            <div class="info-content">{{ gameData.releaseDate }}</div>
-          </div>
-          <div class="info-row">
-            <div class="info-label">Community Score</div>
-            <div class="info-content">{{ gameData.communityScore }}</div>
-          </div>
-          <div class="info-row">
-            <div class="info-label">User Score</div>
-            <div class="info-content">{{ gameData.personalScore }}</div>
-          </div>
-          <div class="info-row">
-            <div class="info-label">Tags</div>
-            <div class="info-content">
-              <div class="tags-flex-wrap">
-                <el-tag v-for="(tag, index) in gameData.tags" :key="index" style="margin: 2px 6px 2px 0;">{{ tag
-                }}</el-tag>
-              </div>
-            </div>
-          </div>
-          <div class="info-row">
-            <div class="info-label">Links</div>
-            <div class="info-content">
-              <div v-for="(link, name) in gameData.links" :key="name">
-                <a :href="link" target="_blank" class="game-link">{{ name }}</a>
-              </div>
+      <!-- Main Info & Actions Container  -->
+      <div class="main-info-action-container">
+        <!-- Action Button Container -->
+        <div class="action-button-container">
+          <div class="button-group">
+            <el-button type="primary" size="large" style="margin: 10px 5px; padding: 0 40px;">Play</el-button>
+            <el-button type="primary" size="large" style="margin: 10px 5px;">...</el-button>
+            <el-button type="primary" size="large" style="margin: 10px 5px;" @click="openEditWindow">Edit</el-button>
+            <div class="game-playtime-text">
+              <p>Time Played: {{ gameData.timePlayed }}</p>
+              <p>Last Played: {{ gameData.lastPlayed }}</p>
             </div>
           </div>
         </div>
+        <!-- Cover Container -->
+        <div class="game-cover">
+          <img :src="gameData.coverImage" alt="Game Cover">
+        </div>
       </div>
-      <div class="description-container">
-        <el-card style="margin:10px;">
-          <template #header>
-            <span style="font-size: 1.5em; color: #409eff; font-weight: bold;">Description</span>
-          </template>
-          <p v-for="(line, index) in gameData.description" :key="index" class="description-text">{{ line }}</p>
-        </el-card>
+      <!-- Detail Info & Description container -->
+      <div class="info-row-container">
+        <div class="detail-info-container">
+          <div class="custom-info-table">
+            <div class="info-row">
+              <div class="info-label">Install Path</div>
+              <div class="info-content">{{ gameData.installPath }}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Install Size</div>
+              <div class="info-content">{{ gameData.installSize }}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Genre</div>
+              <div class="info-content">{{ gameData.genre }}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Developer</div>
+              <div class="info-content">{{ gameData.developer }}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Publisher</div>
+              <div class="info-content">{{ gameData.publisher }}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Release Date</div>
+              <div class="info-content">{{ gameData.releaseDate }}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Community Score</div>
+              <div class="info-content">{{ gameData.communityScore }}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">User Score</div>
+              <div class="info-content">{{ gameData.personalScore }}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Tags</div>
+              <div class="info-content">
+                <div class="tags-flex-wrap">
+                  <el-tag v-for="(tag, index) in gameData.tags" :key="index" style="margin: 2px 6px 2px 0;">{{ tag
+                  }}</el-tag>
+                </div>
+              </div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Links</div>
+              <div class="info-content">
+                <div v-for="(link, name) in gameData.links" :key="name">
+                  <a :href="link" target="_blank" class="game-link">{{ name }}</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="description-container">
+          <el-card style="margin:10px;">
+            <template #header>
+              <span style="font-size: 1.5em; color: #409eff; font-weight: bold;">Description</span>
+            </template>
+            <p v-for="(line, index) in gameData.description" :key="index" class="description-text">{{ line }}</p>
+          </el-card>
+        </div>
       </div>
     </div>
   </el-scrollbar>
 </template>
 
 <script setup lang="ts" name="MainAeraGameInfo">
-  import { ref } from 'vue'
+  import { ref, watch } from 'vue'
+  import { useGameStore } from '../stores/game'
 
-  const gameData = ref<gameData>({
+  const gameStore = useGameStore()
+
+  const gameData = ref<gameData | null>(null)
+  const isLoading = ref(false)
+
+  const defaultGameData: gameData = {
     uuid: 'c32503c7-039a-4d7d-a8e6-bd9ee030fb3d',
     title: 'WHITE ALBUM 2',
     coverImage: 'library/images/c32503c7-039a-4d7d-a8e6-bd9ee030fb3d/cover.jpg',
@@ -157,11 +174,52 @@
       'Long ago I didn\'t know what a white album was. Because, I can no longer sing.',
       'Long ago there will be no more love that cannot be conveyed. For, I will no longer be in love.',
     ],
-  })
+  }
+
+  // Load the current game data
+  async function loadCurrentGameData() {
+    if (!gameStore.currentGameUuid) {
+      gameData.value = defaultGameData
+      return
+    }
+
+    isLoading.value = true
+    try {
+      const data = await gameStore.loadGameDetail(gameStore.currentGameUuid)
+      if (data) {
+        gameData.value = data
+      } else {
+        // If no data found, use default data
+        console.warn('No game data found for UUID:', gameStore.currentGameUuid)
+        gameData.value = defaultGameData
+      }
+    } catch (error) {
+      console.error('Failed to load game data:', error)
+      gameData.value = defaultGameData
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  //  Watch for changes in currentGameUuid
+  watch(
+    () => gameStore.currentGameUuid,
+    (newUuid) => {
+      if (newUuid) {
+        loadCurrentGameData()
+      }
+    },
+    { immediate: true }
+  )
+
+  // Initialize with default data
+  if (!gameData.value) {
+    gameData.value = defaultGameData
+  }
 
   // open edit window function
   async function openEditWindow() {
-    if (window.electronAPI?.createEditWindow) {
+    if (window.electronAPI?.createEditWindow && gameData.value) {
       try {
         // Pass a plain object to avoid IPC clone errors
         await window.electronAPI.createEditWindow(JSON.parse(JSON.stringify(gameData.value)))
@@ -169,7 +227,7 @@
         console.error('Failed to open edit window:', error)
       }
     } else {
-      console.error('electronAPI not available')
+      console.error('electronAPI not available or no game data')
     }
   }
 </script>
@@ -284,13 +342,13 @@
   }
 
   .detail-info-container {
-    width: 400px;
+    width: 40%;
     height: auto;
     margin: 0 5px;
   }
 
   .description-container {
-    width: auto;
+    width: 60%;
     height: auto;
     margin: 0 5px;
   }
@@ -352,5 +410,35 @@
     font-size: 0.8em;
     word-break: break-word;
     overflow-wrap: break-word;
+  }
+
+  .loading-container,
+  .no-game-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+    color: #666;
+    font-size: 16px;
+  }
+
+  .no-game-text {
+    text-align: center;
+    opacity: 0.7;
+  }
+
+  .no-game-text p {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    color: #909399;
+    letter-spacing: 0.5px;
+  }
+
+  .no-game-hint {
+    font-size: 14px;
+    font-weight: 400;
+    color: #c0c4cc;
+    opacity: 0.8;
   }
 </style>

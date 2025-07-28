@@ -80,7 +80,24 @@ db.prepare(`
 
 // pick a game by uuid
 ipcMain.handle('get-game-by-id', (_, gameid:string) => {
-  return db.prepare('SELECT * FROM games WHERE uuid = ?').get(gameid);
+  const result = db.prepare('SELECT * FROM games WHERE uuid = ?').get(gameid);
+  
+  if (result) {
+    // Parse JSON fields back to objects/arrays
+    try {
+      result.tags = result.tags ? JSON.parse(result.tags) : [];
+      result.links = result.links ? JSON.parse(result.links) : {};
+      result.description = result.description ? JSON.parse(result.description) : [];
+    } catch (error) {
+      console.error('Error parsing JSON fields for game:', gameid, error);
+      // Fallback to default values if parsing fails
+      result.tags = [];
+      result.links = {};
+      result.description = [];
+    }
+  }
+  
+  return result;
 });
 
 // get games list (lightweight - only fields needed for list display)
