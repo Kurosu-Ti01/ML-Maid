@@ -92,6 +92,7 @@ export const useGameStore = defineStore('game', () => {
   async function addGame(game: gameData) {
     try {
       if (window.electronAPI?.addGame) {
+        // Update database
         await window.electronAPI.addGame(game)
         
         // Update lightweight list
@@ -121,6 +122,7 @@ export const useGameStore = defineStore('game', () => {
   async function updateGame(updatedGame: gameData) {
     try {
       if (window.electronAPI?.updateGame) {
+        // Update database
         await window.electronAPI.updateGame(updatedGame)
         
         // Update lightweight list
@@ -152,12 +154,14 @@ export const useGameStore = defineStore('game', () => {
 
   async function deleteGame(uuid: string) {
     try {
-      // TODO: electronAPI.deleteGame
-      // if (window.electronAPI?.deleteGame) {
-      //   await window.electronAPI.deleteGame(uuid)
-      // }
+      // Call electron API to delete game from database
+      if (window.electronAPI?.deleteGame) {
+        await window.electronAPI.deleteGame(uuid)
+      } else {
+        throw new Error('electronAPI.deleteGame not available')
+      }
       
-      // remove from lightweight list
+      // Remove from lightweight list
       const listIndex = gamesList.value.findIndex(game => game.uuid === uuid)
       if (listIndex !== -1) {
         gamesList.value.splice(listIndex, 1)
@@ -251,6 +255,23 @@ export const useGameStore = defineStore('game', () => {
         console.log('✅ Updated game in list via IPC:', data.game.title)
       } else {
         console.log('❌ Game not found for update:', data.game.title)
+      }
+    } else if (data.action === 'delete' && data.game) {
+      // Delete game from list
+      const existingIndex = gamesList.value.findIndex(g => g.uuid === data.game!.uuid)
+      if (existingIndex !== -1) {
+        gamesList.value.splice(existingIndex, 1)
+        console.log('✅ Deleted game from list via IPC:', data.game.title)
+        
+        // Remove from details cache
+        gameDetailsCache.value.delete(data.game.uuid)
+        
+        // Clear current selection if deleted game was selected
+        if (currentGameUuid.value === data.game.uuid) {
+          currentGameUuid.value = null
+        }
+      } else {
+        console.log('❌ Game not found for delete:', data.game.title)
       }
     }
   }

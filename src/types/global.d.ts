@@ -7,6 +7,7 @@ interface Window {
     getGamesList: () => Promise<GameListItem[]>
     addGame: (game: gameData) => Promise<void>
     updateGame: (game: gameData) => Promise<void>
+    deleteGame: (uuid: string) => Promise<void>
     // window operations
     createEditWindow: (gameData: gameData) => Promise<number>
     createAddGameWindow: () => Promise<number>
@@ -36,6 +37,11 @@ interface Window {
     // event listeners
     onEditGameData: (callback: (data: gameData) => void) => void
     onGameListChanged: (callback: (data: { action: string, game?: gameData }) => void) => void
+  }
+  modalTitleBarManager?: {
+    originalColor: string
+    modalColor: string
+    setModalState: (isModal: boolean) => Promise<void>
   }
 }
 

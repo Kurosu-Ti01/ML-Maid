@@ -1,7 +1,7 @@
 <template>
   <el-scrollbar>
-    <div v-if="isLoading" class="loading-container">
-      <el-loading :loading="true" text="Loading game data..." />
+    <div v-if="isLoading" class="loading-container" v-loading="true" element-loading-text="Loading game data...">
+      <!-- Loading content will be handled by v-loading directive -->
     </div>
     <div v-else-if="(!gameStore.currentGameUuid) || (!gameData)" class="no-game-container">
       <div class="no-game-text">
@@ -25,8 +25,46 @@
         <div class="action-button-container">
           <div class="button-group">
             <el-button type="primary" size="large" style="margin: 10px 5px; padding: 0 40px;">Play</el-button>
-            <el-button type="primary" size="large" style="margin: 10px 5px;">...</el-button>
             <el-button type="primary" size="large" style="margin: 10px 5px;" @click="openEditWindow">Edit</el-button>
+            <el-dropdown trigger="click" @command="handleMenuCommand">
+              <el-button type="primary" size="large" style="margin: 10px 5px;">
+                ...
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="openFolder">
+                    <el-icon>
+                      <Folder />
+                    </el-icon>
+                    Open Install Path
+                  </el-dropdown-item>
+                  <el-dropdown-item command="createShortcut">
+                    <el-icon>
+                      <Link />
+                    </el-icon>
+                    Create Shortcut
+                  </el-dropdown-item>
+                  <el-dropdown-item command="gameInfo">
+                    <el-icon>
+                      <InfoFilled />
+                    </el-icon>
+                    Game Info
+                  </el-dropdown-item>
+                  <el-dropdown-item command="backup" divided>
+                    <el-icon>
+                      <Download />
+                    </el-icon>
+                    Backup Save
+                  </el-dropdown-item>
+                  <el-dropdown-item command="delete">
+                    <el-icon>
+                      <Delete />
+                    </el-icon>
+                    Delete
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
             <div class="game-playtime-text">
               <p>Time Played: {{ gameData.timePlayed }}</p>
               <p>Last Played: {{ gameData.lastPlayed }}</p>
@@ -109,6 +147,8 @@
 <script setup lang="ts" name="MainAeraGameInfo">
   import { ref, watch } from 'vue'
   import { useGameStore } from '../stores/game'
+  import { Delete, Folder, Link, InfoFilled, Download } from '@element-plus/icons-vue'
+  import { ElMessage, ElMessageBox } from 'element-plus'
 
   const gameStore = useGameStore()
 
@@ -228,6 +268,80 @@
       }
     } else {
       console.error('electronAPI not available or no game data')
+    }
+  }
+
+  // handle dropdown menu command
+  async function handleMenuCommand(command: string) {
+    switch (command) {
+      case 'delete':
+        await handleDeleteGame()
+        break
+      case 'openFolder':
+        ElMessage.info('This function is not implemented yet')
+        break
+      case 'createShortcut':
+        ElMessage.info('This is just a placeholder.\nMay not be implemented in the future.')
+        break
+      case 'gameInfo':
+        ElMessage.info('This is just a placeholder.\nMay not be implemented in the future.')
+        break
+      case 'backup':
+        ElMessage.info('This function is not implemented yet')
+        break
+      default:
+        console.log('Unknown command:', command)
+    }
+  }
+
+  // handle delete game with confirmation
+  async function handleDeleteGame() {
+    if (!gameData.value) {
+      ElMessage.error('No game data available')
+      return
+    }
+
+    try {
+      await ElMessageBox.confirm(
+        `Are you sure you want to delete the game <br>"${gameData.value.title}"?`,
+        'Confirm Deletion',
+        {
+          confirmButtonText: 'Delete',
+          cancelButtonText: 'Cancel',
+          type: 'warning',
+          confirmButtonClass: 'el-button--danger',
+          // Lock the scroll will make the scroll background turn white
+          lockScroll: false,
+          dangerouslyUseHTMLString: true
+        }
+      )
+
+      // Show loading message
+      const loadingMessage = ElMessage({
+        message: 'Deleting Game...',
+        type: 'info',
+        duration: 0
+      })
+
+      try {
+        await gameStore.deleteGame(gameData.value.uuid)
+        loadingMessage.close()
+        ElMessage.success('Delete Game Successfully')
+
+        // Clear current selection after deletion
+        gameStore.currentGameUuid = null
+        gameData.value = null
+      } catch (error) {
+        loadingMessage.close()
+        console.error('Failed to delete game:', error)
+        ElMessage.error('Failed to delete game: ' + (error instanceof Error ? error.message : '未知错误'))
+      }
+    } catch {
+      // User cancelled the deletion
+      console.log('User cancelled game deletion')
+    } finally {
+      // Restore normal state for title bar
+      await window.modalTitleBarManager?.setModalState(false)
     }
   }
 </script>
@@ -440,5 +554,14 @@
     font-weight: 400;
     color: #c0c4cc;
     opacity: 0.8;
+  }
+</style>
+
+<style>
+
+  /* Hide overlay of ElMessageBox  */
+  /* The overlay can't work on window controls */
+  .el-overlay {
+    background-color: transparent !important;
   }
 </style>

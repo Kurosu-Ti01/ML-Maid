@@ -322,6 +322,71 @@ ipcMain.handle('update-game', async (_, game:gameData) => {
   }
 });
 
+// Delete game
+ipcMain.handle('delete-game', async (_, uuid: string) => {
+  try {
+    // First check if the game exists
+    const gameData = db.prepare('SELECT * FROM games WHERE uuid = ?').get(uuid);
+    if (!gameData) {
+      throw new Error(`Game with UUID ${uuid} not found`);
+    }
+    
+    // Delete the game from database
+    const deleteStmt = db.prepare('DELETE FROM games WHERE uuid = ?');
+    const result = deleteStmt.run(uuid);
+    
+    if (result.changes === 0) {
+      throw new Error(`Failed to delete game with UUID ${uuid}`);
+    }
+    
+    // Delete associated image files
+    const gameImageDir = path.join(imgPath_game, uuid);
+    if (fs.existsSync(gameImageDir)) {
+      try {
+        // Remove all files in the game's image directory
+        const files = fs.readdirSync(gameImageDir);
+        for (const file of files) {
+          const filePath = path.join(gameImageDir, file);
+          fs.unlinkSync(filePath);
+        }
+        // Remove the directory itself
+        fs.rmdirSync(gameImageDir);
+        console.log(`Deleted image directory for game ${uuid}`);
+      } catch (imageError) {
+        console.warn(`Warning: Failed to delete image directory for game ${uuid}:`, imageError);
+        // Don't throw error here, as the database deletion was successful
+      }
+    }
+    
+    // Also clean up any temp images for this game
+    const tempImageDir = path.join(process.env.APP_ROOT, 'temp', 'images', uuid);
+    if (fs.existsSync(tempImageDir)) {
+      try {
+        const tempFiles = fs.readdirSync(tempImageDir);
+        for (const file of tempFiles) {
+          const filePath = path.join(tempImageDir, file);
+          fs.unlinkSync(filePath);
+        }
+        fs.rmdirSync(tempImageDir);
+        console.log(`Cleaned up temp images for game ${uuid}`);
+      } catch (tempError) {
+        console.warn(`Warning: Failed to clean up temp images for game ${uuid}:`, tempError);
+      }
+    }
+    
+    // Notify main window to refresh game list
+    if (win && !win.isDestroyed()) {
+      win.webContents.send('game-list-changed', { action: 'delete', game: { uuid, title: gameData.title } });
+    }
+    
+    console.log(`Successfully deleted game: ${gameData.title} (${uuid})`);
+    return { success: true, deletedGame: { uuid, title: gameData.title } };
+  } catch (error) {
+    console.error('Error deleting game:', error);
+    throw error;
+  }
+});
+
 // Select image file dialog
 ipcMain.handle('select-image-file', async () => {
   const result = await dialog.showOpenDialog({

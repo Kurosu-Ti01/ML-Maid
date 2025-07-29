@@ -30,6 +30,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getGamesList: () => ipcRenderer.invoke('get-games-list'),
   addGame: (game:gameData) => ipcRenderer.invoke('add-game', game),
   updateGame: (game:gameData) => ipcRenderer.invoke('update-game', game),
+  deleteGame: (uuid: string) => ipcRenderer.invoke('delete-game', uuid),
   
   // window operations
   createEditWindow: (gameData:gameData) => ipcRenderer.invoke('create-edit-window', gameData),
