@@ -212,12 +212,66 @@
         </el-scrollbar>
       </el-tab-pane>
 
-      <!-- Actions Tab (TODO) -->
+      <!-- Actions Tab -->
       <el-tab-pane label="Actions" name="actions">
         <el-scrollbar class="tab-scrollbar">
-          <div class="placeholder-content">
-            <el-empty description="Actions configuration coming soon..." />
-          </div>
+          <el-form :model="gameForm" label-width="120px" class="tab-form">
+            <div class="actions-container">
+              <div class="actions-header">
+                <h3>Game Actions</h3>
+                <el-button type="primary" size="small" @click="addAction">
+                  <el-icon>
+                    <Plus />
+                  </el-icon>
+                  Add Action
+                </el-button>
+              </div>
+
+              <div v-if="gameForm.actions && gameForm.actions.length > 0" class="actions-list">
+                <div v-for="(action, index) in gameForm.actions" :key="index" class="action-item">
+                  <div class="action-header">
+                    <span class="action-index">{{ index + 1 }}</span>
+                    <el-button type="danger" size="small" text @click="removeAction(index)">
+                      <el-icon>
+                        <Delete />
+                      </el-icon>
+                    </el-button>
+                  </div>
+
+                  <el-form-item label="Action Name">
+                    <el-input v-model="action.name" placeholder="Enter action name (e.g., Play)" />
+                  </el-form-item>
+
+                  <el-form-item label="Type">
+                    <el-select v-model="action.type" placeholder="Select action type" style="width: 100%">
+                      <el-option label="File" value="File" />
+                      <el-option label="Link" value="Link" disabled />
+                      <el-option label="Script" value="Script" disabled />
+                    </el-select>
+                  </el-form-item>
+
+                  <el-form-item v-if="action.type === 'File'" label="Executable Path">
+                    <div class="executable-path-input">
+                      <el-input v-model="action.executablePath" placeholder="Path to executable file" />
+                      <el-button @click="selectExecutablePath(index)" style="margin-left: 8px;">
+                        Browse
+                      </el-button>
+                    </div>
+                  </el-form-item>
+
+                  <el-form-item v-if="action.type === 'File'" label="Parameters">
+                    <el-input v-model="action.parameters"
+                      placeholder="Optional command line parameters (NOT AVAILABLE YET)" />
+                  </el-form-item>
+                </div>
+              </div>
+
+              <div v-else class="no-actions">
+                <el-empty description="No actions configured" />
+                <p class="hint-text">Add actions to define how to launch or interact with this game.</p>
+              </div>
+            </div>
+          </el-form>
         </el-scrollbar>
       </el-tab-pane>
 
@@ -242,6 +296,7 @@
 <script setup lang="ts" name="GameAddForm">
   import { ref, computed, toRaw } from 'vue'
   import { ElMessage } from 'element-plus'
+  import { Plus, Delete } from '@element-plus/icons-vue'
   import { v4 as uuidv4 } from 'uuid'
   import { useGameStore } from '../stores/game'
 
@@ -280,7 +335,8 @@
       'WikiPedia': '',
       'WikiData': ''
     },
-    description: []
+    description: [],
+    actions: []
   })
 
   const saving = ref(false)
@@ -373,6 +429,48 @@
         break
     }
     ElMessage.success(`${imageType} image removed`)
+  }
+
+  // Actions management functions
+  function addAction() {
+    if (!gameForm.value.actions) {
+      gameForm.value.actions = []
+    }
+    gameForm.value.actions.push({
+      name: '',
+      type: 'File',
+      executablePath: '',
+      parameters: ''
+    })
+    ElMessage.success('Action added')
+  }
+
+  function removeAction(index: number) {
+    if (gameForm.value.actions && index >= 0 && index < gameForm.value.actions.length) {
+      gameForm.value.actions.splice(index, 1)
+      ElMessage.success('Action removed')
+    }
+  }
+
+  async function selectExecutablePath(index: number) {
+    try {
+      if (window.electronAPI?.selectExecutableFile) {
+        const result = await window.electronAPI.selectExecutableFile()
+
+        if (result && !result.canceled && result.filePaths.length > 0) {
+          const selectedPath = result.filePaths[0]
+          if (gameForm.value.actions && gameForm.value.actions[index]) {
+            gameForm.value.actions[index].executablePath = selectedPath
+            ElMessage.success('Executable path updated')
+          }
+        }
+      } else {
+        ElMessage.error('File selection API not available')
+      }
+    } catch (error) {
+      console.error('Error selecting executable:', error)
+      ElMessage.error('Failed to select executable')
+    }
   }
 
   // deal with tags input
@@ -709,6 +807,81 @@
 
   .action-btn:hover .btn-icon {
     opacity: 1;
+  }
+
+  /* Actions tab specific styles */
+  .actions-container {
+    max-width: 800px;
+  }
+
+  .actions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e4e7ed;
+  }
+
+  .actions-header h3 {
+    margin: 0;
+    color: #303133;
+    font-size: 18px;
+  }
+
+  .actions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .action-item {
+    border: 1px solid #e4e7ed;
+    border-radius: 8px;
+    padding: 20px;
+    background-color: #fafafa;
+    position: relative;
+  }
+
+  .action-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .action-index {
+    background-color: #409eff;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .executable-path-input {
+    width: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  .executable-path-input .el-input {
+    flex: 1;
+  }
+
+  .no-actions {
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .hint-text {
+    color: #909399;
+    font-size: 14px;
+    margin-top: 10px;
   }
 
   /* Responsive Design */

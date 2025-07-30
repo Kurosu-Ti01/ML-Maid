@@ -31,6 +31,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   addGame: (game:gameData) => ipcRenderer.invoke('add-game', game),
   updateGame: (game:gameData) => ipcRenderer.invoke('update-game', game),
   deleteGame: (uuid: string) => ipcRenderer.invoke('delete-game', uuid),
+
+  // game actions operations
+  launchGame: (params: { gameUuid: string, executablePath?: string }) => ipcRenderer.invoke('launch-game', params),
+  selectExecutableFile: () => ipcRenderer.invoke('select-executable-file'),
   
   // window operations
   createEditWindow: (gameData:gameData) => ipcRenderer.invoke('create-edit-window', gameData),
@@ -51,5 +55,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // listen for game list changes
   onGameListChanged: (callback: (data: { action: string, game?: gameData }) => void) => {
     ipcRenderer.on('game-list-changed', (_, data) => callback(data));
+  },
+
+  // listen for game launched events
+  onGameLaunched: (callback: (data: { gameUuid: string, executablePath: string, lastPlayed: string }) => void) => {
+    ipcRenderer.on('game-launched', (_, data) => callback(data));
+  },
+
+  // listen for game session ended events
+  onGameSessionEnded: (callback: (data: { gameUuid: string, sessionTimeSeconds: number, totalTimePlayed: number, executablePath: string }) => void) => {
+    ipcRenderer.on('game-session-ended', (_, data) => callback(data));
   }
 });

@@ -24,7 +24,8 @@
         <!-- Action Button Container -->
         <div class="action-button-container">
           <div class="button-group">
-            <el-button type="primary" size="large" style="margin: 10px 5px; padding: 0 40px;">Play</el-button>
+            <el-button type="primary" size="large" style="margin: 10px 5px; padding: 0 40px;"
+              @click="handlePlayGame">Play</el-button>
             <el-button type="primary" size="large" style="margin: 10px 5px;" @click="openEditWindow">Edit</el-button>
             <el-dropdown trigger="click" @command="handleMenuCommand">
               <el-button type="primary" size="large" style="margin: 10px 5px;">
@@ -161,9 +162,9 @@
     coverImage: 'library/images/c32503c7-039a-4d7d-a8e6-bd9ee030fb3d/cover.jpg',
     backgroundImage: 'library/images/c32503c7-039a-4d7d-a8e6-bd9ee030fb3d/background.png',
     iconImage: 'library/images/c32503c7-039a-4d7d-a8e6-bd9ee030fb3d/icon.ico',
-    lastPlayed: '2025-02-08',
+    lastPlayed: '2012-07-20 12:00:00',
     timePlayed: 192312412,
-    installPath: 'C:\\Amusement\\WHITE ALBUM 2',
+    installPath: 'C:/Amusement/WHITE ALBUM 2',
     installSize: 124164828731,
     genre: 'Visual Novel',
     developer: 'Leaf',
@@ -214,6 +215,13 @@
       'Long ago I didn\'t know what a white album was. Because, I can no longer sing.',
       'Long ago there will be no more love that cannot be conveyed. For, I will no longer be in love.',
     ],
+    actions: [{
+      name: 'Play',
+      type: 'File',
+      executablePath: 'C:/Amusement/WHITE ALBUM 2/WA2.exe',
+      parameters: ''
+    }
+    ]
   }
 
   // Load the current game data
@@ -241,7 +249,7 @@
     }
   }
 
-  //  Watch for changes in currentGameUuid
+  // Watch for changes in currentGameUuid
   watch(
     () => gameStore.currentGameUuid,
     (newUuid) => {
@@ -252,9 +260,73 @@
     { immediate: true }
   )
 
+  // Watch for changes in gameDetailsCache for the current game
+  watch(
+    () => gameStore.currentGameUuid ? gameStore.gameDetailsCache.get(gameStore.currentGameUuid) : null,
+    (newGameData) => {
+      if (newGameData && gameStore.currentGameUuid) {
+        console.log('Game data updated in cache, refreshing display:', newGameData.title)
+        gameData.value = newGameData
+      }
+    },
+    { deep: true }
+  )
+
   // Initialize with default data
   if (!gameData.value) {
     gameData.value = defaultGameData
+  }
+
+  // handle play game function
+  async function handlePlayGame() {
+    if (!gameData.value) {
+      ElMessage.error('No game data available')
+      return
+    }
+
+    try {
+      // Show loading message
+      const loadingMessage = ElMessage({
+        message: 'Launching game...',
+        type: 'info',
+        duration: 0
+      })
+
+      // Launch the game using the electronAPI
+      // First try to find a File type action
+      let executablePath: string | undefined
+
+      if (gameData.value.actions && gameData.value.actions.length > 0) {
+        const fileAction = gameData.value.actions.find(action => action.type === 'File' && action.executablePath)
+        if (fileAction && fileAction.executablePath) {
+          executablePath = fileAction.executablePath
+        }
+      }
+
+      if (!executablePath) {
+        loadingMessage.close()
+        ElMessage.error('No executable path configured. Please edit the game and add an action.')
+        return
+      }
+
+      const result = await window.electronAPI?.launchGame({
+        gameUuid: gameData.value.uuid,
+        executablePath: executablePath
+      })
+
+      loadingMessage.close()
+
+      if (result?.success) {
+        ElMessage.success(`Game launched successfully!`)
+        // Refresh the game data to update last played time
+        await loadCurrentGameData()
+      } else {
+        ElMessage.error('Failed to launch game')
+      }
+    } catch (error) {
+      console.error('Failed to launch game:', error)
+      ElMessage.error('Failed to launch game: ' + (error instanceof Error ? error.message : 'Unknown error'))
+    }
   }
 
   // open edit window function
@@ -339,9 +411,6 @@
     } catch {
       // User cancelled the deletion
       console.log('User cancelled game deletion')
-    } finally {
-      // Restore normal state for title bar
-      await window.modalTitleBarManager?.setModalState(false)
     }
   }
 </script>
