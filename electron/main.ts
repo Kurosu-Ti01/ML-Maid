@@ -5,6 +5,7 @@ import { ipcMain, dialog } from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import fs from 'node:fs'
+import { spawn } from 'node:child_process'
 
 // To avoid the "ReferenceError: __filename is not defined" error in ESM
 // See 👉 https://github.com/TooTallNate/node-bindings/issues/81
@@ -54,6 +55,18 @@ function getMimeType(extension: string): string {
   return mimeTypes[extension.toLowerCase()] || 'image/jpeg';
 }
 
+// Helper function to format date to local timezone YYYY-MM-DD HH:MM:SS format
+function formatLocalDateTime(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
 // initialize the database
 db.prepare(`
   CREATE TABLE IF NOT EXISTS games (
@@ -62,7 +75,7 @@ db.prepare(`
     coverImage TEXT,
     backgroundImage TEXT,
     iconImage TEXT,
-    lastPlayed TEXT,
+    lastPlayed TEXT,   -- YYYY-MM-DD HH:MM:SS format
     timePlayed  NUMERIC DEFAULT 0,
     installPath TEXT,
     installSize NUMERIC DEFAULT 0,
@@ -74,7 +87,8 @@ db.prepare(`
     personalScore NUMERIC DEFAULT 0,
     tags TEXT,         -- use JSON.stringify to store, use JSON.parse to retrieve
     links TEXT,        -- use JSON.stringify to store, use JSON.parse to retrieve
-    description TEXT   -- use JSON.stringify to store, use JSON.parse to retrieve
+    description TEXT,  -- use JSON.stringify to store, use JSON.parse to retrieve
+    actions TEXT       -- use JSON.stringify to store, use JSON.parse to retrieve
   )
 `).run();
 
@@ -88,12 +102,14 @@ ipcMain.handle('get-game-by-id', (_, gameid:string) => {
       result.tags = result.tags ? JSON.parse(result.tags) : [];
       result.links = result.links ? JSON.parse(result.links) : {};
       result.description = result.description ? JSON.parse(result.description) : [];
+      result.actions = result.actions ? JSON.parse(result.actions) : [];
     } catch (error) {
       console.error('Error parsing JSON fields for game:', gameid, error);
       // Fallback to default values if parsing fails
       result.tags = [];
       result.links = {};
       result.description = [];
+      result.actions = [];
     }
   }
   
@@ -177,8 +193,8 @@ ipcMain.handle('add-game', async (_, game:gameData) => {
     `INSERT INTO games (
       uuid, title, coverImage, backgroundImage, iconImage, lastPlayed, timePlayed,
       installPath, installSize, genre, developer, publisher, releaseDate,
-      communityScore, personalScore, tags, links, description
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      communityScore, personalScore, tags, links, description, actions
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     );
     
     stmt.run(
@@ -199,7 +215,8 @@ ipcMain.handle('add-game', async (_, game:gameData) => {
       updatedGame.personalScore || 0,
       JSON.stringify(updatedGame.tags || []),
       JSON.stringify(updatedGame.links || {}),
-      JSON.stringify(updatedGame.description || [])
+      JSON.stringify(updatedGame.description || []),
+      JSON.stringify(updatedGame.actions || [])
     );
     
     // Notify main window to refresh game list
@@ -285,7 +302,7 @@ ipcMain.handle('update-game', async (_, game:gameData) => {
       title = ?, coverImage = ?, backgroundImage = ?, iconImage = ?, lastPlayed = ?,
       timePlayed = ?, installPath = ?, installSize = ?, genre = ?, developer = ?,
       publisher = ?, releaseDate = ?, communityScore = ?, personalScore = ?, tags = ?,
-      links = ?, description = ? 
+      links = ?, description = ?, actions = ? 
     WHERE uuid = ?`
     );
     
@@ -307,10 +324,11 @@ ipcMain.handle('update-game', async (_, game:gameData) => {
       JSON.stringify(updatedGame.tags || []),
       JSON.stringify(updatedGame.links || {}),
       JSON.stringify(updatedGame.description || []),
+      JSON.stringify(updatedGame.actions || []),
       updatedGame.uuid
     );
     
-    // Notify main window to refresh game list
+    // Notify main window to refresh game list and game page
     if (win && !win.isDestroyed()) {
       win.webContents.send('game-list-changed', { action: 'update', game: updatedGame });
     }
@@ -387,6 +405,107 @@ ipcMain.handle('delete-game', async (_, uuid: string) => {
   }
 });
 
+// Game process tracking
+const activeGameProcesses = new Map<string, { 
+  process: any, 
+  startTime: Date, 
+  gameUuid: string,
+  executablePath: string 
+}>();
+
+// Launch game
+ipcMain.handle('launch-game', async (_, { gameUuid, executablePath }: { gameUuid: string, executablePath: string }) => {
+  try {
+      // Check if the path exists
+      if (!fs.existsSync(executablePath)) {
+        throw new Error(`Game executable not found at: ${executablePath}`);
+      }
+    
+    console.log(`Launching game: ${executablePath}`);
+    
+    // Launch the game using spawn
+    const gameProcess = spawn(executablePath, [], {
+      detached: false, // we should monitor the process
+      stdio: 'ignore',
+      cwd: path.dirname(executablePath) // Set working directory to the game's directory
+    });
+    
+    const startTime = new Date();
+    const processKey = `${gameUuid}_${Date.now()}`;
+    
+    // Store process info for tracking
+    activeGameProcesses.set(processKey, {
+      process: gameProcess,
+      startTime,
+      gameUuid,
+      executablePath
+    });
+    
+    // Monitor process exit
+    gameProcess.on('exit', async (code) => {
+      const endTime = new Date();
+      const processInfo = activeGameProcesses.get(processKey);
+      
+      if (processInfo) {
+        const sessionTimeSeconds = Math.floor((endTime.getTime() - processInfo.startTime.getTime()) / 1000);
+        console.log(`Game ${gameUuid} session ended with code ${code}. Duration: ${sessionTimeSeconds} seconds`);
+        
+        try {
+          // Get current timePlayed from database
+          const currentData = db.prepare('SELECT timePlayed FROM games WHERE uuid = ?').get(gameUuid);
+          const currentTimePlayed = currentData ? (currentData.timePlayed || 0) : 0;
+          const newTimePlayed = currentTimePlayed + sessionTimeSeconds;
+          
+          // Update timePlayed in database
+          const updateStmt = db.prepare('UPDATE games SET timePlayed = ? WHERE uuid = ?');
+          updateStmt.run(newTimePlayed, gameUuid);
+          
+          // Notify main window that game session ended
+          if (win && !win.isDestroyed()) {
+            win.webContents.send('game-session-ended', {
+              gameUuid,
+              sessionTimeSeconds,
+              totalTimePlayed: newTimePlayed,
+              executablePath: processInfo.executablePath
+            });
+          }
+          
+          console.log(`Updated timePlayed for ${gameUuid}: +${sessionTimeSeconds}s, total: ${newTimePlayed}s`);
+        } catch (error) {
+          console.error('Error updating game time:', error);
+        }
+        
+        // Clean up tracking
+        activeGameProcesses.delete(processKey);
+      }
+    });
+    
+    gameProcess.on('error', (error) => {
+      console.error('Game process error:', error);
+      activeGameProcesses.delete(processKey);
+    });
+    
+    // Update last played time in database
+    const updateStmt = db.prepare('UPDATE games SET lastPlayed = ? WHERE uuid = ?');
+    const currentDateTime = formatLocalDateTime(new Date()); // Local timezone YYYY-MM-DD HH:MM:SS format
+    updateStmt.run(currentDateTime, gameUuid);
+    
+    // Notify main window that game was launched
+    if (win && !win.isDestroyed()) {
+      win.webContents.send('game-launched', { 
+        gameUuid, 
+        executablePath, 
+        lastPlayed: currentDateTime 
+      });
+    }
+    
+    return { success: true, message: 'Game launched successfully', executablePath };
+  } catch (error) {
+    console.error('Error launching game:', error);
+    throw error;
+  }
+});
+
 // Select image file dialog
 ipcMain.handle('select-image-file', async () => {
   const result = await dialog.showOpenDialog({
@@ -395,6 +514,24 @@ ipcMain.handle('select-image-file', async () => {
       {
         name: 'Images',
         extensions: ['jpg', 'jpeg', 'png', 'ico', 'gif', 'bmp', 'webp']
+      }
+    ]
+  });
+  return result;
+});
+
+// Select executable file dialog
+ipcMain.handle('select-executable-file', async () => {
+  const result = await dialog.showOpenDialog({
+    properties: ['openFile'],
+    filters: [
+      {
+        name: 'Executable Files',
+        extensions: ['exe', 'bat', 'cmd', 'msi']
+      },
+      {
+        name: 'All Files',
+        extensions: ['*']
       }
     ]
   });

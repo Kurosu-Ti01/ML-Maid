@@ -8,6 +8,14 @@ interface Window {
     addGame: (game: gameData) => Promise<void>
     updateGame: (game: gameData) => Promise<void>
     deleteGame: (uuid: string) => Promise<void>
+    // game actions operations
+    launchGame: (params: { gameUuid: string, executablePath?: string }) => Promise<{
+      success: boolean;
+      message?: string;
+      gamePath?: string;
+      error?: string;
+    }>
+    selectExecutableFile: () => Promise<{ canceled: boolean; filePaths: string[] }>
     // window operations
     createEditWindow: (gameData: gameData) => Promise<number>
     createAddGameWindow: () => Promise<number>
@@ -37,11 +45,8 @@ interface Window {
     // event listeners
     onEditGameData: (callback: (data: gameData) => void) => void
     onGameListChanged: (callback: (data: { action: string, game?: gameData }) => void) => void
-  }
-  modalTitleBarManager?: {
-    originalColor: string
-    modalColor: string
-    setModalState: (isModal: boolean) => Promise<void>
+    onGameLaunched: (callback: (data: { gameUuid: string, executablePath: string, lastPlayed: string }) => void) => void
+    onGameSessionEnded: (callback: (data: { gameUuid: string, sessionTimeSeconds: number, totalTimePlayed: number, executablePath: string }) => void) => void
   }
 }
 
@@ -51,7 +56,7 @@ interface gameData {
   coverImage: string;
   backgroundImage: string;
   iconImage: string;
-	lastPlayed: string;     // ISO date format "YYYY-MM-DD"
+	lastPlayed: string;     // ISO date format "YYYY-MM-DD HH:MM:SS"
   timePlayed: number;
   installPath: string;
   installSize: number;    // Size in bytes
@@ -70,6 +75,12 @@ interface gameData {
     'WikiData'?: string;
   };
   description: string[];
+  actions?: {
+    name: string;
+    type: 'File' | 'Link' | 'Script'; // Action type
+    executablePath?: string; // Optional, for actions that require an executable
+    parameters?: string;     // Optional, for actions that require parameters
+  }[];
 }
 
 // For lightweight game list items

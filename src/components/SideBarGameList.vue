@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts" name="SideBarGameList">
-  import { useGameStore } from '../stores/game'
+  import { useGameStore } from '@/stores/game'
 
   const gameStore = useGameStore()
 

@@ -218,6 +218,34 @@ export const useGameStore = defineStore('game', () => {
     } else {
       console.warn('❌ electronAPI.onGameListChanged not available')
     }
+
+    // Set up game launched listener
+    if (window.electronAPI?.onGameLaunched) {
+      console.log('🔧 Setting up game launched listener')
+      
+      window.electronAPI.onGameLaunched((data) => {
+        console.log('🎮 Received game launched notification:', data)
+        handleGameLaunched(data)
+      })
+      
+      console.log('✅ Game launched listener setup complete')
+    } else {
+      console.warn('❌ electronAPI.onGameLaunched not available')
+    }
+
+    // Set up game session ended listener
+    if (window.electronAPI?.onGameSessionEnded) {
+      console.log('🔧 Setting up game session ended listener')
+      
+      window.electronAPI.onGameSessionEnded((data) => {
+        console.log('🏁 Received game session ended notification:', data)
+        handleGameSessionEnded(data)
+      })
+      
+      console.log('✅ Game session ended listener setup complete')
+    } else {
+      console.warn('❌ electronAPI.onGameSessionEnded not available')
+    }
   }
 
   // Logic to handle changes in the game list
@@ -244,7 +272,6 @@ export const useGameStore = defineStore('game', () => {
       // Update existing game
       const existingIndex = gamesList.value.findIndex(g => g.uuid === data.game!.uuid)
       if (existingIndex !== -1) {
-        // Vue 3 支持直接索引赋值来触发响应式更新
         gamesList.value[existingIndex] = {
           uuid: data.game.uuid,
           title: data.game.title,
@@ -252,6 +279,7 @@ export const useGameStore = defineStore('game', () => {
           genre: data.game.genre,
           lastPlayed: data.game.lastPlayed
         }
+        gameDetailsCache.value.set(data.game.uuid, data.game)
         console.log('✅ Updated game in list via IPC:', data.game.title)
       } else {
         console.log('❌ Game not found for update:', data.game.title)
@@ -274,6 +302,40 @@ export const useGameStore = defineStore('game', () => {
         console.log('❌ Game not found for delete:', data.game.title)
       }
     }
+  }
+
+  // Logic to handle game launched events
+  function handleGameLaunched(data: { gameUuid: string, executablePath: string, lastPlayed: string }) {
+    console.log(`🚀 Processing game launched for game:`, data.gameUuid)
+    
+    // Update lastPlayed time in games list
+    const listIndex = gamesList.value.findIndex(g => g.uuid === data.gameUuid)
+    if (listIndex !== -1) {
+      gamesList.value[listIndex].lastPlayed = data.lastPlayed
+      console.log('✅ Updated lastPlayed in list:', data.lastPlayed)
+    }
+    
+    // Update lastPlayed time in details cache if the game is cached
+    if (gameDetailsCache.value.has(data.gameUuid)) {
+      const cachedGame = gameDetailsCache.value.get(data.gameUuid)!
+      cachedGame.lastPlayed = data.lastPlayed
+      gameDetailsCache.value.set(data.gameUuid, cachedGame)
+      console.log('✅ Updated lastPlayed in cache:', data.lastPlayed)
+    }
+  }
+
+  // Logic to handle game session ended events
+  function handleGameSessionEnded(data: { gameUuid: string, sessionTimeSeconds: number, totalTimePlayed: number, executablePath: string }) {
+    console.log(`🏁 Processing game session ended for game:`, data.gameUuid)
+    console.log(`⏱️ Session duration: ${data.sessionTimeSeconds}s, Total time: ${data.totalTimePlayed}s`)
+    
+    // Update timePlayed in details cache if the game is cached
+    if (gameDetailsCache.value.has(data.gameUuid)) {
+      const cachedGame = gameDetailsCache.value.get(data.gameUuid)!
+      cachedGame.timePlayed = data.totalTimePlayed
+      gameDetailsCache.value.set(data.gameUuid, cachedGame)
+      console.log('✅ Updated timePlayed in cache:', data.totalTimePlayed)
+    }    
   }
 
   return {
