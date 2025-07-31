@@ -34,11 +34,13 @@
         <!-- Action Button Container -->
         <div class="action-button-container">
           <div class="button-group">
-            <el-button type="primary" size="large" style="margin: 10px 5px; padding: 0 40px;"
+            <el-button type="primary" size="large"
+              style="font-weight: bold; font-size: 1.2em; margin: 10px 5px; padding: 0 40px;"
               @click="handlePlayGame">Play</el-button>
-            <el-button type="primary" size="large" style="margin: 10px 5px;" @click="openEditWindow">Edit</el-button>
+            <el-button type="primary" size="large" style="font-weight: bold; font-size: 1.2em; margin: 10px 5px;"
+              @click="openEditWindow">Edit</el-button>
             <el-dropdown trigger="click" @command="handleMenuCommand">
-              <el-button type="primary" size="large" style="margin: 10px 5px;">
+              <el-button type="primary" size="large" style="font-weight: bold; font-size: 1.2em; margin: 10px 5px;">
                 ...
               </el-button>
               <template #dropdown>
@@ -77,8 +79,14 @@
               </template>
             </el-dropdown>
             <div class="game-playtime-text">
-              <p>Time Played: {{ gameData.timePlayed }}</p>
-              <p>Last Played: {{ gameData.lastPlayed }}</p>
+              <div class="game-playtime">
+                <p style="font-size: 1.1em; color: black;">Time Played</p>
+                <p style="font-weight: bold;">{{ formatTimePlayed(gameData.timePlayed) }}</p>
+              </div>
+              <div class="game-playtime">
+                <p style="font-size: 1.1em; color: black;">Last Played</p>
+                <p style="font-weight: bold;">{{ gameData.lastPlayed }}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -100,7 +108,7 @@
             </div>
             <div class="info-row">
               <div class="info-label">Install Size</div>
-              <div class="info-content">{{ gameData.installSize }}</div>
+              <div class="info-content">{{ formatFileSize(gameData.installSize) }}</div>
             </div>
             <div class="info-row">
               <div class="info-label">Genre</div>
@@ -127,20 +135,20 @@
               <div class="info-content">{{ gameData.personalScore }}</div>
             </div>
             <div class="info-row">
-              <div class="info-label">Tags</div>
-              <div class="info-content">
-                <div class="tags-flex-wrap">
-                  <el-tag v-for="(tag, index) in gameData.tags" :key="index" style="margin: 2px 6px 2px 0;">
-                    {{ tag }}
-                  </el-tag>
-                </div>
-              </div>
-            </div>
-            <div class="info-row">
               <div class="info-label">Links</div>
               <div class="info-content">
                 <div v-for="(link, name) in gameData.links" :key="name">
                   <a :href="link" target="_blank" class="game-link">{{ name }}</a>
+                </div>
+              </div>
+            </div>
+            <div class="info-row-tags">
+              <div class="info-label-tags">Tags</div>
+              <div class="info-content-tags">
+                <div class="tags-flex-wrap">
+                  <el-tag v-for="(tag, index) in gameData.tags" :key="index" style="margin: 2px 6px 2px 0;">
+                    {{ tag }}
+                  </el-tag>
                 </div>
               </div>
             </div>
@@ -169,6 +177,46 @@
 
   const gameData = ref<gameData | null>(null)
   const isLoading = ref(false)
+
+  // Format time from seconds to hours and minutes
+  function formatTimePlayed(seconds: number): string {
+    if (!seconds || seconds === 0) {
+      return '0m'
+    }
+
+    const hours = Math.floor(seconds / 3600)
+    const minutes = Math.floor((seconds % 3600) / 60)
+
+    if (hours === 0) {
+      return `${minutes}m`
+    } else if (minutes === 0) {
+      return `${hours}h`
+    } else {
+      return `${hours}h ${minutes}m`
+    }
+  }
+
+  // Format file size from bytes to human readable format
+  function formatFileSize(bytes: number): string {
+    if (!bytes || bytes === 0) {
+      return '0 B'
+    }
+
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
+    const i = Math.floor(Math.log(bytes) / Math.log(1024))
+    const size = bytes / Math.pow(1024, i)
+
+    // For sizes >= 1GB, show 2 decimal places
+    // For sizes >= 1MB, show 1 decimal place
+    // For smaller sizes, show no decimal places
+    if (i >= 3) {
+      return `${size.toFixed(2)} ${sizes[i]}`
+    } else if (i >= 2) {
+      return `${size.toFixed(1)} ${sizes[i]}`
+    } else {
+      return `${Math.round(size)} ${sizes[i]}`
+    }
+  }
 
   // Load the current game data
   async function loadCurrentGameData() {
@@ -378,9 +426,10 @@
     font-weight: 600;
     color: #ffffff;
     letter-spacing: 1px;
+    margin-left: 0.2em;
     text-shadow:
-      4px 4px 16px rgba(34, 34, 34, 0.40),
-      2px 2px 4px rgba(34, 34, 34, 0.28);
+      0 0 6px rgba(34, 34, 34, 0.40),
+      0 0 4px rgba(34, 34, 34, 0.28);
   }
 
   .game-icon {
@@ -391,8 +440,13 @@
 
   .game-background {
     width: 100%;
+    height: 100%;
     object-fit: cover;
     object-position: center center;
+    /* Fix image bottom white bar issue:
+       - display: block eliminates baseline alignment whitespace from inline elements
+       - height: 100% ensures image fully fills parent container height */
+    display: block;
   }
 
   .main-info-action-container {
@@ -414,6 +468,7 @@
     justify-content: flex-start;
     background: rgba(255, 255, 255, 0.92);
     z-index: 1;
+    margin-left: 2px;
   }
 
   .button-group {
@@ -432,6 +487,13 @@
     flex-direction: row;
     align-items: center;
     gap: 16px;
+  }
+
+  .game-playtime {
+    line-height: 0.5;
+    flex-direction: column;
+    align-items: center;
+    color: #a174e9;
   }
 
   .game-cover {
@@ -519,8 +581,8 @@
     background-color: #fafafa;
     border-right: 1px solid #ebeef5;
     font: 1em;
-    font-weight: 520;
-    color: #4080ff;
+    font-weight: 600;
+    color: #409eff;
     word-break: break-word;
     overflow-wrap: break-word;
   }
@@ -528,6 +590,31 @@
   .info-content {
     flex: 1;
     padding: 12px;
+    background-color: #ffffff;
+    font-size: 0.8em;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .info-row-tags {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid #ebeef5;
+  }
+
+  .info-label-tags {
+    width: 100%;
+    padding: 12px 12px 8px 12px;
+    font: 1em;
+    font-weight: 600;
+    color: #409eff;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .info-content-tags {
+    width: 100%;
+    padding: 8px 12px 12px 12px;
     background-color: #ffffff;
     font-size: 0.8em;
     word-break: break-word;
