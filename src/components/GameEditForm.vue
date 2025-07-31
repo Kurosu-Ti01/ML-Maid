@@ -88,7 +88,7 @@
               </el-col>
               <el-col :span="12">
                 <el-form-item label="Time Played">
-                  <el-input v-model="gameForm.timePlayed" placeholder="Time played in minutes" type="number" />
+                  <el-input v-model="gameForm.timePlayed" placeholder="Time played in seconds" type="number" />
                 </el-form-item>
               </el-col>
             </el-row>
