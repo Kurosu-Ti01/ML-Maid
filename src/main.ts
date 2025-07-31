@@ -24,7 +24,10 @@ function initTitlebar() {
         // Create title element
         const titleElement = document.createElement('div')
         titleElement.className = 'titlebar-title'
-        titleElement.textContent = 'ML-Maid'
+        titleElement.innerHTML = `
+          <img src="/default/ML-Maid-Icon-M.png" alt="ML-Maid Icon">
+          <span>ML-Maid</span>
+        `
         
         // Create buttons container
         const buttonsContainer = document.createElement('div')

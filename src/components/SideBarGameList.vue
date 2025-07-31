@@ -24,7 +24,7 @@
 
   function getIconFin(imagePath: string) {
     if (!imagePath) {
-      return '/images/icon.ico'; // default icon if no image path is provided
+      return '/default/ML-Maid-Icon-W.png'; // default icon if no image path is provided
     }
     // Return cached 32x32 icon URL or default
     return imagePath || '/images/icon.ico';
@@ -64,9 +64,9 @@
     width: 32px;
     height: 32px;
     margin-right: 12px;
-    border-radius: 8px;
+    /* border-radius: 8px; */
     object-fit: cover;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    /* box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06); */
   }
 
   .game-title {

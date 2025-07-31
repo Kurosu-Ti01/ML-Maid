@@ -12,10 +12,20 @@
     <div v-else>
       <!-- Background & Title Container-->
       <div class="background-title-container">
-        <img :src="gameData.backgroundImage" alt="Game Background" class="game-background" />
+        <div v-if="gameData.backgroundImage">
+          <img :src="gameData.backgroundImage" alt="Game Background" class="game-background" />
+        </div>
+        <div v-else>
+          <img src="/default/ML-Maid-Background.png" alt="Default Background" class="game-background" />
+        </div>
         <!-- Icon & Title Container -->
         <div class="icon-title-container">
-          <img src="/images/icon.ico" alt="Game Icon" class="game-icon" />
+          <div v-if="gameData.iconImage" class="game-icon-container">
+            <img :src="gameData.iconImage" alt="Game Icon" class="game-icon" />
+          </div>
+          <div v-else class="game-icon-container">
+            <img src="/default/ML-Maid-Icon-W.png" alt="Default Icon" class="game-icon" />
+          </div>
           <span class="game-title">{{ gameData.title }}</span>
         </div>
       </div>
@@ -74,7 +84,10 @@
         </div>
         <!-- Cover Container -->
         <div class="game-cover">
-          <img :src="gameData.coverImage" alt="Game Cover">
+          <div v-if="gameData.coverImage">
+            <img :src="gameData.coverImage" alt="Game Cover">
+          </div>
+          <div v-else></div>
         </div>
       </div>
       <!-- Detail Info & Description container -->
@@ -117,8 +130,9 @@
               <div class="info-label">Tags</div>
               <div class="info-content">
                 <div class="tags-flex-wrap">
-                  <el-tag v-for="(tag, index) in gameData.tags" :key="index" style="margin: 2px 6px 2px 0;">{{ tag
-                  }}</el-tag>
+                  <el-tag v-for="(tag, index) in gameData.tags" :key="index" style="margin: 2px 6px 2px 0;">
+                    {{ tag }}
+                  </el-tag>
                 </div>
               </div>
             </div>
@@ -156,78 +170,9 @@
   const gameData = ref<gameData | null>(null)
   const isLoading = ref(false)
 
-  const defaultGameData: gameData = {
-    uuid: 'c32503c7-039a-4d7d-a8e6-bd9ee030fb3d',
-    title: 'WHITE ALBUM 2',
-    coverImage: 'library/images/c32503c7-039a-4d7d-a8e6-bd9ee030fb3d/cover.jpg',
-    backgroundImage: 'library/images/c32503c7-039a-4d7d-a8e6-bd9ee030fb3d/background.png',
-    iconImage: 'library/images/c32503c7-039a-4d7d-a8e6-bd9ee030fb3d/icon.ico',
-    lastPlayed: '2012-07-20 12:00:00',
-    timePlayed: 192312412,
-    installPath: 'C:/Amusement/WHITE ALBUM 2',
-    installSize: 124164828731,
-    genre: 'Visual Novel',
-    developer: 'Leaf',
-    publisher: 'AQUAPLUS',
-    releaseDate: '2010-03-26',
-    communityScore: 95,
-    personalScore: 92,
-    tags: [
-      'Romance', 'University', 'Relationship Problems', 'Dramatic Love Triangle', 'Winter', 'Drama', 'Musical Themes',
-      'University Student Protagonist', 'Adult Heroine', 'Instrumentalist Heroine', 'Sex with Protagonist Only',
-      'Protagonist with Voice Acting', 'Multiple Endings', ' High School', 'High School Student Protagonist', 'Male Protagonist',
-      'University Student Heroine', 'High School Student Heroine', 'Journalist Protagonist', 'More Than Seven Endings', 'Nakige',
-      'Music Club', 'Musician Heroine', 'ADV', 'Insert Songs', 'Female Friend', 'Singer Heroine'
-    ],
-    links: {
-      '批評空間': 'https://erogamescape.dyndns.org/~ap2/ero/toukei_kaiseki/game.php?game=13255',
-      'VNDB': 'https://vndb.org/v7771',
-      'Bangumi': 'https://bgm.tv/subject/22290',
-      'WikiPedia': 'https://wikipedia.org/wiki/White_Album_2',
-      'WikiData': 'https://www.wikidata.org/wiki/Q5960516'
-    },
-    description: [
-      '~ Introductory Chapter ~',
-      'Shivering from the cold wind, when the song was heard ......',
-      'It\'s like it\'s trying to match the guitar melody I\'m playing in the classroom at sunset.',
-      'It\'s like it\'s trying to match the piano melody played by someone I\'ve never met in the classroom next door.',
-      'From the rooftop rings that voice as loud and clear as a bell, linking the scattered melodies of the three of us together.',
-      'It started, it was in the late fall like that.',
-      'Back then, someone was in love with someone.',
-      'Whoever it is is fighting hard. Whoever is going forward with a strong heart. Whoever is single-minded, very purely and honestly ......',
-      'Wanting to bond from the bottom of my heart and capture this irreplaceable moment.',
-      'So at that point, someone fell in love with someone. It\'s a love affair that can\'t be one step too late.',
-      'Then came the winter - the snow that fell from the sky and covered all sin.',
-      'Soon spring arrives - along with the melting snow, all the punishments are coming. ',
-      '',
-      '--------- ---------- ---------',
-      '~ Closing Chapter ~',
-      'The cold wind blows and shivers, the song reaches the ears -',
-      'The song that froze three years ago ......',
-      'Had echoed in the sunset-stained campus, in the empty cafeteria, by the windows of the silent schoolhouse ......',
-      'Sprouted in passion, sublimated in sheer longing, only to dissipate in the end as a song of deception.',
-      'That winter of three men walking together is far away, but the winter of one man and one man goes on week after week.',
-      'The season comes to late fall.',
-      'The ugly wounds caused by that year\'s broken bonds had not yet dried up, but the premonition of change to come was already upon us.',
-      'Two lonely melodies attract and hurt each other, and brand new melodies will be called.',
-      'A new winter will come soon.',
-      'A winter without that person\'s company, a winter without her.',
-      'Long ago I didn\'t know what a white album was. Because, I can no longer sing.',
-      'Long ago there will be no more love that cannot be conveyed. For, I will no longer be in love.',
-    ],
-    actions: [{
-      name: 'Play',
-      type: 'File',
-      executablePath: 'C:/Amusement/WHITE ALBUM 2/WA2.exe',
-      parameters: ''
-    }
-    ]
-  }
-
   // Load the current game data
   async function loadCurrentGameData() {
     if (!gameStore.currentGameUuid) {
-      gameData.value = defaultGameData
       return
     }
 
@@ -239,11 +184,10 @@
       } else {
         // If no data found, use default data
         console.warn('No game data found for UUID:', gameStore.currentGameUuid)
-        gameData.value = defaultGameData
+        gameStore.currentGameUuid = null
       }
     } catch (error) {
       console.error('Failed to load game data:', error)
-      gameData.value = defaultGameData
     } finally {
       isLoading.value = false
     }
@@ -271,11 +215,6 @@
     },
     { deep: true }
   )
-
-  // Initialize with default data
-  if (!gameData.value) {
-    gameData.value = defaultGameData
-  }
 
   // handle play game function
   async function handlePlayGame() {
