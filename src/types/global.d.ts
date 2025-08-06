@@ -16,6 +16,8 @@ interface Window {
       error?: string;
     }>
     selectExecutableFile: () => Promise<{ canceled: boolean; filePaths: string[] }>
+    // external operations
+    openExternalLink: (url: string) => Promise<void>
     // window operations
     createEditWindow: (gameData: gameData) => Promise<number>
     createAddGameWindow: () => Promise<number>
@@ -68,12 +70,9 @@ interface gameData {
   personalScore: number;
   tags: string[];
   links: {
-    '批評空間'?: string;
-    'VNDB'?: string;
-    'Bangumi'?: string;
-    'WikiPedia'?: string;
-    'WikiData'?: string;
-  };
+    name: string;
+    url: string;
+  }[];
   description: string[];
   actions?: {
     name: string;

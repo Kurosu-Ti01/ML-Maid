@@ -47,6 +47,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   finalizeGameImages: (gameUuid: string) => ipcRenderer.invoke('finalize-game-images', gameUuid),
   cleanupTempImages: (gameUuid: string) => ipcRenderer.invoke('cleanup-temp-images', gameUuid),
   
+  // external operations
+  openExternalLink: (url: string) => ipcRenderer.invoke('open-external-link', url),
+  
   // load game data into edit window
   onEditGameData: (callback: (data: gameData) => void) => {
     ipcRenderer.on('load-edit-game-data', (_, data) => callback(data));
