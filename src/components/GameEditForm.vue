@@ -189,25 +189,34 @@
       <el-tab-pane label="Links" name="links">
         <el-scrollbar class="tab-scrollbar">
           <el-form :model="gameForm" label-width="120px" class="tab-form">
-            <el-form-item label="批評空間">
-              <el-input v-model="gameForm.links.批評空間" placeholder="批評空間 URL" />
-            </el-form-item>
+            <div class="links-container">
+              <div class="links-header">
+                <h3>Game Links</h3>
+                <el-button type="primary" :icon="Plus" @click="addLink">Add Link</el-button>
+              </div>
 
-            <el-form-item label="VNDB">
-              <el-input v-model="gameForm.links.VNDB" placeholder="VNDB URL" />
-            </el-form-item>
+              <div v-if="gameForm.links && gameForm.links.length > 0" class="links-list">
+                <div v-for="(link, index) in gameForm.links" :key="index" class="link-item">
+                  <div class="link-header">
+                    <div class="link-index">{{ index + 1 }}</div>
+                    <el-button type="danger" size="small" :icon="Delete" @click="removeLink(index)" circle />
+                  </div>
 
-            <el-form-item label="Bangumi">
-              <el-input v-model="gameForm.links.Bangumi" placeholder="Bangumi URL" />
-            </el-form-item>
+                  <el-form-item label="Link Name" :prop="`links.${index}.name`">
+                    <el-input v-model="link.name" placeholder="Enter link name (e.g., VNDB, Official Site)" />
+                  </el-form-item>
 
-            <el-form-item label="WikiPedia">
-              <el-input v-model="gameForm.links.WikiPedia" placeholder="Wikipedia URL" />
-            </el-form-item>
+                  <el-form-item label="URL" :prop="`links.${index}.url`">
+                    <el-input v-model="link.url" placeholder="Enter URL (e.g., https://vndb.org/...)" />
+                  </el-form-item>
+                </div>
+              </div>
 
-            <el-form-item label="WikiData">
-              <el-input v-model="gameForm.links.WikiData" placeholder="WikiData URL" />
-            </el-form-item>
+              <div v-else class="no-links">
+                <p>No links added yet</p>
+                <p class="hint-text">Add links to external sites like VNDB, official websites, etc.</p>
+              </div>
+            </div>
           </el-form>
         </el-scrollbar>
       </el-tab-pane>
@@ -322,13 +331,7 @@
     communityScore: 0,
     personalScore: 0,
     tags: [],
-    links: {
-      '批評空間': '',
-      'VNDB': '',
-      'Bangumi': '',
-      'WikiPedia': '',
-      'WikiData': ''
-    },
+    links: [],
     description: [],
     actions: []
   })
@@ -467,6 +470,25 @@
     }
   }
 
+  // Links management functions
+  function addLink() {
+    if (!gameForm.value.links) {
+      gameForm.value.links = []
+    }
+    gameForm.value.links.push({
+      name: '',
+      url: ''
+    })
+    ElMessage.success('Link added')
+  }
+
+  function removeLink(index: number) {
+    if (gameForm.value.links && index >= 0 && index < gameForm.value.links.length) {
+      gameForm.value.links.splice(index, 1)
+      ElMessage.success('Link removed')
+    }
+  }
+
   // Load existing image preview
   async function loadExistingImagePreview(imagePath: string, imageType: 'icon' | 'background' | 'cover') {
     if (!imagePath || !window.electronAPI?.processGameImage) return
@@ -576,15 +598,8 @@
         gameForm.value.personalScore = data.personalScore || 0
         gameForm.value.tags = Array.isArray(data.tags) ? data.tags : []
         gameForm.value.description = Array.isArray(data.description) ? data.description : []
-        gameForm.value.links = {
-          '批評空間': data.links?.['批評空間'] || '',
-          'VNDB': data.links?.VNDB || '',
-          'Bangumi': data.links?.Bangumi || '',
-          'WikiPedia': data.links?.WikiPedia || '',
-          'WikiData': data.links?.WikiData || ''
-        }
+        gameForm.value.links = Array.isArray(data.links) ? data.links : []
         gameForm.value.actions = Array.isArray(data.actions) ? data.actions : []
-
         // Load existing image previews
         if (data.iconImage) {
           loadExistingImagePreview(data.iconImage, 'icon')
@@ -957,6 +972,65 @@
     color: #909399;
     font-size: 14px;
     margin-top: 10px;
+  }
+
+  /* Links tab specific styles */
+  .links-container {
+    max-width: 800px;
+  }
+
+  .links-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e4e7ed;
+  }
+
+  .links-header h3 {
+    margin: 0;
+    color: #303133;
+    font-size: 18px;
+  }
+
+  .links-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .link-item {
+    border: 1px solid #e4e7ed;
+    border-radius: 8px;
+    padding: 20px;
+    background-color: #fafafa;
+    position: relative;
+  }
+
+  .link-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .link-index {
+    background-color: #409eff;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .no-links {
+    text-align: center;
+    padding: 40px 20px;
   }
 
   /* Responsive Design */

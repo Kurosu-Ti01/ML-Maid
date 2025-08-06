@@ -1,7 +1,7 @@
 import { app, BrowserWindow } from 'electron'
 import { createRequire } from 'node:module'
 const require = createRequire(import.meta.url)
-import { ipcMain, dialog } from 'electron'
+import { ipcMain, dialog, shell } from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import fs from 'node:fs'
@@ -538,6 +538,28 @@ ipcMain.handle('select-executable-file', async () => {
   return result;
 });
 
+// Open external link in default browser
+ipcMain.handle('open-external-link', async (_, url: string) => {
+  try {
+    // Validate URL format
+    if (!url || typeof url !== 'string') {
+      throw new Error('Invalid URL provided')
+    }
+
+    // Basic URL validation
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      throw new Error('URL must start with http:// or https://')
+    }
+
+    // Open in external browser
+    await shell.openExternal(url)
+    console.log('Successfully opened external link:', url)
+  } catch (error) {
+    console.error('Failed to open external link:', error)
+    throw error
+  }
+});
+
 // Process game image (copy and rename)
 ipcMain.handle('process-game-image', async (_, { sourcePath, gameUuid, imageType }) => {
   try {
@@ -784,7 +806,7 @@ function createWindow() {
         height: 50
       }
     } : {}),
-    icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
+    icon: './public/default/ML-Maid-Icon-M.png',
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
     },

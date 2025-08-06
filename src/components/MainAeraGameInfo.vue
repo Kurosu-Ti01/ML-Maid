@@ -137,8 +137,8 @@
             <div class="info-row">
               <div class="info-label">Links</div>
               <div class="info-content">
-                <div v-for="(link, name) in gameData.links" :key="name">
-                  <a :href="link" target="_blank" class="game-link">{{ name }}</a>
+                <div v-for="(link, index) in gameData.links" :key="index">
+                  <a @click.prevent="openExternalLink(link.url)" class="game-link">{{ link.name }}</a>
                 </div>
               </div>
             </div>
@@ -400,6 +400,26 @@
       console.log('User cancelled game deletion')
     }
   }
+
+  // Open external link in default browser
+  async function openExternalLink(url: string) {
+    if (!url) {
+      ElMessage.warning('No URL provided')
+      return
+    }
+
+    try {
+      if (window.electronAPI?.openExternalLink) {
+        await window.electronAPI.openExternalLink(url)
+      } else {
+        // Fallback: try to open with window.open (might not work in Electron)
+        ElMessage.warning('External link API not available')
+      }
+    } catch (error) {
+      console.error('Failed to open external link:', error)
+      ElMessage.error('Failed to open link: ' + (error instanceof Error ? error.message : 'Unknown error'))
+    }
+  }
 </script>
 
 <style scoped>
@@ -459,7 +479,8 @@
 
   .action-button-container {
     position: relative;
-    width: 100%;
+    /* 2px for scoller in game list */
+    width: calc(100% - 2px);
     height: 100%;
     bottom: 0;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.10);
@@ -556,6 +577,13 @@
     color: #409eff;
     text-decoration: none;
     font-weight: 500;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+
+  .game-link:hover {
+    color: #66b1ff;
+    text-decoration: underline;
   }
 
   .custom-info-table {
