@@ -1,15 +1,15 @@
 <template>
   <div class="sidebar-nav">
     <div class="top-buttons">
-      <button class="icon-btn">
+      <button class="icon-btn" :class="{ active: currentPage === 'list' }" @click="setPage('list')">
         <img src="/icons/list.svg" alt="icon" />
       </button>
-      <button class="icon-btn">
+      <button class="icon-btn" :class="{ active: currentPage === 'statistics' }" @click="setPage('statistics')">
         <img src="/icons/pie-chart.svg" alt="icon" />
       </button>
     </div>
     <div class="bottom-button">
-      <button class="icon-btn">
+      <button class="icon-btn" :class="{ active: currentPage === 'settings' }" @click="setPage('settings')">
         <img src="/icons/settings.svg" alt="icon" />
       </button>
     </div>
@@ -17,7 +17,15 @@
 </template>
 
 <script setup lang="ts" name="SideBarNav">
+  import { usePageStore, type PageType } from '@/stores/page'
+  import { storeToRefs } from 'pinia'
 
+  const pageStore = usePageStore()
+  const { currentPage } = storeToRefs(pageStore)
+
+  const setPage = (page: PageType) => {
+    pageStore.setCurrentPage(page)
+  }
 </script>
 
 <style scoped>
@@ -59,6 +67,10 @@
 
   .icon-btn:hover {
     background: #72aaff;
+  }
+
+  .icon-btn.active {
+    background: #409EFF;
   }
 
   .icon-btn img {

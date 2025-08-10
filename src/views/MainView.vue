@@ -1,17 +1,22 @@
 <template>
   <el-container>
     <el-aside>
-      <SideBarNav/>
+      <SideBarNav />
     </el-aside>
     <el-main>
-      <el-splitter>
+      <!-- Main List -->
+      <el-splitter v-if="currentPage === 'list'">
         <el-splitter-panel size="25%" min="10%" max="40%">
-          <SideBarGameList/>
+          <SideBarGameList />
         </el-splitter-panel>
         <el-splitter-panel>
-          <MainAeraGameInfo/>
+          <MainAeraGameInfo />
         </el-splitter-panel>
       </el-splitter>
+      <!-- Statistics -->
+      <Statistics v-else-if="currentPage === 'statistics'" />
+      <!-- Settings -->
+      <Settings v-else-if="currentPage === 'settings'" />
     </el-main>
   </el-container>
 </template>
@@ -20,29 +25,36 @@
   import SideBarNav from '@/components/SideBarNav.vue';
   import SideBarGameList from '@/components/SideBarGameList.vue';
   import MainAeraGameInfo from '@/components/MainAeraGameInfo.vue';
+  import Statistics from '@/components/Statistics.vue';
+  import Settings from '@/components/Settings.vue';
+  import { usePageStore } from '@/stores/page';
+  import { storeToRefs } from 'pinia';
+
+  const pageStore = usePageStore();
+  const { currentPage } = storeToRefs(pageStore);
 </script>
 
 <style scoped>
-.el-container {
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  min-width: 0;
-  overflow: hidden;
-}
+  .el-container {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
+  }
 
-.el-aside {
-  background: #F2F6FC;
-  padding: 12px;
-  border-right: 1px solid #d6d9dc;
-  width: 50px;
-}
+  .el-aside {
+    background: #F2F6FC;
+    padding: 12px;
+    border-right: 1px solid #d6d9dc;
+    width: 50px;
+  }
 
-.el-main {
-  padding: 0;
-  height: 100%;
-  min-height: 0;
-  overflow: hidden;
-  background-color: #ffffff;
-}
+  .el-main {
+    padding: 0;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    background-color: #ffffff;
+  }
 </style>
