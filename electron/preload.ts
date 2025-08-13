@@ -26,35 +26,33 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
 // -------- Expose Electron API to Renderer process ---------
 contextBridge.exposeInMainWorld('electronAPI', {
   // game database operations
-  getGameById: (gameid:string) => ipcRenderer.invoke('get-game-by-id', gameid),
+  getGameById: (gameid: string) => ipcRenderer.invoke('get-game-by-id', gameid),
   getGamesList: () => ipcRenderer.invoke('get-games-list'),
-  addGame: (game:gameData) => ipcRenderer.invoke('add-game', game),
-  updateGame: (game:gameData) => ipcRenderer.invoke('update-game', game),
+  addGame: (game: gameData) => ipcRenderer.invoke('add-game', game),
+  updateGame: (game: gameData) => ipcRenderer.invoke('update-game', game),
   deleteGame: (uuid: string) => ipcRenderer.invoke('delete-game', uuid),
 
   // game actions operations
   launchGame: (params: { gameUuid: string, executablePath?: string }) => ipcRenderer.invoke('launch-game', params),
   selectExecutableFile: () => ipcRenderer.invoke('select-executable-file'),
-  
+
   // window operations
-  createEditWindow: (gameData:gameData) => ipcRenderer.invoke('create-edit-window', gameData),
+  createEditWindow: (gameData: gameData) => ipcRenderer.invoke('create-edit-window', gameData),
   createAddGameWindow: () => ipcRenderer.invoke('create-add-game-window'),
-  
+
   // image operations
   selectImageFile: () => ipcRenderer.invoke('select-image-file'),
-  processGameImage: (params: { sourcePath: string, gameUuid: string, imageType: string }) => 
+  processGameImage: (params: { sourcePath: string, gameUuid: string, imageType: string }) =>
     ipcRenderer.invoke('process-game-image', params),
   finalizeGameImages: (gameUuid: string) => ipcRenderer.invoke('finalize-game-images', gameUuid),
-  cleanupTempImages: (gameUuid: string) => ipcRenderer.invoke('cleanup-temp-images', gameUuid),
-  
-  // external operations
+  cleanupTempImages: (gameUuid: string) => ipcRenderer.invoke('cleanup-temp-images', gameUuid),  // external operations
   openExternalLink: (url: string) => ipcRenderer.invoke('open-external-link', url),
-  
+
   // load game data into edit window
   onEditGameData: (callback: (data: gameData) => void) => {
     ipcRenderer.on('load-edit-game-data', (_, data) => callback(data));
   },
-  
+
   // listen for game list changes
   onGameListChanged: (callback: (data: { action: string, game?: gameData }) => void) => {
     ipcRenderer.on('game-list-changed', (_, data) => callback(data));

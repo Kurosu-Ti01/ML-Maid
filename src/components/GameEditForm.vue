@@ -426,9 +426,7 @@
         break
     }
     ElMessage.success(`${imageType} image removed`)
-  }
-
-  // Actions management functions
+  }  // Actions management functions
   function addAction() {
     if (!gameForm.value.actions) {
       gameForm.value.actions = []

@@ -23,15 +23,15 @@ interface Window {
     createAddGameWindow: () => Promise<number>
     // image operations
     selectImageFile: () => Promise<{ canceled: boolean; filePaths: string[] }>
-    processGameImage: (params: { 
-      sourcePath: string; 
-      gameUuid: string; 
-      imageType: string 
-    }) => Promise<{ 
-      success: boolean; 
-      tempPath?: string; 
-      previewUrl?: string; 
-      error?: string 
+    processGameImage: (params: {
+      sourcePath: string;
+      gameUuid: string;
+      imageType: string
+    }) => Promise<{
+      success: boolean;
+      tempPath?: string;
+      previewUrl?: string;
+      error?: string
     }>
     finalizeGameImages: (gameUuid: string) => Promise<{
       success: boolean;
@@ -58,7 +58,7 @@ interface gameData {
   coverImage: string;
   backgroundImage: string;
   iconImage: string;
-	lastPlayed: string;     // ISO date format "YYYY-MM-DD HH:MM:SS"
+  lastPlayed: string;     // ISO date format "YYYY-MM-DD HH:MM:SS"
   timePlayed: number;
   installPath: string;
   installSize: number;    // Size in bytes

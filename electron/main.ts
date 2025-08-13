@@ -522,8 +522,12 @@ ipcMain.handle('select-image-file', async () => {
     properties: ['openFile'],
     filters: [
       {
-        name: 'Images',
-        extensions: ['jpg', 'jpeg', 'png', 'ico', 'gif', 'bmp', 'webp']
+        name: 'Images or Executable Files',
+        extensions: ['jpg', 'jpeg', 'png', 'ico', 'gif', 'bmp', 'webp', 'exe', 'dll', 'lnk']
+      },
+      {
+        name: 'All Files',
+        extensions: ['*']
       }
     ]
   });
@@ -618,20 +622,58 @@ ipcMain.handle('process-game-image', async (_, { sourcePath, gameUuid, imageType
     }
 
     // Get file extension
-    const fileExtension = path.extname(sourcePath);
+    const fileExtension = path.extname(sourcePath).toLowerCase();
 
-    // Create new filename
-    const newFileName = `${imageType}${fileExtension}`;
-    const tempFilePath = path.join(tempDir, newFileName);
+    // Check if this is an executable file that needs icon extraction
+    const executableExtensions = ['.exe', '.dll', '.lnk', '.ico'];      // Also include ICO for extracting 48px icons
+    const isExecutableFile = executableExtensions.includes(fileExtension);
 
-    // Copy file to temp location
-    fs.copyFileSync(sourcePath, tempFilePath);
+    let tempFilePath: string;
+    let previewUrl: string;
 
-    // Read file and convert to base64 for preview
-    const fileBuffer = fs.readFileSync(tempFilePath);
-    const base64Data = fileBuffer.toString('base64');
-    const mimeType = getMimeType(fileExtension);
-    const previewUrl = `data:${mimeType};base64,${base64Data}`;
+    if (isExecutableFile && imageType === 'icon') {
+      // Extract icon from executable file, ICO file, or shortcut file
+      console.log('Extracting icon from file:', sourcePath);
+
+      try {
+        // Get file icon using Electron's built-in API with 48px size
+        const icon = await app.getFileIcon(sourcePath, { size: 'normal' }); // 'normal' gives 48px
+
+        // Convert to PNG buffer
+        const iconBuffer = icon.toPNG();
+
+        // Save icon as PNG file
+        const iconFileName = 'icon.png';
+        tempFilePath = path.join(tempDir, iconFileName);
+        fs.writeFileSync(tempFilePath, iconBuffer);
+
+        // Generate preview URL
+        const base64Data = iconBuffer.toString('base64');
+        previewUrl = `data:image/png;base64,${base64Data}`;
+
+        console.log('Icon extracted and saved successfully:', tempFilePath);
+      } catch (iconError) {
+        console.error('Failed to extract icon from file:', iconError);
+        return {
+          success: false,
+          error: 'Failed to extract icon from file'
+        };
+      }
+    } else {
+      // Normal image file processing
+      // Create new filename
+      const newFileName = `${imageType}${fileExtension}`;
+      tempFilePath = path.join(tempDir, newFileName);
+
+      // Copy file to temp location
+      fs.copyFileSync(sourcePath, tempFilePath);
+
+      // Read file and convert to base64 for preview
+      const fileBuffer = fs.readFileSync(tempFilePath);
+      const base64Data = fileBuffer.toString('base64');
+      const mimeType = getMimeType(fileExtension);
+      previewUrl = `data:${mimeType};base64,${base64Data}`;
+    }
 
     return {
       success: true,
