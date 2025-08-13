@@ -13,6 +13,8 @@ dist-ssr
 dist-electron
 *.local
 
+release
+
 # files created while running the app
 library
 temp

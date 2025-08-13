@@ -9,10 +9,10 @@ function initTitlebar() {
   const titlebar = document.getElementById('titlebar')
   if (titlebar) {
     const currentRoute = window.location.hash
-    
+
     // Normalize the route path by removing query parameters
     const routePath = currentRoute.split('?')[0]
-    
+
     switch (routePath) {
       case '':
       case '#':
@@ -20,19 +20,19 @@ function initTitlebar() {
         // Main-window titlebar
         titlebar.innerHTML = ''
         titlebar.className = 'titlebar main-titlebar'
-        
+
         // Create title element
         const titleElement = document.createElement('div')
         titleElement.className = 'titlebar-title'
         titleElement.innerHTML = `
-          <img src="/default/ML-Maid-Icon-M.png" alt="ML-Maid Icon">
+          <img src="default/ML-Maid-Icon-M.png" alt="ML-Maid Icon">
           <span>ML-Maid</span>
         `
-        
+
         // Create buttons container
         const buttonsContainer = document.createElement('div')
         buttonsContainer.className = 'titlebar-buttons'
-        
+
         // Add "Add Game" button
         const addGameButton = document.createElement('button')
         addGameButton.className = 'titlebar-button'
@@ -46,12 +46,12 @@ function initTitlebar() {
           }
         }
         buttonsContainer.appendChild(addGameButton)
-        
+
         // Append title and buttons to titlebar
         titlebar.appendChild(titleElement)
         titlebar.appendChild(buttonsContainer)
         break
-      
+
       case '#/edit':
         // edit-window titlebar
         titlebar.textContent = 'Edit Game'
@@ -63,7 +63,7 @@ function initTitlebar() {
         titlebar.textContent = 'Add Game'
         titlebar.className = 'titlebar add-titlebar'
         break
-        
+
       default:
         // fallback for other routes
         titlebar.textContent = 'ML-Maid'

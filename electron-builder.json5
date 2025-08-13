@@ -1,7 +1,7 @@
 // @see - https://www.electron.build/configuration/configuration
 {
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
-  "appId": "ML-Maid",
+  "appId": "dev.mlworld.maid",
   "asar": true,
   "productName": "ML-Maid",
   "directories": {
@@ -26,6 +26,7 @@
         ]
       }
     ],
+    "icon": "public/default/favicon.ico",
     "artifactName": "${productName}-Windows-${version}-Setup.${ext}"
   },
   "nsis": {
