@@ -104,7 +104,11 @@
           <div class="custom-info-table">
             <div class="info-row">
               <div class="info-label">Install Path</div>
-              <div class="info-content">{{ gameData.installPath }}</div>
+              <div class="info-content">
+                <span class="clickable-path" @click="openInstallPath" :title="gameData.installPath">
+                  {{ gameData.installPath }}
+                </span>
+              </div>
             </div>
             <div class="info-row">
               <div class="info-label">Install Size</div>
@@ -420,6 +424,26 @@
       ElMessage.error('Failed to open link: ' + (error instanceof Error ? error.message : 'Unknown error'))
     }
   }
+
+  // Open install path in file explorer
+  async function openInstallPath() {
+    if (!gameData.value?.installPath) {
+      ElMessage.warning('No install path specified')
+      return
+    }
+
+    try {
+      if (window.electronAPI?.openFolder) {
+        await window.electronAPI.openFolder(gameData.value.installPath)
+        ElMessage.success('Opened install path in file explorer')
+      } else {
+        ElMessage.warning('Folder opening API not available')
+      }
+    } catch (error) {
+      console.error('Failed to open install path:', error)
+      ElMessage.error('Failed to open folder: ' + (error instanceof Error ? error.message : 'Unknown error'))
+    }
+  }
 </script>
 
 <style scoped>
@@ -582,6 +606,19 @@
   }
 
   .game-link:hover {
+    color: #66b1ff;
+    text-decoration: underline;
+  }
+
+  .clickable-path {
+    color: #409eff;
+    text-decoration: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+
+  .clickable-path:hover {
     color: #66b1ff;
     text-decoration: underline;
   }

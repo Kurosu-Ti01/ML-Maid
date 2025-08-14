@@ -16,8 +16,10 @@ interface Window {
       error?: string;
     }>
     selectExecutableFile: () => Promise<{ canceled: boolean; filePaths: string[] }>
+    selectFolder: () => Promise<{ canceled: boolean; filePaths: string[] }>
     // external operations
     openExternalLink: (url: string) => Promise<void>
+    openFolder: (folderPath: string) => Promise<void>
     // window operations
     createEditWindow: (gameData: gameData) => Promise<number>
     createAddGameWindow: () => Promise<number>

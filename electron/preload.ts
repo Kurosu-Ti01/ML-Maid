@@ -35,6 +35,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // game actions operations
   launchGame: (params: { gameUuid: string, executablePath?: string }) => ipcRenderer.invoke('launch-game', params),
   selectExecutableFile: () => ipcRenderer.invoke('select-executable-file'),
+  selectFolder: () => ipcRenderer.invoke('select-folder'),
 
   // window operations
   createEditWindow: (gameData: gameData) => ipcRenderer.invoke('create-edit-window', gameData),
@@ -46,7 +47,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('process-game-image', params),
   finalizeGameImages: (gameUuid: string) => ipcRenderer.invoke('finalize-game-images', gameUuid),
   cleanupTempImages: (gameUuid: string) => ipcRenderer.invoke('cleanup-temp-images', gameUuid),  // external operations
+
+  // open external links and folders
   openExternalLink: (url: string) => ipcRenderer.invoke('open-external-link', url),
+  openFolder: (folderPath: string) => ipcRenderer.invoke('open-folder', folderPath),
 
   // load game data into edit window
   onEditGameData: (callback: (data: gameData) => void) => {
