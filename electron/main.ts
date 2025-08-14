@@ -552,6 +552,14 @@ ipcMain.handle('select-executable-file', async () => {
   return result;
 });
 
+// Select folder dialog
+ipcMain.handle('select-folder', async () => {
+  const result = await dialog.showOpenDialog({
+    properties: ['openDirectory']
+  });
+  return result;
+});
+
 // Open external link in default browser
 ipcMain.handle('open-external-link', async (_, url: string) => {
   try {
@@ -570,6 +578,28 @@ ipcMain.handle('open-external-link', async (_, url: string) => {
     console.log('Successfully opened external link:', url)
   } catch (error) {
     console.error('Failed to open external link:', error)
+    throw error
+  }
+});
+
+// Open folder in file explorer
+ipcMain.handle('open-folder', async (_, folderPath: string) => {
+  try {
+    // Validate folder path
+    if (!folderPath || typeof folderPath !== 'string') {
+      throw new Error('Invalid folder path provided')
+    }
+
+    // Check if the path exists
+    if (!fs.existsSync(folderPath)) {
+      throw new Error('Folder does not exist')
+    }
+
+    // Open in file explorer
+    await shell.openPath(folderPath)
+    console.log('Successfully opened folder:', folderPath)
+  } catch (error) {
+    console.error('Failed to open folder:', error)
     throw error
   }
 });

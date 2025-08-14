@@ -76,7 +76,12 @@
             </el-form-item>
 
             <el-form-item label="Install Path">
-              <el-input v-model="gameForm.installPath" placeholder="Game installation path" />
+              <div class="install-path-input">
+                <el-input v-model="gameForm.installPath" placeholder="Game installation path" />
+                <el-button @click="selectInstallPath" style="margin-left: 8px;">
+                  Browse
+                </el-button>
+              </div>
             </el-form-item>
 
             <!-- Install Size and Time Played in one row -->
@@ -465,6 +470,25 @@
     } catch (error) {
       console.error('Error selecting executable:', error)
       ElMessage.error('Failed to select executable')
+    }
+  }
+
+  async function selectInstallPath() {
+    try {
+      if (window.electronAPI?.selectFolder) {
+        const result = await window.electronAPI.selectFolder()
+
+        if (result && !result.canceled && result.filePaths.length > 0) {
+          const selectedPath = result.filePaths[0]
+          gameForm.value.installPath = selectedPath
+          ElMessage.success('Install path updated')
+        }
+      } else {
+        ElMessage.error('Folder selection API not available')
+      }
+    } catch (error) {
+      console.error('Error selecting folder:', error)
+      ElMessage.error('Failed to select folder')
     }
   }
 
@@ -958,6 +982,16 @@
   }
 
   .executable-path-input .el-input {
+    flex: 1;
+  }
+
+  .install-path-input {
+    width: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  .install-path-input .el-input {
     flex: 1;
   }
 
