@@ -9,7 +9,7 @@ interface Window {
     updateGame: (game: gameData) => Promise<void>
     deleteGame: (uuid: string) => Promise<void>
     // game actions operations
-    launchGame: (params: { gameUuid: string, executablePath?: string }) => Promise<{
+    launchGame: (params: { gameUuid: string, executablePath?: string, launchMethodName?: string }) => Promise<{
       success: boolean;
       message?: string;
       gamePath?: string;
@@ -46,6 +46,51 @@ interface Window {
       message?: string;
       error?: string;
     }>
+    // statistics operations
+    getGameDailyStats: (gameUuid: string, days?: number) => Promise<{
+      sessionDate: string;
+      totalSeconds: number;
+      sessionCount: number;
+    }[]>
+    getOverallStats: () => Promise<{
+      totalPlayTime: number;
+      totalSessions: number;
+      gamesPlayed: number;
+      todayPlayTime: number;
+      thisWeekPlayTime: number;
+      thisMonthPlayTime: number;
+    }>
+    getTopGamesStats: (limit?: number) => Promise<{
+      uuid: string;
+      title: string;
+      totalSeconds: number;
+      sessionCount: number;
+      lastPlayed: string;
+    }[]>
+    getMonthlyStats: (year?: number) => Promise<{
+      sessionMonth: number;
+      totalSeconds: number;
+      sessionCount: number;
+      uniqueGames: number;
+    }[]>
+    getRecentSessions: (limit?: number) => Promise<{
+      id: number;
+      uuid: string;
+      title: string;
+      startTime: string;
+      endTime: string;
+      durationSeconds: number;
+      sessionDate: string;
+      launchMethod: string;
+    }[]>
+    getLaunchMethodStats: (gameUuid?: string) => Promise<{
+      launchMethod: string;
+      sessionCount: number;
+      totalSeconds: number;
+      avgSeconds?: number;
+      uniqueGames?: number;
+      lastUsed: string;
+    }[]>
     // event listeners
     onEditGameData: (callback: (data: gameData) => void) => void
     onGameListChanged: (callback: (data: { action: string, game?: gameData }) => void) => void

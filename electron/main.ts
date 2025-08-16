@@ -44,11 +44,13 @@ if (!fs.existsSync(tempPath)) {
   fs.mkdirSync(tempPath, { recursive: true })
 }
 const dbPath_game = path.join(libPath, 'metadata.db');
+const dbPath_statistics = path.join(libPath, 'statistics.db');
 const imgPath_game = path.join(libPath, 'images');
 if (!fs.existsSync(imgPath_game)) {
   fs.mkdirSync(imgPath_game, { recursive: true })
 }
 const db = new Database(dbPath_game);
+const statsDb = new Database(dbPath_statistics);
 
 // Helper function to get MIME type from file extension
 function getMimeType(extension: string): string {
@@ -77,6 +79,19 @@ function formatLocalDateTime(date: Date): string {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
+// Helper function to get week number of the year
+function getWeekNumber(date: Date): number {
+  const target = new Date(date.valueOf());
+  const dayNr = (date.getDay() + 6) % 7;
+  target.setDate(target.getDate() - dayNr + 3);
+  const firstThursday = target.valueOf();
+  target.setMonth(0, 1);
+  if (target.getDay() !== 4) {
+    target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+  }
+  return 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000); // 604800000 = 7 * 24 * 3600 * 1000
+}
+
 // initialize the database
 db.prepare(`
   CREATE TABLE IF NOT EXISTS games (
@@ -101,6 +116,36 @@ db.prepare(`
     actions TEXT       -- use JSON.stringify to store, use JSON.parse to retrieve
   )
 `).run();
+
+// initialize the statistics database
+statsDb.prepare(`
+  CREATE TABLE IF NOT EXISTS game (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    uuid TEXT NOT NULL,
+    title TEXT,                            -- Game title for easier querying
+    startTime TEXT NOT NULL,               -- YYYY-MM-DD HH:MM:SS format
+    endTime TEXT,                          -- YYYY-MM-DD HH:MM:SS format, NULL if session is ongoing
+    durationSeconds INTEGER,               -- Duration in seconds, calculated when session ends
+    launchMethod TEXT,                     -- Launch method name (e.g., "Direct Launch", "Steam", "Launcher")
+    executablePath TEXT,                   -- Path of the executable that was launched
+    exitCode INTEGER,                      -- Process exit code, NULL if session is ongoing
+    sessionDate TEXT NOT NULL,             -- YYYY-MM-DD format for easy date-based queries
+    sessionYear INTEGER NOT NULL,          -- Year for yearly statistics
+    sessionMonth INTEGER NOT NULL,         -- Month (1-12) for monthly statistics
+    sessionWeek INTEGER NOT NULL,          -- Week number (1-53) for weekly statistics
+    sessionDayOfWeek INTEGER NOT NULL,     -- Day of week (0=Sunday, 6=Saturday)
+    isCompleted BOOLEAN DEFAULT 0,         -- Whether the session ended normally
+    createdAt TEXT DEFAULT (datetime('now', 'localtime'))
+  )
+`).run();
+
+// Create indexes for better query performance
+statsDb.prepare(`CREATE INDEX IF NOT EXISTS idx_game_uuid ON game (uuid)`).run();
+statsDb.prepare(`CREATE INDEX IF NOT EXISTS idx_game_date ON game (sessionDate)`).run();
+statsDb.prepare(`CREATE INDEX IF NOT EXISTS idx_game_year_month ON game (sessionYear, sessionMonth)`).run();
+statsDb.prepare(`CREATE INDEX IF NOT EXISTS idx_game_start_time ON game (startTime)`).run();
+statsDb.prepare(`CREATE INDEX IF NOT EXISTS idx_game_completed ON game (isCompleted)`).run();
+statsDb.prepare(`CREATE INDEX IF NOT EXISTS idx_game_launch_method ON game (launchMethod)`).run();
 
 // pick a game by uuid
 ipcMain.handle('get-game-by-id', (_, gameid: string) => {
@@ -415,16 +460,147 @@ ipcMain.handle('delete-game', async (_, uuid: string) => {
   }
 });
 
+// Get game statistics - daily play time for a specific game
+ipcMain.handle('get-game-daily-stats', (_, gameUuid: string, days: number = 30) => {
+  const query = `
+    SELECT 
+      sessionDate,
+      SUM(durationSeconds) as totalSeconds,
+      COUNT(*) as sessionCount
+    FROM game 
+    WHERE uuid = ? AND isCompleted = 1
+    AND sessionDate >= date('now', '-${days} days')
+    GROUP BY sessionDate
+    ORDER BY sessionDate DESC
+  `;
+  return statsDb.prepare(query).all(gameUuid);
+});
+
+// Get overall statistics for all games
+ipcMain.handle('get-overall-stats', () => {
+  const queries = {
+    totalPlayTime: `SELECT SUM(durationSeconds) as total FROM game WHERE isCompleted = 1`,
+    totalSessions: `SELECT COUNT(*) as total FROM game WHERE isCompleted = 1`,
+    gamesPlayed: `SELECT COUNT(DISTINCT uuid) as total FROM game WHERE isCompleted = 1`,
+    todayPlayTime: `SELECT SUM(durationSeconds) as total FROM game WHERE isCompleted = 1 AND sessionDate = date('now', 'localtime')`,
+    thisWeekPlayTime: `SELECT SUM(durationSeconds) as total FROM game WHERE isCompleted = 1 AND sessionDate >= date('now', 'weekday 0', '-6 days')`,
+    thisMonthPlayTime: `SELECT SUM(durationSeconds) as total FROM game WHERE isCompleted = 1 AND sessionYear = strftime('%Y', 'now') AND sessionMonth = strftime('%m', 'now')`
+  };
+
+  const stats: any = {};
+  for (const [key, query] of Object.entries(queries)) {
+    const result = statsDb.prepare(query).get();
+    stats[key] = result ? (result.total || 0) : 0;
+  }
+
+  return stats;
+});
+
+// Get top played games
+ipcMain.handle('get-top-games-stats', (_, limit: number = 10) => {
+  const query = `
+    SELECT 
+      uuid,
+      title,
+      SUM(durationSeconds) as totalSeconds,
+      COUNT(*) as sessionCount,
+      MAX(sessionDate) as lastPlayed
+    FROM game 
+    WHERE isCompleted = 1
+    GROUP BY uuid, title
+    ORDER BY totalSeconds DESC
+    LIMIT ?
+  `;
+  return statsDb.prepare(query).all(limit);
+});
+
+// Get monthly statistics
+ipcMain.handle('get-monthly-stats', (_, year?: number) => {
+  const targetYear = year || new Date().getFullYear();
+  const query = `
+    SELECT 
+      sessionMonth,
+      SUM(durationSeconds) as totalSeconds,
+      COUNT(*) as sessionCount,
+      COUNT(DISTINCT uuid) as uniqueGames
+    FROM game 
+    WHERE isCompleted = 1 AND sessionYear = ?
+    GROUP BY sessionMonth
+    ORDER BY sessionMonth
+  `;
+  return statsDb.prepare(query).all(targetYear);
+});
+
+// Get recent game sessions (updated to include launch method)
+ipcMain.handle('get-recent-sessions', (_, limit: number = 20) => {
+  const query = `
+    SELECT 
+      id,
+      uuid,
+      title,
+      startTime,
+      endTime,
+      durationSeconds,
+      sessionDate,
+      launchMethod
+    FROM game 
+    WHERE isCompleted = 1
+    ORDER BY startTime DESC
+    LIMIT ?
+  `;
+  return statsDb.prepare(query).all(limit);
+});
+
+// Get launch method statistics
+ipcMain.handle('get-launch-method-stats', (_, gameUuid?: string) => {
+  let query;
+  let params: any[] = [];
+
+  if (gameUuid) {
+    // Statistics for a specific game
+    query = `
+      SELECT 
+        launchMethod,
+        COUNT(*) as sessionCount,
+        SUM(durationSeconds) as totalSeconds,
+        AVG(durationSeconds) as avgSeconds,
+        MAX(sessionDate) as lastUsed
+      FROM game 
+      WHERE isCompleted = 1 AND uuid = ?
+      GROUP BY launchMethod
+      ORDER BY sessionCount DESC
+    `;
+    params = [gameUuid];
+  } else {
+    // Overall launch method statistics
+    query = `
+      SELECT 
+        launchMethod,
+        COUNT(*) as sessionCount,
+        SUM(durationSeconds) as totalSeconds,
+        COUNT(DISTINCT uuid) as uniqueGames,
+        MAX(sessionDate) as lastUsed
+      FROM game 
+      WHERE isCompleted = 1
+      GROUP BY launchMethod
+      ORDER BY sessionCount DESC
+    `;
+  }
+
+  return statsDb.prepare(query).all(...params);
+});
+
 // Game process tracking
 const activeGameProcesses = new Map<string, {
   process: any,
   startTime: Date,
   gameUuid: string,
-  executablePath: string
+  executablePath: string,
+  sessionId: number  // Add session ID for tracking
 }>();
 
 // Launch game
-ipcMain.handle('launch-game', async (_, { gameUuid, executablePath }: { gameUuid: string, executablePath: string }) => {
+ipcMain.handle('launch-game', async (_, { gameUuid, executablePath, launchMethodName }: { gameUuid: string, executablePath: string, launchMethodName: string }) => {
   try {
     // Check if the path exists
     if (!fs.existsSync(executablePath)) {
@@ -432,6 +608,17 @@ ipcMain.handle('launch-game', async (_, { gameUuid, executablePath }: { gameUuid
     }
 
     console.log(`Launching game: ${executablePath}`);
+
+    // Get game name for statistics
+    const gameData = db.prepare('SELECT title FROM games WHERE uuid = ?').get(gameUuid);
+    const gameName = gameData ? gameData.title : 'Unknown Game';
+
+    // Use provided launch method name (should always be provided since name is required)
+    if (!launchMethodName) {
+      throw new Error('Launch method name is required');
+    }
+
+    console.log(`Launch method: ${launchMethodName}`);
 
     // Launch the game using spawn
     const gameProcess = spawn(executablePath, [], {
@@ -442,13 +629,37 @@ ipcMain.handle('launch-game', async (_, { gameUuid, executablePath }: { gameUuid
 
     const startTime = new Date();
     const processKey = `${gameUuid}_${Date.now()}`;
+    const startTimeStr = formatLocalDateTime(startTime);
+    const sessionDate = startTimeStr.split(' ')[0]; // Extract YYYY-MM-DD part
+
+    // Extract date components for statistics
+    const sessionYear = startTime.getFullYear();
+    const sessionMonth = startTime.getMonth() + 1; // JavaScript months are 0-based
+    const sessionWeek = getWeekNumber(startTime);
+    const sessionDayOfWeek = startTime.getDay(); // 0=Sunday, 6=Saturday
+
+    // Create session record in statistics database
+    const sessionStmt = statsDb.prepare(`
+      INSERT INTO game (
+        uuid, title, startTime, launchMethod, executablePath, sessionDate, 
+        sessionYear, sessionMonth, sessionWeek, sessionDayOfWeek
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    const sessionResult = sessionStmt.run(
+      gameUuid, gameName, startTimeStr, launchMethodName, executablePath, sessionDate,
+      sessionYear, sessionMonth, sessionWeek, sessionDayOfWeek
+    );
+    const sessionId = sessionResult.lastInsertRowid as number;
+
+    console.log(`Created game session ${sessionId} for game ${gameUuid} (${gameName})`);
 
     // Store process info for tracking
     activeGameProcesses.set(processKey, {
       process: gameProcess,
       startTime,
       gameUuid,
-      executablePath
+      executablePath,
+      sessionId
     });
 
     // Monitor process exit
@@ -458,9 +669,19 @@ ipcMain.handle('launch-game', async (_, { gameUuid, executablePath }: { gameUuid
 
       if (processInfo) {
         const sessionTimeSeconds = Math.floor((endTime.getTime() - processInfo.startTime.getTime()) / 1000);
-        console.log(`Game ${gameUuid} session ended with code ${code}. Duration: ${sessionTimeSeconds} seconds`);
+        const endTimeStr = formatLocalDateTime(endTime);
+
+        console.log(`Game ${gameUuid} session ${processInfo.sessionId} ended with code ${code}. Duration: ${sessionTimeSeconds} seconds`);
 
         try {
+          // Update session record in statistics database
+          const updateSessionStmt = statsDb.prepare(`
+            UPDATE game 
+            SET endTime = ?, durationSeconds = ?, exitCode = ?, isCompleted = 1
+            WHERE id = ?
+          `);
+          updateSessionStmt.run(endTimeStr, sessionTimeSeconds, code, processInfo.sessionId);
+
           // Get current timePlayed from database
           const currentData = db.prepare('SELECT timePlayed FROM games WHERE uuid = ?').get(gameUuid);
           const currentTimePlayed = currentData ? (currentData.timePlayed || 0) : 0;
@@ -474,13 +695,16 @@ ipcMain.handle('launch-game', async (_, { gameUuid, executablePath }: { gameUuid
           if (win && !win.isDestroyed()) {
             win.webContents.send('game-session-ended', {
               gameUuid,
+              sessionId: processInfo.sessionId,
               sessionTimeSeconds,
               totalTimePlayed: newTimePlayed,
-              executablePath: processInfo.executablePath
+              executablePath: processInfo.executablePath,
+              startTime: formatLocalDateTime(processInfo.startTime),
+              endTime: endTimeStr
             });
           }
 
-          console.log(`Updated timePlayed for ${gameUuid}: +${sessionTimeSeconds}s, total: ${newTimePlayed}s`);
+          console.log(`Updated session ${processInfo.sessionId} and timePlayed for ${gameUuid}: +${sessionTimeSeconds}s, total: ${newTimePlayed}s`);
         } catch (error) {
           console.error('Error updating game time:', error);
         }
