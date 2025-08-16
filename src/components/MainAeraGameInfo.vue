@@ -286,11 +286,13 @@
       // Launch the game using the electronAPI
       // First try to find a File type action
       let executablePath: string | undefined
+      let launchMethodName: string | undefined
 
       if (gameData.value.actions && gameData.value.actions.length > 0) {
         const fileAction = gameData.value.actions.find(action => action.type === 'File' && action.executablePath)
         if (fileAction && fileAction.executablePath) {
           executablePath = fileAction.executablePath
+          launchMethodName = fileAction.name
         }
       }
 
@@ -302,7 +304,8 @@
 
       const result = await window.electronAPI?.launchGame({
         gameUuid: gameData.value.uuid,
-        executablePath: executablePath
+        executablePath: executablePath,
+        launchMethodName: launchMethodName
       })
 
       loadingMessage.close()

@@ -46,7 +46,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
   processGameImage: (params: { sourcePath: string, gameUuid: string, imageType: string }) =>
     ipcRenderer.invoke('process-game-image', params),
   finalizeGameImages: (gameUuid: string) => ipcRenderer.invoke('finalize-game-images', gameUuid),
-  cleanupTempImages: (gameUuid: string) => ipcRenderer.invoke('cleanup-temp-images', gameUuid),  // external operations
+  cleanupTempImages: (gameUuid: string) => ipcRenderer.invoke('cleanup-temp-images', gameUuid),
+
+  // statistics operations
+  getGameDailyStats: (gameUuid: string, days?: number) => ipcRenderer.invoke('get-game-daily-stats', gameUuid, days),
+  getOverallStats: () => ipcRenderer.invoke('get-overall-stats'),
+  getTopGamesStats: (limit?: number) => ipcRenderer.invoke('get-top-games-stats', limit),
+  getMonthlyStats: (year?: number) => ipcRenderer.invoke('get-monthly-stats', year),
+  getRecentSessions: (limit?: number) => ipcRenderer.invoke('get-recent-sessions', limit),
+  getLaunchMethodStats: (gameUuid?: string) => ipcRenderer.invoke('get-launch-method-stats', gameUuid),
+
+  // external operations
 
   // open external links and folders
   openExternalLink: (url: string) => ipcRenderer.invoke('open-external-link', url),
