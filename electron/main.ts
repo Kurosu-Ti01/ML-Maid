@@ -67,11 +67,6 @@ function getMimeType(extension: string): string {
   return mimeTypes[extension.toLowerCase()] || 'image/jpeg';
 }
 
-// Helper function to get current ISO 8601 datetime string (UTC)
-function getCurrentISODateTime(): string {
-  return new Date().toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, ''); // Replace T with space, remove milliseconds and Z
-}
-
 // Helper function to format ISO datetime to local display format
 function formatISOToLocal(isoDateTime: string): string {
   if (!isoDateTime) return '';
@@ -89,6 +84,11 @@ function formatISOToLocal(isoDateTime: string): string {
     console.error('Error formatting ISO datetime:', error);
     return '';
   }
+}
+
+// Helper function to format a Date object to ISO datetime string (UTC)
+function formatDateToISO(date: Date): string {
+  return date.toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, ''); // Replace T with space, remove milliseconds and Z
 }
 
 // Helper function to get week number of the year
@@ -135,17 +135,17 @@ statsDb.prepare(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     uuid TEXT NOT NULL,
     title TEXT,                            -- Game title for easier querying
-    startTime TEXT NOT NULL,               -- YYYY-MM-DD HH:MM:SS format
-    endTime TEXT,                          -- YYYY-MM-DD HH:MM:SS format, NULL if session is ongoing
+    startTime TEXT NOT NULL,               -- YYYY-MM-DD HH:MM:SS format (UTC)
+    endTime TEXT,                          -- YYYY-MM-DD HH:MM:SS format (UTC), NULL if session is ongoing
     durationSeconds INTEGER,               -- Duration in seconds, calculated when session ends
     launchMethod TEXT,                     -- Launch method name (e.g., "Direct Launch", "Steam", "Launcher")
     executablePath TEXT,                   -- Path of the executable that was launched
     exitCode INTEGER,                      -- Process exit code, NULL if session is ongoing
-    sessionDate TEXT NOT NULL,             -- YYYY-MM-DD format for easy date-based queries
-    sessionYear INTEGER NOT NULL,          -- Year for yearly statistics
-    sessionMonth INTEGER NOT NULL,         -- Month (1-12) for monthly statistics
-    sessionWeek INTEGER NOT NULL,          -- Week number (1-53) for weekly statistics
-    sessionDayOfWeek INTEGER NOT NULL,     -- Day of week (0=Sunday, 6=Saturday)
+    sessionDate TEXT NOT NULL,             -- YYYY-MM-DD format for easy date-based queries (local date)
+    sessionYear INTEGER NOT NULL,          -- Year for yearly statistics (local time)
+    sessionMonth INTEGER NOT NULL,         -- Month (1-12) for monthly statistics (local time)
+    sessionWeek INTEGER NOT NULL,          -- Week number (1-53) for weekly statistics (local time)
+    sessionDayOfWeek INTEGER NOT NULL,     -- Day of week (0=Sunday, 6=Saturday) (local time)
     isCompleted BOOLEAN DEFAULT 0,         -- Whether the session ended normally
     createdAt TEXT DEFAULT (datetime('now', 'localtime'))
   )
@@ -656,10 +656,15 @@ ipcMain.handle('launch-game', async (_, { gameUuid, executablePath, launchMethod
 
     const startTime = new Date();
     const processKey = `${gameUuid}_${Date.now()}`;
-    const startTimeStr = formatLocalDateTime(startTime);
-    const sessionDate = startTimeStr.split(' ')[0]; // Extract YYYY-MM-DD part
+    const startTimeStr = formatDateToISO(startTime); // Store UTC time in database
 
-    // Extract date components for statistics
+    // For statistics, use local date for date/time components
+    const year = startTime.getFullYear();
+    const month = String(startTime.getMonth() + 1).padStart(2, '0');
+    const day = String(startTime.getDate()).padStart(2, '0');
+    const sessionDate = `${year}-${month}-${day}`; // Local date in YYYY-MM-DD format
+
+    // Extract date components for statistics (based on local time)
     const sessionYear = startTime.getFullYear();
     const sessionMonth = startTime.getMonth() + 1; // JavaScript months are 0-based
     const sessionWeek = getWeekNumber(startTime);
@@ -696,7 +701,7 @@ ipcMain.handle('launch-game', async (_, { gameUuid, executablePath, launchMethod
 
       if (processInfo) {
         const sessionTimeSeconds = Math.floor((endTime.getTime() - processInfo.startTime.getTime()) / 1000);
-        const endTimeStr = formatLocalDateTime(endTime);
+        const endTimeStr = formatDateToISO(endTime);
 
         console.log(`Game ${gameUuid} session ${processInfo.sessionId} ended with code ${code}. Duration: ${sessionTimeSeconds} seconds`);
 
@@ -714,9 +719,9 @@ ipcMain.handle('launch-game', async (_, { gameUuid, executablePath, launchMethod
           const currentTimePlayed = currentData ? (currentData.timePlayed || 0) : 0;
           const newTimePlayed = currentTimePlayed + sessionTimeSeconds;
 
-          // Update timePlayed in database
-          const updateStmt = db.prepare('UPDATE games SET timePlayed = ? WHERE uuid = ?');
-          updateStmt.run(newTimePlayed, gameUuid);
+          // Update timePlayed and lastPlayed in database
+          const updateStmt = db.prepare('UPDATE games SET timePlayed = ?, lastPlayed = ? WHERE uuid = ?');
+          updateStmt.run(newTimePlayed, endTimeStr, gameUuid);
 
           // Notify main window that game session ended
           if (win && !win.isDestroyed()) {
@@ -726,8 +731,8 @@ ipcMain.handle('launch-game', async (_, { gameUuid, executablePath, launchMethod
               sessionTimeSeconds,
               totalTimePlayed: newTimePlayed,
               executablePath: processInfo.executablePath,
-              startTime: formatLocalDateTime(processInfo.startTime),
-              endTime: endTimeStr
+              startTime: formatISOToLocal(formatDateToISO(processInfo.startTime)),
+              endTime: formatISOToLocal(endTimeStr)
             });
           }
 
@@ -746,17 +751,10 @@ ipcMain.handle('launch-game', async (_, { gameUuid, executablePath, launchMethod
       activeGameProcesses.delete(processKey);
     });
 
-    // Update last played time in database
-    const updateStmt = db.prepare('UPDATE games SET lastPlayed = ? WHERE uuid = ?');
-    const currentDateTime = getCurrentISODateTime(); // ISO 8601 format
-    updateStmt.run(currentDateTime, gameUuid);
-
     // Notify main window that game was launched
     if (win && !win.isDestroyed()) {
       win.webContents.send('game-launched', {
-        gameUuid,
-        executablePath,
-        lastPlayed: currentDateTime
+        gameUuid
       });
     }
 

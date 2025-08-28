@@ -73,12 +73,20 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
 
   // listen for game launched events
-  onGameLaunched: (callback: (data: { gameUuid: string, executablePath: string, lastPlayed: string }) => void) => {
+  onGameLaunched: (callback: (data: { gameUuid: string }) => void) => {
     ipcRenderer.on('game-launched', (_, data) => callback(data));
   },
 
   // listen for game session ended events
-  onGameSessionEnded: (callback: (data: { gameUuid: string, sessionTimeSeconds: number, totalTimePlayed: number, executablePath: string }) => void) => {
+  onGameSessionEnded: (callback: (data: {
+    gameUuid: string,
+    sessionId: number,
+    sessionTimeSeconds: number,
+    totalTimePlayed: number,
+    executablePath: string,
+    startTime: string,
+    endTime: string
+  }) => void) => {
     ipcRenderer.on('game-session-ended', (_, data) => callback(data));
   }
 });

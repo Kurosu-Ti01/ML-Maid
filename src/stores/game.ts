@@ -13,7 +13,7 @@ export const useGameStore = defineStore('game', () => {
 
   // Getters
   const gamesCount = computed(() => gamesList.value.length)
-  
+
   // Get game details from cache or database
   const getGameById = computed(() => (uuid: string) => {
     return gameDetailsCache.value.get(uuid) || null
@@ -94,7 +94,7 @@ export const useGameStore = defineStore('game', () => {
       if (window.electronAPI?.addGame) {
         // Update database
         await window.electronAPI.addGame(game)
-        
+
         // Update lightweight list
         gamesList.value.push({
           uuid: game.uuid,
@@ -103,10 +103,10 @@ export const useGameStore = defineStore('game', () => {
           genre: game.genre,
           lastPlayed: game.lastPlayed
         })
-        
+
         // Add detailed data to cache
         gameDetailsCache.value.set(game.uuid, game)
-        
+
         listLastUpdated.value = new Date()
         console.log('Game added to store:', game.title)
       } else {
@@ -124,7 +124,7 @@ export const useGameStore = defineStore('game', () => {
       if (window.electronAPI?.updateGame) {
         // Update database
         await window.electronAPI.updateGame(updatedGame)
-        
+
         // Update lightweight list
         const listIndex = gamesList.value.findIndex(game => game.uuid === updatedGame.uuid)
         if (listIndex !== -1) {
@@ -136,10 +136,10 @@ export const useGameStore = defineStore('game', () => {
             lastPlayed: updatedGame.lastPlayed
           }
         }
-        
+
         // Update detailed data cache
         gameDetailsCache.value.set(updatedGame.uuid, updatedGame)
-        
+
         listLastUpdated.value = new Date()
         console.log('Game updated in store:', updatedGame.title)
       } else {
@@ -160,16 +160,16 @@ export const useGameStore = defineStore('game', () => {
       } else {
         throw new Error('electronAPI.deleteGame not available')
       }
-      
+
       // Remove from lightweight list
       const listIndex = gamesList.value.findIndex(game => game.uuid === uuid)
       if (listIndex !== -1) {
         gamesList.value.splice(listIndex, 1)
       }
-      
+
       // Remove from detailed data cache
       gameDetailsCache.value.delete(uuid)
-      
+
       listLastUpdated.value = new Date()
       console.log('Game deleted from store:', uuid)
     } catch (err) {
@@ -199,7 +199,7 @@ export const useGameStore = defineStore('game', () => {
     if (gamesList.value.length === 0) {
       await loadGamesList()
     }
-    
+
     // Set up cross-window communication listeners
     setupCrossWindowListeners()
   }
@@ -208,12 +208,12 @@ export const useGameStore = defineStore('game', () => {
   function setupCrossWindowListeners() {
     if (window.electronAPI?.onGameListChanged) {
       console.log('🔧 Setting up cross-window listener')
-      
+
       window.electronAPI.onGameListChanged((data) => {
         console.log('📡 Received game list change notification:', data)
         handleGameListChange(data)
       })
-      
+
       console.log('✅ Cross-window listener setup complete')
     } else {
       console.warn('❌ electronAPI.onGameListChanged not available')
@@ -222,12 +222,12 @@ export const useGameStore = defineStore('game', () => {
     // Set up game launched listener
     if (window.electronAPI?.onGameLaunched) {
       console.log('🔧 Setting up game launched listener')
-      
+
       window.electronAPI.onGameLaunched((data) => {
         console.log('🎮 Received game launched notification:', data)
         handleGameLaunched(data)
       })
-      
+
       console.log('✅ Game launched listener setup complete')
     } else {
       console.warn('❌ electronAPI.onGameLaunched not available')
@@ -236,12 +236,12 @@ export const useGameStore = defineStore('game', () => {
     // Set up game session ended listener
     if (window.electronAPI?.onGameSessionEnded) {
       console.log('🔧 Setting up game session ended listener')
-      
+
       window.electronAPI.onGameSessionEnded((data) => {
         console.log('🏁 Received game session ended notification:', data)
         handleGameSessionEnded(data)
       })
-      
+
       console.log('✅ Game session ended listener setup complete')
     } else {
       console.warn('❌ electronAPI.onGameSessionEnded not available')
@@ -251,7 +251,7 @@ export const useGameStore = defineStore('game', () => {
   // Logic to handle changes in the game list
   function handleGameListChange(data: { action: string, game?: gameData }) {
     console.log(`🎮 Processing ${data.action} action for game:`, data.game?.title || 'unknown')
-    
+
     if (data.action === 'add' && data.game) {
       // Check if the game already exists to avoid duplicate addition
       const existingIndex = gamesList.value.findIndex(g => g.uuid === data.game!.uuid)
@@ -290,10 +290,10 @@ export const useGameStore = defineStore('game', () => {
       if (existingIndex !== -1) {
         gamesList.value.splice(existingIndex, 1)
         console.log('✅ Deleted game from list via IPC:', data.game.title)
-        
+
         // Remove from details cache
         gameDetailsCache.value.delete(data.game.uuid)
-        
+
         // Clear current selection if deleted game was selected
         if (currentGameUuid.value === data.game.uuid) {
           currentGameUuid.value = null
@@ -305,37 +305,45 @@ export const useGameStore = defineStore('game', () => {
   }
 
   // Logic to handle game launched events
-  function handleGameLaunched(data: { gameUuid: string, executablePath: string, lastPlayed: string }) {
+  function handleGameLaunched(data: { gameUuid: string }) {
     console.log(`🚀 Processing game launched for game:`, data.gameUuid)
-    
-    // Update lastPlayed time in games list
-    const listIndex = gamesList.value.findIndex(g => g.uuid === data.gameUuid)
-    if (listIndex !== -1) {
-      gamesList.value[listIndex].lastPlayed = data.lastPlayed
-      console.log('✅ Updated lastPlayed in list:', data.lastPlayed)
-    }
-    
-    // Update lastPlayed time in details cache if the game is cached
-    if (gameDetailsCache.value.has(data.gameUuid)) {
-      const cachedGame = gameDetailsCache.value.get(data.gameUuid)!
-      cachedGame.lastPlayed = data.lastPlayed
-      gameDetailsCache.value.set(data.gameUuid, cachedGame)
-      console.log('✅ Updated lastPlayed in cache:', data.lastPlayed)
-    }
+
+
   }
 
   // Logic to handle game session ended events
-  function handleGameSessionEnded(data: { gameUuid: string, sessionTimeSeconds: number, totalTimePlayed: number, executablePath: string }) {
+  function handleGameSessionEnded(data: {
+    gameUuid: string,
+    sessionId: number,
+    sessionTimeSeconds: number,
+    totalTimePlayed: number,
+    executablePath: string,
+    startTime: string,
+    endTime: string
+  }) {
     console.log(`🏁 Processing game session ended for game:`, data.gameUuid)
     console.log(`⏱️ Session duration: ${data.sessionTimeSeconds}s, Total time: ${data.totalTimePlayed}s`)
-    
+
+    // Update lastPlayed time in games list
+    const listIndex = gamesList.value.findIndex(g => g.uuid === data.gameUuid)
+    if (listIndex !== -1) {
+      gamesList.value[listIndex].lastPlayedDisplay = data.endTime
+      console.log('✅ Updated lastPlayed in list:', data.endTime)
+    }
+    // Update lastPlayed time in details cache if the game is cached
+    if (gameDetailsCache.value.has(data.gameUuid)) {
+      const cachedGame = gameDetailsCache.value.get(data.gameUuid)!
+      cachedGame.lastPlayedDisplay = data.endTime
+      gameDetailsCache.value.set(data.gameUuid, cachedGame)
+      console.log('✅ Updated lastPlayed in cache:', data.endTime)
+    }
     // Update timePlayed in details cache if the game is cached
     if (gameDetailsCache.value.has(data.gameUuid)) {
       const cachedGame = gameDetailsCache.value.get(data.gameUuid)!
       cachedGame.timePlayed = data.totalTimePlayed
       gameDetailsCache.value.set(data.gameUuid, cachedGame)
       console.log('✅ Updated timePlayed in cache:', data.totalTimePlayed)
-    }    
+    }
   }
 
   return {
@@ -347,13 +355,13 @@ export const useGameStore = defineStore('game', () => {
     isLoadingDetail,
     error,
     listLastUpdated,
-    
+
     // Getters
     gamesCount,
     getGameById,
     gamesByGenre,
     gamesForList,
-    
+
     // Actions
     loadGamesList,
     loadGameDetail,
