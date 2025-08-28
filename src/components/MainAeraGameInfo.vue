@@ -85,7 +85,7 @@
               </div>
               <div class="game-playtime">
                 <p style="font-size: 1.1em; color: black;">Last Played</p>
-                <p style="font-weight: bold;">{{ gameData.lastPlayed }}</p>
+                <p style="font-weight: bold;">{{ gameData.lastPlayedDisplay }}</p>
               </div>
             </div>
           </div>
