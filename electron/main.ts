@@ -65,16 +65,28 @@ function getMimeType(extension: string): string {
   return mimeTypes[extension.toLowerCase()] || 'image/jpeg';
 }
 
-// Helper function to format date to local timezone YYYY-MM-DD HH:MM:SS format
-function formatLocalDateTime(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  const seconds = String(date.getSeconds()).padStart(2, '0');
+// Helper function to get current ISO 8601 datetime string (UTC)
+function getCurrentISODateTime(): string {
+  return new Date().toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, ''); // Replace T with space, remove milliseconds and Z
+}
 
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+// Helper function to format ISO datetime to local display format
+function formatISOToLocal(isoDateTime: string): string {
+  if (!isoDateTime) return '';
+  try {
+    const date = new Date(isoDateTime + 'Z'); // Add Z to indicate UTC
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  } catch (error) {
+    console.error('Error formatting ISO datetime:', error);
+    return '';
+  }
 }
 
 // initialize the database
@@ -85,7 +97,7 @@ db.prepare(`
     coverImage TEXT,
     backgroundImage TEXT,
     iconImage TEXT,
-    lastPlayed TEXT,   -- YYYY-MM-DD HH:MM:SS format
+    lastPlayed TEXT,   -- ISO 8601 format: YYYY-MM-DD HH:MM:SS (UTC)
     timePlayed  NUMERIC DEFAULT 0,
     installPath TEXT,
     installSize NUMERIC DEFAULT 0,
@@ -113,6 +125,9 @@ ipcMain.handle('get-game-by-id', (_, gameid: string) => {
       result.links = result.links ? JSON.parse(result.links) : {};
       result.description = result.description ? JSON.parse(result.description) : [];
       result.actions = result.actions ? JSON.parse(result.actions) : [];
+
+      // Convert ISO datetime to formatted date string for display
+      result.lastPlayedDisplay = formatISOToLocal(result.lastPlayed || '');
     } catch (error) {
       console.error('Error parsing JSON fields for game:', gameid, error);
       // Fallback to default values if parsing fails
@@ -120,6 +135,7 @@ ipcMain.handle('get-game-by-id', (_, gameid: string) => {
       result.links = {};
       result.description = [];
       result.actions = [];
+      result.lastPlayedDisplay = '';
     }
   }
 
@@ -129,7 +145,18 @@ ipcMain.handle('get-game-by-id', (_, gameid: string) => {
 // get games list (lightweight - only fields needed for list display)
 ipcMain.handle('get-games-list', () => {
   // Only select the fields needed for list display - much faster!
-  return db.prepare('SELECT uuid, title, iconImage, genre, lastPlayed FROM games').all();
+  const games = db.prepare('SELECT uuid, title, iconImage, genre, lastPlayed FROM games').all();
+
+  // Add formatted display date for each game
+  return games.map((game: any) => ({
+    ...game,
+    lastPlayedDisplay: formatISOToLocal(game.lastPlayed || '')
+  }));
+});
+
+// Format ISO datetime for display (utility function for frontend)
+ipcMain.handle('format-datetime', (_, isoDateTime: string) => {
+  return formatISOToLocal(isoDateTime);
 });
 
 // Add a new game
@@ -497,7 +524,7 @@ ipcMain.handle('launch-game', async (_, { gameUuid, executablePath }: { gameUuid
 
     // Update last played time in database
     const updateStmt = db.prepare('UPDATE games SET lastPlayed = ? WHERE uuid = ?');
-    const currentDateTime = formatLocalDateTime(new Date()); // Local timezone YYYY-MM-DD HH:MM:SS format
+    const currentDateTime = getCurrentISODateTime(); // ISO 8601 format
     updateStmt.run(currentDateTime, gameUuid);
 
     // Notify main window that game was launched
