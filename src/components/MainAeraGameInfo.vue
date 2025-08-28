@@ -262,6 +262,7 @@
     (newGameData) => {
       if (newGameData && gameStore.currentGameUuid) {
         console.log('Game data updated in cache, refreshing display:', newGameData.title)
+        console.log(newGameData)
         gameData.value = newGameData
       }
     },
