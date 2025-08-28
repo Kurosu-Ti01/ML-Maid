@@ -60,7 +60,8 @@ interface gameData {
   coverImage: string;
   backgroundImage: string;
   iconImage: string;
-  lastPlayed: string;     // ISO date format "YYYY-MM-DD HH:MM:SS"
+  lastPlayed: string;     // ISO date format "YYYY-MM-DD HH:MM:SS" (UTC)
+  lastPlayedDisplay?: string; // Formatted local time for display
   timePlayed: number;
   installPath: string;
   installSize: number;    // Size in bytes
@@ -91,4 +92,5 @@ interface GameListItem {
   iconImage: string
   genre: string
   lastPlayed: string
+  lastPlayedDisplay?: string // Formatted local time for display
 }
