@@ -91,7 +91,7 @@ function formatDateToISO(date: Date): string {
   return date.toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, ''); // Replace T with space, remove milliseconds and Z
 }
 
-// Helper function to get week number of the year
+// Helper function to get week number of the year (ISO 8601 standard, Monday-based)
 function getWeekNumber(date: Date): number {
   const target = new Date(date.valueOf());
   const dayNr = (date.getDay() + 6) % 7;
@@ -487,8 +487,8 @@ ipcMain.handle('delete-game', async (_, uuid: string) => {
   }
 });
 
-// Get game statistics - daily play time for a specific game
-ipcMain.handle('get-game-daily-stats', (_, gameUuid: string, days: number = 30) => {
+// Get game statistics - daily play time for a specific game (recent days)
+ipcMain.handle('get-game-recent-daily-stats', (_, gameUuid: string, days: number = 30) => {
   const query = `
     SELECT 
       sessionDate,
@@ -502,6 +502,57 @@ ipcMain.handle('get-game-daily-stats', (_, gameUuid: string, days: number = 30) 
   `;
   return statsDb.prepare(query).all(gameUuid);
 });
+
+// Internal function to get game daily statistics by date range
+function getGameDailyStatsByRange(gameUuid: string, startDate: string, endDate: string) {
+  const query = `
+    SELECT 
+      sessionDate,
+      SUM(durationSeconds) as totalSeconds,
+      COUNT(*) as sessionCount
+    FROM game 
+    WHERE uuid = ? AND isCompleted = 1
+    AND sessionDate >= ? AND sessionDate <= ?
+    GROUP BY sessionDate
+    ORDER BY sessionDate DESC
+  `;
+  return statsDb.prepare(query).all(gameUuid, startDate, endDate);
+}
+
+// Internal function to get weekly statistics by date string
+function getWeeklyStatisticsByDate(dateString: string) {
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const weekNumber = getWeekNumber(date);
+
+  const query = `
+    SELECT 
+      sessionDate,
+      sessionDayOfWeek,
+      uuid,
+      title,
+      SUM(durationSeconds) as totalSeconds,
+      COUNT(*) as sessionCount
+    FROM game 
+    WHERE isCompleted = 1 
+    AND sessionYear = ? 
+    AND sessionWeek = ?
+    GROUP BY sessionDate, sessionDayOfWeek, uuid, title
+    ORDER BY sessionDayOfWeek ASC, title ASC
+  `;
+  return statsDb.prepare(query).all(year, weekNumber);
+}
+
+// Get weekly statistics for specified date string
+ipcMain.handle('get-weekly-stats-by-date', (_, dateString: string) => {
+  return getWeeklyStatisticsByDate(dateString);
+});
+
+// Get game statistics - daily play time for a specific game (date range)
+ipcMain.handle('get-game-daily-stats-range', (_, gameUuid: string, startDate: string, endDate: string) => {
+  return getGameDailyStatsByRange(gameUuid, startDate, endDate);
+});
+
 
 // Get overall statistics for all games
 ipcMain.handle('get-overall-stats', () => {

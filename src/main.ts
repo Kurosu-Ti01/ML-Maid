@@ -4,6 +4,20 @@ import router from './router'
 import pinia from './stores'
 import 'element-plus/dist/index.css'
 
+// Configure Day.js for Element Plus date components
+import { dayjs } from 'element-plus'
+import weekOfYear from 'dayjs/plugin/weekOfYear'
+import isoWeek from 'dayjs/plugin/isoWeek'
+
+dayjs.extend(weekOfYear)
+dayjs.extend(isoWeek)
+
+// Set locale to ensure Monday is first day of week (ISO 8601 standard)
+dayjs.locale({
+  ...dayjs.Ls.en,
+  weekStart: 1 // Monday = 1, Sunday = 0
+})
+
 // initialize the title bar based on the current route
 function initTitlebar() {
   const titlebar = document.getElementById('titlebar')
