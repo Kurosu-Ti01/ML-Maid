@@ -47,8 +47,18 @@ interface Window {
       error?: string;
     }>
     // statistics operations
-    getGameDailyStats: (gameUuid: string, days?: number) => Promise<{
+    getGameRecentDailyStats: (gameUuid: string, days?: number) => Promise<{
       sessionDate: string;
+      totalSeconds: number;
+      sessionCount: number;
+    }[]>
+    getGameDailyStatsRange: (gameUuid: string, startDate: string, endDate: string) => Promise<{
+      sessionDate: string;
+      totalSeconds: number;
+      sessionCount: number;
+    }[]>
+    getWeeklyStatsByDate: (dateString: string) => Promise<{
+      date: string;
       totalSeconds: number;
       sessionCount: number;
     }[]>
