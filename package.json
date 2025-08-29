@@ -1,11 +1,16 @@
 {
-  "name": "my-electron-app",
+  "name": "ml-maid",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc && vite build && electron-builder",
+    "build": "vue-tsc && vite build && npm run rebuild:all && electron-builder",
+    "build:x64": "vue-tsc && vite build && npm run rebuild:x64 && electron-builder --x64",
+    "build:x86": "vue-tsc && vite build && npm run rebuild:x86 && electron-builder --ia32",
+    "rebuild:all": "npm run rebuild:x64 && npm run rebuild:x86",
+    "rebuild:x64": "npx electron-rebuild -f -w better-sqlite3 --arch=x64",
+    "rebuild:x86": "npx electron-rebuild -f -w better-sqlite3 --arch=ia32",
     "preview": "vite preview"
   },
   "dependencies": {
