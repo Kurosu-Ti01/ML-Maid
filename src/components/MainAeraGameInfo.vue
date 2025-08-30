@@ -16,7 +16,7 @@
           <img :src="gameData.backgroundImage" alt="Game Background" class="game-background" />
         </div>
         <div v-else>
-          <img src="/default/ML-Maid-Background.png" alt="Default Background" class="game-background" />
+          <img :src="defaultBackground" alt="Default Background" class="game-background" />
         </div>
         <!-- Icon & Title Container -->
         <div class="icon-title-container">
@@ -24,7 +24,7 @@
             <img :src="gameData.iconImage" alt="Game Icon" class="game-icon" />
           </div>
           <div v-else class="game-icon-container">
-            <img src="/default/ML-Maid-Icon-W.png" alt="Default Icon" class="game-icon" />
+            <img :src="defaultIcon" alt="Default Icon" class="game-icon" />
           </div>
           <span class="game-title">{{ gameData.title }}</span>
         </div>
@@ -176,6 +176,8 @@
   import { useGameStore } from '../stores/game'
   import { Delete, Folder, Link, InfoFilled, Download } from '@element-plus/icons-vue'
   import { ElMessage, ElMessageBox } from 'element-plus'
+  import defaultBackground from '/public/default/ML-Maid-Background.png'
+  import defaultIcon from '/public/default/ML-Maid-Icon-W.png'
 
   const gameStore = useGameStore()
 
