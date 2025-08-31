@@ -19,20 +19,8 @@
   },
   "win": {
     "target": [
-      {
-        "target": "nsis",
-        "arch": [
-          "x64",
-          "ia32"
-        ]
-      },
-      {
-        "target": "zip",
-        "arch": [
-          "x64",
-          "ia32"
-        ]
-      }
+      "nsis",
+      "zip"
     ],
     "icon": "public/default/favicon.ico",
     "artifactName": "${productName}-Windows-${arch}-${version}.${ext}"
