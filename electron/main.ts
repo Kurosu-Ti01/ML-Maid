@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, protocol } from 'electron'
 import { createRequire } from 'node:module'
 const require = createRequire(import.meta.url)
 import { ipcMain, dialog, shell } from 'electron'
@@ -10,7 +10,7 @@ import { spawn } from 'node:child_process'
 // To avoid the "ReferenceError: __filename is not defined" error in ESM
 // See 👉 https://github.com/TooTallNate/node-bindings/issues/81
 // better-sqlite3 uses bindings internally, so we need to use createRequire to load it
-// u may need to rebuild it with `npx electron-rebuild -f -w better-sqlite3`
+// u may need to rebuild it with `npm run postinstall`
 // import Database from 'better-sqlite3'
 const Database = require('better-sqlite3')
 
@@ -36,6 +36,46 @@ const appDataPath = isDev
 
 const libPath = path.join(appDataPath, 'library');
 const tempPath = path.join(appDataPath, 'temp');
+
+// Helper function to convert local file paths to custom protocol URLs
+function convertToLocalFileUrl(filePath: string): string {
+  if (!filePath) return '';
+
+  // If already a protocol URL, return as-is
+  if (filePath.includes('://')) return filePath;
+
+  // Convert relative path to absolute path
+  const fullPath = path.isAbsolute(filePath) ? filePath : path.join(appDataPath, filePath);
+
+  // Normalize the path and ensure proper format for Windows
+  const normalizedPath = path.resolve(fullPath).replace(/\\/g, '/');
+
+  // For Windows, ensure the drive letter format is correct and consistent
+  let protocolPath = normalizedPath;
+  if (process.platform === 'win32') {
+    // Ensure Windows drive letter is uppercase and properly formatted
+    protocolPath = normalizedPath.replace(/^([a-z]):/i, (_, drive) => `${drive.toUpperCase()}:`);
+    // For Windows, DON'T add a leading slash before the drive letter
+    // The protocol format should be local-file://C:/path not local-file:///C:/path
+  } else {
+    // For non-Windows, ensure it starts with a slash
+    if (!protocolPath.startsWith('/')) {
+      protocolPath = `/${protocolPath}`;
+    }
+  }
+
+  // In production, always use custom protocol for local files
+  if (!isDev) {
+    return `local-file://${protocolPath}`;
+  }
+
+  // In development, check if file exists first
+  if (fs.existsSync(fullPath)) {
+    return `local-file://${protocolPath}`;
+  }
+
+  return filePath;
+}
 
 if (!fs.existsSync(libPath)) {
   fs.mkdirSync(libPath, { recursive: true })
@@ -65,6 +105,12 @@ function getMimeType(extension: string): string {
   };
 
   return mimeTypes[extension.toLowerCase()] || 'image/jpeg';
+}
+
+// Helper function to get MIME type from file path
+function getMimeTypeFromPath(filePath: string): string {
+  const extension = path.extname(filePath);
+  return getMimeType(extension);
 }
 
 // Helper function to format ISO datetime to local display format
@@ -173,6 +219,11 @@ ipcMain.handle('get-game-by-id', (_, gameid: string) => {
 
       // Convert ISO datetime to formatted date string for display
       result.lastPlayedDisplay = formatISOToLocal(result.lastPlayed || '');
+
+      // Convert image paths to custom protocol URLs for production
+      result.iconImage = convertToLocalFileUrl(result.iconImage);
+      result.coverImage = convertToLocalFileUrl(result.coverImage);
+      result.backgroundImage = convertToLocalFileUrl(result.backgroundImage);
     } catch (error) {
       console.error('Error parsing JSON fields for game:', gameid, error);
       // Fallback to default values if parsing fails
@@ -192,10 +243,11 @@ ipcMain.handle('get-games-list', () => {
   // Only select the fields needed for list display - much faster!
   const games = db.prepare('SELECT uuid, title, iconImage, genre, lastPlayed FROM games').all();
 
-  // Add formatted display date for each game
+  // Add formatted display date and convert icon paths for each game
   return games.map((game: any) => ({
     ...game,
-    lastPlayedDisplay: formatISOToLocal(game.lastPlayed || '')
+    lastPlayedDisplay: formatISOToLocal(game.lastPlayed || ''),
+    iconImage: convertToLocalFileUrl(game.iconImage)
   }));
 });
 
@@ -1225,4 +1277,61 @@ app.on('activate', () => {
   }
 })
 
-app.whenReady().then(createWindow);
+// Set protocol privileges before app is ready
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: 'local-file',
+    privileges: {
+      standard: true,
+      secure: true,
+      supportFetchAPI: true,
+      corsEnabled: true
+    }
+  }
+]);
+
+// Register custom protocol for local files
+app.whenReady().then(() => {
+  // Register the local-file protocol using the new handle method
+  protocol.handle('local-file', (request) => {
+    // Handle both local-file:// and local-file:/// formats
+    let url = request.url.replace(/^local-file:\/\/\/?/, '');
+
+    // Handle Windows path format
+    if (process.platform === 'win32') {
+      // Handle case where browser converts C: to c (URL normalization)
+      // Check if it looks like a Windows drive letter without colon
+      if (url.match(/^[a-zA-Z]\//) && !url.includes(':')) {
+        // Add colon after drive letter: "c/path" -> "C:/path"
+        url = url.replace(/^([a-zA-Z])\//, (_, drive) => `${drive.toUpperCase()}:/`);
+      } else {
+        // Handle normal case with colon: "C:/path" or "/C:/path"
+        url = url.replace(/^([a-z]):/i, (_, drive) => `${drive.toUpperCase()}:`);
+        // If there's a leading slash before the drive letter, remove it
+        if (url.match(/^\/[A-Za-z]:/)) {
+          url = url.substring(1);
+        }
+      }
+    }
+
+    try {
+      // Check if file exists before trying to read
+      if (!fs.existsSync(url)) {
+        return new Response('File not found', { status: 404 });
+      }
+
+      // Return a Response object with the file
+      const fileBuffer = fs.readFileSync(url);
+      const response = new Response(fileBuffer, {
+        headers: {
+          'Content-Type': getMimeTypeFromPath(url)
+        }
+      });
+      return response;
+    } catch (error) {
+      return new Response('File not found', { status: 404 });
+    }
+  });
+
+  createWindow();
+});

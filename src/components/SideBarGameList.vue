@@ -19,15 +19,16 @@
 
 <script setup lang="ts" name="SideBarGameList">
   import { useGameStore } from '@/stores/game'
+  import defaultIcon from '/public/default/ML-Maid-Icon-W.png'
 
   const gameStore = useGameStore()
 
   function getIconFin(imagePath: string) {
     if (!imagePath) {
-      return '/default/ML-Maid-Icon-W.png'; // default icon if no image path is provided
+      return defaultIcon; // default icon if no image path is provided
     }
-    // Return cached 32x32 icon URL or default
-    return imagePath || '/images/icon.ico';
+    // Return the provided image path (should be a local-file:// URL from backend)
+    return imagePath || defaultIcon;
   }
 
   function selectGame(uuid: string) {
