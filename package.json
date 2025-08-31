@@ -1,16 +1,15 @@
 {
   "name": "ml-maid",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc && vite build && npm run rebuild:all && electron-builder",
-    "build:x64": "vue-tsc && vite build && npm run rebuild:x64 && electron-builder --x64",
-    "build:x86": "vue-tsc && vite build && npm run rebuild:x86 && electron-builder --ia32",
-    "rebuild:all": "npm run rebuild:x64 && npm run rebuild:x86",
-    "rebuild:x64": "npx electron-rebuild -f -w better-sqlite3 --arch=x64",
-    "rebuild:x86": "npx electron-rebuild -f -w better-sqlite3 --arch=ia32",
+    "build": "vue-tsc && vite build && electron-builder",
+    "build:all": "vue-tsc && vite build && electron-builder --win --x64 --ia32",
+    "build:x64": "vue-tsc && vite build && electron-builder --win --x64",
+    "build:x86": "vue-tsc && vite build && electron-builder --win --ia32",
+    "postinstall": "electron-builder install-app-deps",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -33,7 +32,6 @@
     "@vue/tsconfig": "^0.7.0",
     "electron": "^30.0.1",
     "electron-builder": "^24.13.3",
-    "electron-rebuild": "^3.2.9",
     "npm-run-all2": "^7.0.2",
     "typescript": "~5.8.0",
     "unplugin-auto-import": "^19.3.0",
