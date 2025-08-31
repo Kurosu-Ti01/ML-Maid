@@ -10,7 +10,7 @@ import { spawn } from 'node:child_process'
 // To avoid the "ReferenceError: __filename is not defined" error in ESM
 // See 👉 https://github.com/TooTallNate/node-bindings/issues/81
 // better-sqlite3 uses bindings internally, so we need to use createRequire to load it
-// u may need to rebuild it with `npx electron-rebuild -f -w better-sqlite3`
+// u may need to rebuild it with `npm run postinstall`
 // import Database from 'better-sqlite3'
 const Database = require('better-sqlite3')
 
