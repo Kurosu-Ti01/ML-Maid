@@ -126,8 +126,8 @@ interface gameData {
   lastPlayed: string;     // ISO date format "YYYY-MM-DD HH:MM:SS" (UTC)
   lastPlayedDisplay?: string; // Formatted local time for display
   timePlayed: number;
-  installPath: string;
-  installSize: number;    // Size in bytes
+  workingDir: string;
+  folderSize: number;    // Size in bytes
   genre: string;
   developer: string;
   publisher: string;
@@ -146,6 +146,8 @@ interface gameData {
     executablePath?: string; // Optional, for actions that require an executable
     parameters?: string;     // Optional, for actions that require parameters
   }[];
+  procMonMode: number;    // 0: file, 1: folder, 2: process
+  procNames?: string[];   // Process names to monitor when procMonMode=2
 }
 
 // For lightweight game list items

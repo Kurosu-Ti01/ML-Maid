@@ -15,6 +15,9 @@ dist-electron
 
 release
 
+# docs (testing)
+docs
+
 # files created while running the app
 library
 temp
