@@ -305,11 +305,19 @@
         return
       }
 
-      const result = await window.electronAPI?.launchGame({
-        gameUuid: gameData.value.uuid,
-        executablePath: executablePath,
-        launchMethodName: launchMethodName
-      })
+      // Create a clean object to avoid IPC cloning issues
+      const launchParams = {
+        gameUuid: String(gameData.value.uuid || ''),
+        executablePath: String(executablePath),
+        launchMethodName: String(launchMethodName || ''),
+        workingDir: String(gameData.value.workingDir || executablePath.substring(0, executablePath.lastIndexOf('\\'))),
+        procMonMode: Number(gameData.value.procMonMode || 1), // Default to FOLDER mode
+        procNames: Array.isArray(gameData.value.procNames) ? [...gameData.value.procNames] : []
+      }
+
+      console.log('Launch parameters:', launchParams) // Debug info
+
+      const result = await window.electronAPI?.launchGame(launchParams)
 
       loadingMessage.close()
 

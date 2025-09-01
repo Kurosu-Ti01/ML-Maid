@@ -9,7 +9,14 @@ interface Window {
     updateGame: (game: gameData) => Promise<void>
     deleteGame: (uuid: string) => Promise<void>
     // game actions operations
-    launchGame: (params: { gameUuid: string, executablePath?: string, launchMethodName?: string }) => Promise<{
+    launchGame: (params: {
+      gameUuid: string,
+      executablePath?: string,
+      launchMethodName?: string,
+      workingDir?: string,
+      procMonMode?: number,
+      procNames?: string[]
+    }) => Promise<{
       success: boolean;
       message?: string;
       gamePath?: string;

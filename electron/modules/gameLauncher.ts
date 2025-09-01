@@ -2,7 +2,9 @@ import { ipcMain, BrowserWindow } from 'electron'
 import { spawn } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
-import { formatDateToISO, formatISOToLocal, getWeekNumber } from '../utils/helpers.js'
+import { formatDateToISO, getWeekNumber } from '../utils/helpers.js'
+import { PROC_MON_MODE, type ProcMonMode } from '../constants/procMonMode.js'
+import { handleProcessExit, activeGameProcesses } from './processMonitor.js'
 
 interface LauncherModuleConfig {
   metaDb: any
@@ -10,20 +12,29 @@ interface LauncherModuleConfig {
   win: BrowserWindow | null
 }
 
-// Game process tracking
-const activeGameProcesses = new Map<string, {
-  process: any
-  startTime: Date
+interface GameLaunchParams {
   gameUuid: string
   executablePath: string
-  sessionId: number  // Add session ID for tracking
-}>()
+  launchMethodName: string
+  workingDir: string
+  procMonMode: ProcMonMode
+  procNames?: string[]
+}
 
 export function setupLauncherHandlers(config: LauncherModuleConfig) {
   const { metaDb, statsDb, win } = config
 
-  // Launch game
-  ipcMain.handle('launch-game', async (_, { gameUuid, executablePath, launchMethodName }: { gameUuid: string, executablePath: string, launchMethodName: string }) => {
+  // Launch game with enhanced monitoring
+  ipcMain.handle('launch-game', async (_, params: GameLaunchParams) => {
+    const {
+      gameUuid,
+      executablePath,
+      launchMethodName,
+      workingDir = path.dirname(executablePath),
+      procMonMode = PROC_MON_MODE.FOLDER,
+      procNames = []
+    } = params
+
     try {
       // Check if the path exists
       if (!fs.existsSync(executablePath)) {
@@ -31,12 +42,15 @@ export function setupLauncherHandlers(config: LauncherModuleConfig) {
       }
 
       console.log(`Launching game: ${executablePath}`)
+      console.log(`Working directory: ${workingDir}`)
+      console.log(`Process monitor mode: ${procMonMode}`)
+      console.log(`Process names: ${procNames}`)
 
       // Get game name for statistics
       const gameData = metaDb.prepare('SELECT title FROM games WHERE uuid = ?').get(gameUuid)
       const gameName = gameData ? gameData.title : 'Unknown Game'
 
-      // Use provided launch method name (should always be provided since name is required)
+      // Use provided launch method name
       if (!launchMethodName) {
         throw new Error('Launch method name is required')
       }
@@ -45,20 +59,20 @@ export function setupLauncherHandlers(config: LauncherModuleConfig) {
 
       // Launch the game using spawn
       const gameProcess = spawn(executablePath, [], {
-        detached: false, // we should monitor the process
+        detached: false,
         stdio: 'ignore',
-        cwd: path.dirname(executablePath) // Set working directory to the game's directory
+        cwd: workingDir
       })
 
       const startTime = new Date()
       const processKey = `${gameUuid}_${Date.now()}`
-      const startTimeStr = formatDateToISO(startTime) // Store UTC time in database
+      const startTimeStr = formatDateToISO(startTime)
 
       // For statistics, use local date for date/time components
       const year = startTime.getFullYear()
       const month = String(startTime.getMonth() + 1).padStart(2, '0')
       const day = String(startTime.getDate()).padStart(2, '0')
-      const sessionDate = `${year}-${month}-${day}` // Local date in YYYY-MM-DD format
+      const sessionDate = `${year}-${month}-${day}`
 
       // Extract date components for statistics (based on local time)
       const sessionYear = startTime.getFullYear()
@@ -87,59 +101,17 @@ export function setupLauncherHandlers(config: LauncherModuleConfig) {
         startTime,
         gameUuid,
         executablePath,
-        sessionId
+        workingDir,
+        sessionId,
+        procMonMode,
+        procNames,
+        monitoredProcesses: new Set(),
+        isLauncherOnly: false
       })
 
       // Monitor process exit
       gameProcess.on('exit', async (code) => {
-        const endTime = new Date()
-        const processInfo = activeGameProcesses.get(processKey)
-
-        if (processInfo) {
-          const sessionTimeSeconds = Math.floor((endTime.getTime() - processInfo.startTime.getTime()) / 1000)
-          const endTimeStr = formatDateToISO(endTime)
-
-          console.log(`Game ${gameUuid} session ${processInfo.sessionId} ended with code ${code}. Duration: ${sessionTimeSeconds} seconds`)
-
-          try {
-            // Update session record in statistics database
-            const updateSessionStmt = statsDb.prepare(`
-              UPDATE game 
-              SET endTime = ?, durationSeconds = ?, exitCode = ?, isCompleted = 1
-              WHERE id = ?
-            `)
-            updateSessionStmt.run(endTimeStr, sessionTimeSeconds, code, processInfo.sessionId)
-
-            // Get current timePlayed from database
-            const currentData = metaDb.prepare('SELECT timePlayed FROM games WHERE uuid = ?').get(gameUuid)
-            const currentTimePlayed = currentData ? (currentData.timePlayed || 0) : 0
-            const newTimePlayed = currentTimePlayed + sessionTimeSeconds
-
-            // Update timePlayed and lastPlayed in database
-            const updateStmt = metaDb.prepare('UPDATE games SET timePlayed = ?, lastPlayed = ? WHERE uuid = ?')
-            updateStmt.run(newTimePlayed, endTimeStr, gameUuid)
-
-            // Notify main window that game session ended
-            if (win && !win.isDestroyed()) {
-              win.webContents.send('game-session-ended', {
-                gameUuid,
-                sessionId: processInfo.sessionId,
-                sessionTimeSeconds,
-                totalTimePlayed: newTimePlayed,
-                executablePath: processInfo.executablePath,
-                startTime: formatISOToLocal(formatDateToISO(processInfo.startTime)),
-                endTime: formatISOToLocal(endTimeStr)
-              })
-            }
-
-            console.log(`Updated session ${processInfo.sessionId} and timePlayed for ${gameUuid}: +${sessionTimeSeconds}s, total: ${newTimePlayed}s`)
-          } catch (error) {
-            console.error('Error updating game time:', error)
-          }
-
-          // Clean up tracking
-          activeGameProcesses.delete(processKey)
-        }
+        await handleProcessExit(processKey, code, config)
       })
 
       gameProcess.on('error', (error) => {
