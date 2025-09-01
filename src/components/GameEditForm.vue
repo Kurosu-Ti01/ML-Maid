@@ -77,8 +77,8 @@
 
             <el-form-item label="Install Path">
               <div class="install-path-input">
-                <el-input v-model="gameForm.installPath" placeholder="Game installation path" />
-                <el-button @click="selectInstallPath" style="margin-left: 8px;">
+                <el-input v-model="gameForm.workingDir" placeholder="Game installation path" />
+                <el-button @click="selectworkingDir" style="margin-left: 8px;">
                   Browse
                 </el-button>
               </div>
@@ -88,7 +88,7 @@
             <el-row :gutter="20">
               <el-col :span="12">
                 <el-form-item label="Install Size">
-                  <el-input v-model="gameForm.installSize" placeholder="Installation size in bytes" type="number" />
+                  <el-input v-model="gameForm.folderSize" placeholder="Installation size in bytes" type="number" />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
@@ -101,6 +101,58 @@
             <el-form-item label="Last Played">
               <el-date-picker v-model="gameForm.lastPlayed" type="date" placeholder="Select last played date"
                 format="YYYY-MM-DD" value-format="YYYY-MM-DD" style="width: 100%;" />
+            </el-form-item>
+
+            <el-form-item label="Monitor Mode">
+              <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+                <el-select v-model="gameForm.procMonMode" placeholder="Select process monitoring mode"
+                  style="width: calc(100% - 32px);">
+                  <el-option label="File Mode" :value="PROC_MON_MODE.FILE" />
+                  <el-option label="Folder Mode" :value="PROC_MON_MODE.FOLDER" />
+                  <el-option label="Process Mode" :value="PROC_MON_MODE.PROCESS" />
+                </el-select>
+                <el-tooltip placement="top" :show-after="300" popper-style="max-width: 300px;">
+                  <template #content>
+                    <div style="max-width: 280px; line-height: 1.5;">
+                      This option affects how game statistics are recorded:<br>
+                      • <strong>File mode:</strong> monitors only the process launched by actions<br>
+                      • <strong>Folder mode:</strong> monitors all executable processes created in the game's working
+                      directory<br>
+                      • <strong>Process mode:</strong> for handling extreme cases - enter process names to monitor
+                      specific process activities
+                    </div>
+                  </template>
+                  <el-icon style="color: #909399; cursor: help; width: 24px; height: 24px; flex-shrink: 0;">
+                    <InfoFilled />
+                  </el-icon>
+                </el-tooltip>
+              </div>
+            </el-form-item>
+
+            <!-- Process Names - Only show when Process Monitor is selected -->
+            <el-form-item v-if="gameForm.procMonMode === PROC_MON_MODE.PROCESS" label="Process Names">
+              <div class="process-names-container">
+                <div class="process-names-header">
+                  <span class="hint-text">Enter process names to monitor (e.g., game.exe, launcher.exe)</span>
+                  <el-button type="primary" size="small" :icon="Plus" @click="addProcessName">
+                    Add Process
+                  </el-button>
+                </div>
+
+                <div v-if="gameForm.procNames && gameForm.procNames.length > 0" class="process-names-list">
+                  <div v-for="(_, index) in gameForm.procNames" :key="index" class="process-name-item">
+                    <el-input v-model="gameForm.procNames[index]" placeholder="Enter process name (e.g., game.exe)"
+                      style="flex: 1;" />
+                    <el-button type="danger" size="small" :icon="Delete" @click="removeProcessName(index)"
+                      style="margin-left: 8px;" />
+                  </div>
+                </div>
+
+                <div v-else class="no-process-names">
+                  <p class="hint-text">No process names added yet. Click "Add Process" to add process names to monitor.
+                  </p>
+                </div>
+              </div>
             </el-form-item>
           </el-form>
         </el-scrollbar>
@@ -310,8 +362,9 @@
 <script setup lang="ts" name="GameEditForm">
   import { ref, onMounted, computed, toRaw } from 'vue'
   import { ElMessage } from 'element-plus'
-  import { Plus, Delete } from '@element-plus/icons-vue'
+  import { Plus, Delete, InfoFilled } from '@element-plus/icons-vue'
   import { useGameStore } from '../stores/game'
+  import { PROC_MON_MODE } from '../constants/procMonMode'
 
   // Use game store
   const gameStore = useGameStore()
@@ -327,8 +380,8 @@
     iconImage: '',
     lastPlayed: '',
     timePlayed: 0,
-    installPath: '',
-    installSize: 0,
+    workingDir: '',
+    folderSize: 0,
     genre: '',
     developer: '',
     publisher: '',
@@ -338,7 +391,9 @@
     tags: [],
     links: [],
     description: [],
-    actions: []
+    actions: [],
+    procMonMode: 1,  // Default to folder mode
+    procNames: []    // Default to empty array
   })
 
   const saving = ref(false)
@@ -473,14 +528,14 @@
     }
   }
 
-  async function selectInstallPath() {
+  async function selectworkingDir() {
     try {
       if (window.electronAPI?.selectFolder) {
         const result = await window.electronAPI.selectFolder()
 
         if (result && !result.canceled && result.filePaths.length > 0) {
           const selectedPath = result.filePaths[0]
-          gameForm.value.installPath = selectedPath
+          gameForm.value.workingDir = selectedPath
           ElMessage.success('Install path updated')
         }
       } else {
@@ -508,6 +563,22 @@
     if (gameForm.value.links && index >= 0 && index < gameForm.value.links.length) {
       gameForm.value.links.splice(index, 1)
       ElMessage.success('Link removed')
+    }
+  }
+
+  // Process names management functions
+  function addProcessName() {
+    if (!gameForm.value.procNames) {
+      gameForm.value.procNames = []
+    }
+    gameForm.value.procNames.push('')
+    ElMessage.success('Process name added')
+  }
+
+  function removeProcessName(index: number) {
+    if (gameForm.value.procNames && index >= 0 && index < gameForm.value.procNames.length) {
+      gameForm.value.procNames.splice(index, 1)
+      ElMessage.success('Process name removed')
     }
   }
 
@@ -610,8 +681,8 @@
         gameForm.value.iconImage = data.iconImage || ''
         gameForm.value.lastPlayed = data.lastPlayed || ''
         gameForm.value.timePlayed = data.timePlayed || 0
-        gameForm.value.installPath = data.installPath || ''
-        gameForm.value.installSize = data.installSize || 0
+        gameForm.value.workingDir = data.workingDir || ''
+        gameForm.value.folderSize = data.folderSize || 0
         gameForm.value.genre = data.genre || ''
         gameForm.value.developer = data.developer || ''
         gameForm.value.publisher = data.publisher || ''
@@ -622,6 +693,8 @@
         gameForm.value.description = Array.isArray(data.description) ? data.description : []
         gameForm.value.links = Array.isArray(data.links) ? data.links : []
         gameForm.value.actions = Array.isArray(data.actions) ? data.actions : []
+        gameForm.value.procMonMode = data.procMonMode ?? PROC_MON_MODE.FOLDER  // Default to folder mode
+        gameForm.value.procNames = Array.isArray(data.procNames) ? data.procNames : []  // Default to empty array
         // Load existing image previews
         if (data.iconImage) {
           loadExistingImagePreview(data.iconImage, 'icon')
@@ -1063,6 +1136,40 @@
   .no-links {
     text-align: center;
     padding: 40px 20px;
+  }
+
+  /* Process names specific styles */
+  .process-names-container {
+    width: 100%;
+  }
+
+  .process-names-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e4e7ed;
+  }
+
+  .process-names-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .process-name-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  .no-process-names {
+    text-align: center;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    border: 1px dashed #d3d3d3;
   }
 
   /* Responsive Design */

@@ -103,16 +103,16 @@
         <div class="detail-info-container">
           <div class="custom-info-table">
             <div class="info-row">
-              <div class="info-label">Install Path</div>
+              <div class="info-label">Working Path</div>
               <div class="info-content">
-                <span class="clickable-path" @click="openInstallPath" :title="gameData.installPath">
-                  {{ gameData.installPath }}
+                <span class="clickable-path" @click="openworkingDir" :title="gameData.workingDir">
+                  {{ gameData.workingDir }}
                 </span>
               </div>
             </div>
             <div class="info-row">
-              <div class="info-label">Install Size</div>
-              <div class="info-content">{{ formatFileSize(gameData.installSize) }}</div>
+              <div class="info-label">Folder Size</div>
+              <div class="info-content">{{ formatFileSize(gameData.folderSize) }}</div>
             </div>
             <div class="info-row">
               <div class="info-label">Genre</div>
@@ -176,8 +176,8 @@
   import { useGameStore } from '../stores/game'
   import { Delete, Folder, Link, InfoFilled, Download } from '@element-plus/icons-vue'
   import { ElMessage, ElMessageBox } from 'element-plus'
-  import defaultBackground from '/public/default/ML-Maid-Background.png'
-  import defaultIcon from '/public/default/ML-Maid-Icon-W.png'
+  import defaultBackground from '/default/ML-Maid-Background.png'
+  import defaultIcon from '/default/ML-Maid-Icon-W.png'
 
   const gameStore = useGameStore()
 
@@ -432,15 +432,15 @@
   }
 
   // Open install path in file explorer
-  async function openInstallPath() {
-    if (!gameData.value?.installPath) {
+  async function openworkingDir() {
+    if (!gameData.value?.workingDir) {
       ElMessage.warning('No install path specified')
       return
     }
 
     try {
       if (window.electronAPI?.openFolder) {
-        await window.electronAPI.openFolder(gameData.value.installPath)
+        await window.electronAPI.openFolder(gameData.value.workingDir)
         ElMessage.success('Opened install path in file explorer')
       } else {
         ElMessage.warning('Folder opening API not available')

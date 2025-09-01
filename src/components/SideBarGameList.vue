@@ -19,7 +19,7 @@
 
 <script setup lang="ts" name="SideBarGameList">
   import { useGameStore } from '@/stores/game'
-  import defaultIcon from '/public/default/ML-Maid-Icon-W.png'
+  import defaultIcon from '/default/ML-Maid-Icon-W.png'
 
   const gameStore = useGameStore()
 
