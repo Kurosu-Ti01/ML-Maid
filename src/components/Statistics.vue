@@ -10,8 +10,19 @@
 
       <el-tab-pane label="Day" name="day">
         <div class="tab-content">
-          <h3>Daily Statistics</h3>
-          <p>Daily gaming statistics will be displayed here...</p>
+          <div class="header-section">
+            <h3>Daily Statistics</h3>
+            <div class="day-selector">
+              <el-date-picker v-model="selectedDay" type="date" format="YYYY-MM-DD" value-format="YYYY-MM-DD"
+                placeholder="Today" @change="onDayChange" />
+            </div>
+          </div>
+          <div class="chart-container">
+            <v-chart v-if="isDayChartReady && activeTab === 'day'" class="chart" :option="dayChartOption" autoresize />
+            <div v-else class="loading-placeholder">
+              Loading chart...
+            </div>
+          </div>
         </div>
       </el-tab-pane>
 
@@ -54,42 +65,48 @@
   import { ref, onMounted, nextTick, watch } from 'vue'
   import { use } from 'echarts/core'
   import { CanvasRenderer } from 'echarts/renderers'
-  import { BarChart } from 'echarts/charts'
+  import { BarChart, CustomChart } from 'echarts/charts'
   import {
     TitleComponent,
     TooltipComponent,
     LegendComponent,
     GridComponent,
     DatasetComponent,
-    TransformComponent
+    TransformComponent,
+    DataZoomComponent
   } from 'echarts/components'
+  import { graphic } from 'echarts/core'
   import VChart from 'vue-echarts'
   import type { ComposeOption } from 'echarts/core'
   import type {
-    BarSeriesOption
+    BarSeriesOption,
+    CustomSeriesOption
   } from 'echarts/charts'
   import type {
     TitleComponentOption,
     TooltipComponentOption,
     LegendComponentOption,
     GridComponentOption,
-    DatasetComponentOption
+    DatasetComponentOption,
+    DataZoomComponentOption
   } from 'echarts/components'
 
   // Register required ECharts components
   use([
     CanvasRenderer,
     BarChart,
+    CustomChart,
     TitleComponent,
     TooltipComponent,
     LegendComponent,
     GridComponent,
     DatasetComponent,
-    TransformComponent
+    TransformComponent,
+    DataZoomComponent
   ])
 
-  // Create minimal ECharts option type
-  type ECOption = ComposeOption<
+  // Create specific ECharts option types for different charts
+  type WeekChartOption = ComposeOption<
     | BarSeriesOption
     | TitleComponentOption
     | TooltipComponentOption
@@ -98,8 +115,119 @@
     | DatasetComponentOption
   >
 
+  type DayChartOption = ComposeOption<
+    | CustomSeriesOption
+    | TitleComponentOption
+    | TooltipComponentOption
+    | LegendComponentOption
+    | GridComponentOption
+    | DataZoomComponentOption
+  >
+
   const activeTab = ref('main')
   const isChartReady = ref(false)
+  const isDayChartReady = ref(false)
+
+  // Get today's date as the default value
+  const getTodayDate = () => {
+    const today = new Date()
+    return today.toISOString().split('T')[0] // YYYY-MM-DD format
+  }
+
+  // Selected day (default is today)
+  const selectedDay = ref(getTodayDate())
+
+  // Chart configuration for the Day tab (Profile chart)
+  const dayChartOption = ref<DayChartOption>({
+    title: {
+      text: 'Daily Gaming Timeline',
+      left: 'center'
+    },
+    tooltip: {
+      trigger: 'item',
+      formatter: (params: any) => {
+        const data = params.data
+        const startTime = data[1]
+        const endTime = data[2]
+        const duration = data[3] // Already in minutes
+        const gameTitle = data[4]
+        const launchMethod = data[5]
+
+        const startHour = Math.floor(startTime)
+        const endHour = Math.floor(endTime)
+        const startMin = Math.floor((startTime - startHour) * 60)
+        const endMin = Math.floor((endTime - endHour) * 60)
+
+        return `
+          <strong>${gameTitle}</strong><br/>
+          Time: ${startHour.toString().padStart(2, '0')}:${startMin.toString().padStart(2, '0')} - ${endHour.toString().padStart(2, '0')}:${endMin.toString().padStart(2, '0')}<br/>
+          Duration: ${duration.toFixed(0)} minutes<br/>
+          Launch: ${launchMethod || 'Unknown'}
+        `
+      }
+    },
+    legend: {
+      top: 'bottom',
+      type: 'scroll'
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '15%',
+      containLabel: true,
+      height: 300
+    },
+    xAxis: {
+      type: 'value',
+      min: 0,
+      max: 24,
+      axisLabel: {
+        formatter: (value: number) => {
+          // Simple hour formatting
+          const hour = Math.floor(value)
+          const minute = Math.round((value % 1) * 60)
+          if (minute === 0) {
+            return `${hour}:00`
+          } else {
+            return `${hour}:${minute.toString().padStart(2, '0')}`
+          }
+        }
+      },
+      splitLine: {
+        show: true,
+        lineStyle: {
+          type: 'dashed',
+          opacity: 0.5
+        }
+      }
+    },
+    yAxis: {
+      type: 'category',
+      data: [], // Will be set dynamically based on sessions
+      show: false // Hide y-axis since we're showing timeline
+    },
+    dataZoom: [
+      {
+        type: 'slider',
+        show: true,
+        xAxisIndex: [0],
+        start: 0,
+        end: 100,
+        bottom: '5%',
+        filterMode: 'weakFilter',
+        showDataShadow: false,
+        labelFormatter: ''
+      },
+      {
+        type: 'inside',
+        xAxisIndex: [0],
+        start: 0,
+        end: 100,
+        filterMode: 'weakFilter'
+      }
+    ],
+    series: []
+  })
 
   // Get the current week's Monday as the default value (ISO 8601 standard)
   const getCurrentWeekMonday = () => {
@@ -116,7 +244,7 @@
   const selectedWeek = ref(getCurrentWeekMonday())
 
   // Chart configuration for the Week tab
-  const weekChartOption = ref<ECOption>({
+  const weekChartOption = ref<WeekChartOption>({
     title: {
       text: 'Weekly Gaming Hours by Game',
       left: 'center'
@@ -164,12 +292,20 @@
 
   onMounted(async () => {
     // Initial data load
+    loadDailyStatistics()
     loadWeeklyStatistics()
   })
 
   // Watch for tab changes
   watch(activeTab, async (newTab) => {
-    if (newTab === 'week') {
+    if (newTab === 'day') {
+      // When switching to the Day tab, delay chart initialization
+      isDayChartReady.value = false
+      await nextTick()
+      setTimeout(() => {
+        isDayChartReady.value = true
+      }, 300)
+    } else if (newTab === 'week') {
       // When switching to the Week tab, delay chart initialization
       isChartReady.value = false
       await nextTick()
@@ -177,10 +313,235 @@
         isChartReady.value = true
       }, 300)
     } else {
-      // Hide chart when switching to other tabs
+      // Hide charts when switching to other tabs
+      isDayChartReady.value = false
       isChartReady.value = false
     }
   }, { immediate: true })
+
+  // ==========================================
+  // DAILY STATISTICS CHART (Day Tab)
+  // ==========================================
+
+  // Load daily statistics
+  const loadDailyStatistics = async () => {
+    try {
+      console.log('Loading daily statistics...')
+
+      // Convert selected day to YYYY-MM-DD format
+      const dateString = selectedDay.value
+      console.log(`Loading statistics for day: ${dateString}`)
+
+      // Call the API
+      const dailyData = await window.electronAPI?.getDailyGameSessions(dateString)
+      if (dailyData) {
+        console.log('Daily data received:', dailyData)
+        updateDailyChart(dailyData)
+      }
+
+    } catch (error) {
+      console.error('Failed to load daily statistics:', error)
+    }
+  }
+
+  // Process daily data and update Profile chart
+  const updateDailyChart = (dailyData: any[]) => {
+    if (!dailyData || dailyData.length === 0) {
+      // No data for this day
+      dayChartOption.value.yAxis = { type: 'value', min: 0, max: 10, show: false }
+      dayChartOption.value.series = []
+      return
+    }
+
+    // Get unique games and assign colors using ECharts default palette
+    const uniqueGames = [...new Set(dailyData.map(d => d.title))].sort()
+
+    // Generate colors using ECharts default color palette
+    const defaultColors = [
+      '#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de',
+      '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc', '#ff9f7f'
+    ]
+    const gameColors: { [key: string]: string } = {}
+    uniqueGames.forEach((game, index) => {
+      gameColors[game] = defaultColors[index % defaultColors.length]
+    })
+
+    // Convert time strings to decimal hours for easier processing
+    const sessions = dailyData.map(session => {
+      const startTime = new Date(session.startTime + 'Z') // Add Z to indicate UTC
+      const endTime = new Date(session.endTime + 'Z')
+
+      // Convert to local time decimal hours
+      let startHour = startTime.getHours() + startTime.getMinutes() / 60
+      let endHour = endTime.getHours() + endTime.getMinutes() / 60
+
+      // Handle cross-day sessions: if session crosses midnight, cap it at 24:00
+      if (endTime.getDate() !== startTime.getDate()) {
+        // Session crosses to next day, only show until end of current day
+        endHour = 24
+      }
+
+      // Additional safety check: if endHour is less than startHour, it likely crossed midnight
+      if (endHour < startHour) {
+        endHour = 24
+      }
+
+      return {
+        ...session,
+        startHour,
+        endHour
+      }
+    })
+
+    // Sort sessions by start time
+    sessions.sort((a, b) => a.startHour - b.startHour)
+
+    // Create timeline data following official example pattern
+    const timelineData = createVerticalTimelineData(sessions, uniqueGames)
+
+    // Set up Y-axis categories (like official example)
+    const categories = timelineData.categories
+    dayChartOption.value.yAxis = {
+      type: 'category',
+      data: categories,
+      show: false
+    }
+
+    dayChartOption.value.series = [{
+      name: 'Gaming Sessions',
+      type: 'custom',
+      renderItem: (params: any, api: any) => {
+        const categoryIndex = api.value(0) // Y category index
+        const startTime = api.value(1)     // Start time
+        const endTime = api.value(2)       // End time
+        const gameTitle = api.value(4)     // Game title
+
+        const start = api.coord([startTime, categoryIndex])
+        const end = api.coord([endTime, categoryIndex])
+        const height = api.size([0, 1])[1] * 0.6
+
+        // Create the rectangle shape (same as official example)
+        const rectShape = {
+          x: start[0],
+          y: start[1] - height / 2,
+          width: end[0] - start[0],
+          height: height
+        }
+
+        // Clip the rectangle to the visible coordinate system area
+        const clippedShape = graphic.clipRectByRect(
+          rectShape,
+          {
+            x: params.coordSys.x,
+            y: params.coordSys.y,
+            width: params.coordSys.width,
+            height: params.coordSys.height
+          }
+        )
+
+        // Use game-specific color
+        const color = gameColors[gameTitle] || defaultColors[0]
+
+        return clippedShape && {
+          type: 'rect',
+          transition: ['shape'],
+          shape: clippedShape,
+          style: {
+            fill: color,
+            stroke: '#fff',
+            lineWidth: 1,
+            opacity: 0.8
+          }
+        }
+      },
+      itemStyle: {
+        opacity: 0.8
+      },
+      encode: {
+        x: [1, 2], // Start and end time
+        y: 0       // Category index
+      },
+      data: timelineData.chartData
+    }]
+
+    // Update legend with games and their colors
+    dayChartOption.value.legend = {
+      top: 'bottom',
+      type: 'scroll',
+      data: uniqueGames.map(game => ({
+        name: game,
+        itemStyle: {
+          color: gameColors[game]
+        }
+      }))
+    }
+  }
+
+  // Create vertical timeline data following official example pattern
+  const createVerticalTimelineData = (sessions: any[], _uniqueGames: string[]) => {
+    const chartData: any[] = []
+    const categories: string[] = []
+
+    // Track occupied time slots for each vertical level
+    const levelOccupancy: { start: number, end: number }[] = []
+
+    sessions.forEach(session => {
+      let assignedLevel = 0
+
+      // Find the lowest available level that doesn't have time conflicts
+      while (assignedLevel < levelOccupancy.length) {
+        const hasConflict = levelOccupancy[assignedLevel] &&
+          !(session.endHour <= levelOccupancy[assignedLevel].start ||
+            session.startHour >= levelOccupancy[assignedLevel].end)
+
+        if (!hasConflict) {
+          break
+        }
+        assignedLevel++
+      }
+
+      // Extend levelOccupancy array if needed
+      while (levelOccupancy.length <= assignedLevel) {
+        levelOccupancy.push({ start: 0, end: 0 })
+      }
+
+      // Record the time slot as occupied at this level
+      levelOccupancy[assignedLevel] = {
+        start: session.startHour,
+        end: session.endHour
+      }
+
+      // Create category name for this level if not exists
+      const categoryName = `Level ${assignedLevel + 1}`
+      if (!categories.includes(categoryName)) {
+        categories.push(categoryName)
+      }
+
+      // Data format: [categoryIndex, startTime, endTime, duration, gameTitle, launchMethod]
+      chartData.push([
+        assignedLevel,        // Category index (Y position)
+        session.startHour,    // Start time (X start)
+        session.endHour,      // End time (X end)
+        (session.endHour - session.startHour) * 60, // Duration in minutes
+        session.title,        // Game title
+        session.launchMethod  // Launch method
+      ])
+    })
+
+    return { chartData, categories }
+  }
+
+  // Handle day selection change
+  const onDayChange = (value: string | null) => {
+    if (value) {
+      console.log('Selected day:', value)
+      loadDailyStatistics()
+    }
+  }
+
+  // ==========================================
+  // WEEKLY STATISTICS CHART (Week Tab)
+  // ==========================================
 
   const loadWeeklyStatistics = async () => {
     try {
@@ -311,6 +672,12 @@
   }
 
   .week-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .day-selector {
     display: flex;
     align-items: center;
     gap: 10px;

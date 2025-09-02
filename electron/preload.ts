@@ -52,6 +52,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getGameRecentDailyStats: (gameUuid: string, days?: number) => ipcRenderer.invoke('get-game-recent-daily-stats', gameUuid, days),
   getGameDailyStatsRange: (gameUuid: string, startDate: string, endDate: string) => ipcRenderer.invoke('get-game-daily-stats-range', gameUuid, startDate, endDate),
   getWeeklyStatsByDate: (dateString: string) => ipcRenderer.invoke('get-weekly-stats-by-date', dateString),
+  getDailyGameSessions: (dateString: string) => ipcRenderer.invoke('get-daily-game-sessions', dateString),
   getOverallStats: () => ipcRenderer.invoke('get-overall-stats'),
   getTopGamesStats: (limit?: number) => ipcRenderer.invoke('get-top-games-stats', limit),
   getMonthlyStats: (year?: number) => ipcRenderer.invoke('get-monthly-stats', year),

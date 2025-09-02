@@ -69,6 +69,14 @@ interface Window {
       totalSeconds: number;
       sessionCount: number;
     }[]>
+    getDailyGameSessions: (dateString: string) => Promise<{
+      uuid: string;
+      title: string;
+      startTime: string;
+      endTime: string;
+      durationSeconds: number;
+      launchMethod: string;
+    }[]>
     getOverallStats: () => Promise<{
       totalPlayTime: number;
       totalSessions: number;
