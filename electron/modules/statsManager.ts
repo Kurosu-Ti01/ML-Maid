@@ -34,6 +34,11 @@ export function setupStatsHandlers(config: StatsModuleConfig) {
     return getWeeklyStatisticsByDate(dateString, statsDb)
   })
 
+  // Get daily game sessions for a specific date (for Profile chart)
+  ipcMain.handle('get-daily-game-sessions', (_, dateString: string) => {
+    return getDailyGameSessions(dateString, statsDb)
+  })
+
   // Get overall statistics for all games
   ipcMain.handle('get-overall-stats', () => {
     const queries = {
@@ -187,4 +192,22 @@ function getWeeklyStatisticsByDate(dateString: string, statsDb: any) {
     ORDER BY sessionDayOfWeek ASC, title ASC
   `
   return statsDb.prepare(query).all(year, weekNumber)
+}
+
+// Internal function to get daily game sessions for Profile chart
+function getDailyGameSessions(dateString: string, statsDb: any) {
+  const query = `
+    SELECT 
+      uuid,
+      title,
+      startTime,
+      endTime,
+      durationSeconds,
+      launchMethod
+    FROM game 
+    WHERE isCompleted = 1 
+    AND sessionDate = ?
+    ORDER BY startTime ASC
+  `
+  return statsDb.prepare(query).all(dateString)
 }
