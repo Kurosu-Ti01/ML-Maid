@@ -77,6 +77,10 @@ interface Window {
       durationSeconds: number;
       launchMethod: string;
     }[]>
+    getMonthlyDailyStats: (year: number, month: number) => Promise<{
+      sessionDate: string;
+      totalSeconds: number;
+    }[]>
     getOverallStats: () => Promise<{
       totalPlayTime: number;
       totalSessions: number;
