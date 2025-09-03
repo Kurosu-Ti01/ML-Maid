@@ -44,10 +44,23 @@
         </div>
       </el-tab-pane>
 
+      <!-- Replace Month tab with month selector and chart -->
       <el-tab-pane label="Month" name="month">
         <div class="tab-content">
-          <h3>Monthly Statistics</h3>
-          <p>Monthly gaming statistics will be displayed here...</p>
+          <div class="header-section">
+            <h3>Monthly Statistics</h3>
+            <div class="month-selector">
+              <el-date-picker v-model="selectedMonth" type="month" format="YYYY-MM" value-format="YYYY-MM"
+                placeholder="This Month" @change="onMonthChange" />
+            </div>
+          </div>
+          <div class="chart-container">
+            <v-chart v-if="isMonthChartReady && activeTab === 'month'" class="chart" :option="monthChartOption"
+              autoresize />
+            <div v-else class="loading-placeholder">
+              Loading chart...
+            </div>
+          </div>
         </div>
       </el-tab-pane>
 
@@ -65,7 +78,7 @@
   import { ref, onMounted, nextTick, watch } from 'vue'
   import { use } from 'echarts/core'
   import { CanvasRenderer } from 'echarts/renderers'
-  import { BarChart, CustomChart } from 'echarts/charts'
+  import { BarChart, CustomChart, LineChart } from 'echarts/charts'
   import {
     TitleComponent,
     TooltipComponent,
@@ -80,7 +93,8 @@
   import type { ComposeOption } from 'echarts/core'
   import type {
     BarSeriesOption,
-    CustomSeriesOption
+    CustomSeriesOption,
+    LineSeriesOption
   } from 'echarts/charts'
   import type {
     TitleComponentOption,
@@ -96,6 +110,7 @@
     CanvasRenderer,
     BarChart,
     CustomChart,
+    LineChart,
     TitleComponent,
     TooltipComponent,
     LegendComponent,
@@ -124,9 +139,19 @@
     | DataZoomComponentOption
   >
 
+  // New: Month chart option type
+  type MonthChartOption = ComposeOption<
+    | LineSeriesOption
+    | TitleComponentOption
+    | TooltipComponentOption
+    | LegendComponentOption
+    | GridComponentOption
+  >
+
   const activeTab = ref('main')
   const isChartReady = ref(false)
   const isDayChartReady = ref(false)
+  const isMonthChartReady = ref(false)
 
   // Get today's date as the default value
   const getTodayDate = () => {
@@ -134,8 +159,16 @@
     return today.toISOString().split('T')[0] // YYYY-MM-DD format
   }
 
+  // Get current month string YYYY-MM
+  const getCurrentMonthString = () => {
+    const today = new Date()
+    return `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}`
+  }
+
   // Selected day (default is today)
   const selectedDay = ref(getTodayDate())
+  // Selected month (default is current month)
+  const selectedMonth = ref(getCurrentMonthString())
 
   // Chart configuration for the Day tab (Profile chart)
   const dayChartOption = ref<DayChartOption>({
@@ -290,10 +323,49 @@
     series: []
   })
 
+  // Chart configuration for the Month tab (daily totals area/line chart)
+  const monthChartOption = ref<MonthChartOption>({
+    title: {
+      text: 'Daily Total Play Time',
+      left: 'center'
+    },
+    tooltip: {
+      trigger: 'axis',
+      formatter: (params: any) => {
+        if (!params || params.length === 0) return ''
+        const p = params[0]
+        return `${p.axisValue}<br/>${p.seriesName}: ${Number(p.data).toFixed(2)} hours`
+      }
+    },
+    legend: {
+      top: 'bottom',
+      type: 'scroll'
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '15%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: []
+    },
+    yAxis: {
+      type: 'value',
+      name: 'Hours',
+      axisLabel: {
+        formatter: '{value}h'
+      }
+    },
+    series: []
+  })
+
   onMounted(async () => {
     // Initial data load
     loadDailyStatistics()
     loadWeeklyStatistics()
+    loadMonthlyDailyStats()
   })
 
   // Watch for tab changes
@@ -312,10 +384,18 @@
       setTimeout(() => {
         isChartReady.value = true
       }, 300)
+    } else if (newTab === 'month') {
+      // When switching to the Month tab, delay chart initialization
+      isMonthChartReady.value = false
+      await nextTick()
+      setTimeout(() => {
+        isMonthChartReady.value = true
+      }, 300)
     } else {
       // Hide charts when switching to other tabs
       isDayChartReady.value = false
       isChartReady.value = false
+      isMonthChartReady.value = false
     }
   }, { immediate: true })
 
@@ -629,6 +709,83 @@
     if (value) {
       console.log('Selected week:', value)
       loadWeeklyStatistics()
+    }
+  }
+
+  // ==========================================
+  // MONTHLY STATISTICS CHART (Month Tab)
+  // ==========================================
+
+  // Load monthly daily totals for the selected year/month
+  const loadMonthlyDailyStats = async () => {
+    try {
+      console.log('Loading monthly daily statistics...')
+
+      // Determine year and month
+      let year: number
+      let month: number
+      if (typeof selectedMonth.value === 'string') {
+        const parts = selectedMonth.value.split('-')
+        year = parseInt(parts[0], 10)
+        month = parseInt(parts[1], 10)
+      } else {
+        const d = selectedMonth.value as Date
+        year = d.getFullYear()
+        month = d.getMonth() + 1
+      }
+
+      console.log(`Loading statistics for month: ${year}-${month.toString().padStart(2, '0')}`)
+
+      // Call the API exposed by preload (camelCase)
+      const monthlyData = await window.electronAPI?.getMonthlyDailyStats(year, month)
+      if (monthlyData) {
+        console.log('Monthly daily data received:', monthlyData)
+        updateMonthChart(year, month, monthlyData)
+      }
+
+    } catch (error) {
+      console.error('Failed to load monthly daily statistics:', error)
+    }
+  }
+
+  // Update month chart from API data
+  const updateMonthChart = (year: number, month: number, monthlyData: any[]) => {
+    // Number of days in selected month
+    const daysInMonth = new Date(year, month, 0).getDate()
+
+    // Prepare labels (e.g. 'MM-DD') and default zeros
+    const monthStr = month.toString().padStart(2, '0')
+    const labels = Array.from({ length: daysInMonth }, (_, i) => `${monthStr}-${(i + 1).toString().padStart(2, '0')}`)
+
+    // Map API results (sessionDate -> totalSeconds)
+    const dayMap = new Map<number, number>()
+    monthlyData.forEach((row: any) => {
+      const parts = row.sessionDate.split('-')
+      const day = parseInt(parts[2], 10)
+      const hours = (row.totalSeconds || 0) / 3600
+      dayMap.set(day, hours)
+    })
+
+    const seriesData = Array.from({ length: daysInMonth }, (_, i) => {
+      const v = dayMap.get(i + 1)
+      return v != null ? Number(v.toFixed(2)) : 0
+    })
+
+    monthChartOption.value.xAxis = { type: 'category', data: labels }
+    monthChartOption.value.series = [{
+      name: 'Total Hours',
+      type: 'line',
+      smooth: true,
+      areaStyle: {},
+      data: seriesData
+    }]
+  }
+
+  // Handle month selection change
+  const onMonthChange = (value: string | null) => {
+    if (value) {
+      console.log('Selected month:', value)
+      loadMonthlyDailyStats()
     }
   }
 </script>
