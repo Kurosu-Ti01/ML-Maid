@@ -1,5 +1,7 @@
 {
   "name": "ml-maid",
+  "description": "A Visual Novel Manager",
+  "author": "Kurosu-Ti01",
   "private": true,
   "version": "0.2.0",
   "type": "module",

@@ -1,6 +1,7 @@
 import { app, BrowserWindow, protocol } from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
+import fs from 'node:fs'
 
 // Import modules
 import { initializeDatabases } from './database/init.js'
@@ -28,9 +29,24 @@ let win: BrowserWindow | null
 
 // App configuration
 const isDev = !app.isPackaged
-const appDataPath = isDev
-  ? process.env.APP_ROOT  // Development: use project root
-  : path.dirname(process.execPath)  // Production: use executable directory
+
+let appDataPath: string
+if (isDev) {
+  appDataPath = process.env.APP_ROOT as string // Development: use project root
+} else {
+  const exeDir = path.dirname(process.execPath)
+
+  // Check if this is an installed version by looking for uninstaller
+  const hasUninstaller = fs.existsSync(path.join(exeDir, 'Uninstall ML-Maid.exe'))
+
+  if (hasUninstaller) {
+    // Installed: store data in Documents
+    appDataPath = path.join(app.getPath('documents'), 'ML-Maid')
+  } else {
+    // Portable: store data next to executable
+    appDataPath = exeDir
+  }
+}
 
 const appConfig: AppConfig = {
   isDev,
