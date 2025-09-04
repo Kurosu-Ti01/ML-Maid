@@ -4,7 +4,64 @@
       <el-tab-pane label="Main" name="main">
         <div class="tab-content">
           <h3>Overall Statistics</h3>
-          <p>Main statistics overview will be displayed here...</p>
+          <div class="main-stats-container">
+            <div class="stats-cards">
+              <div class="stat-card">
+                <div class="stat-icon">🎮</div>
+                <div class="stat-content">
+                  <div class="stat-value">{{ formatTime(overallStats.totalPlayTime) }}</div>
+                  <div class="stat-label">Total Play Time</div>
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-content">
+                  <div class="stat-value">{{ overallStats.totalSessions }}</div>
+                  <div class="stat-label">Total Sessions</div>
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-icon">📚</div>
+                <div class="stat-content">
+                  <div class="stat-value">{{ overallStats.gamesPlayed }}</div>
+                  <div class="stat-label">Games Played</div>
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-content">
+                  <div class="stat-value">{{ formatTime(overallStats.todayPlayTime) }}</div>
+                  <div class="stat-label">Today</div>
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-content">
+                  <div class="stat-value">{{ formatTime(overallStats.thisWeekPlayTime) }}</div>
+                  <div class="stat-label">This Week</div>
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-icon">🗓️</div>
+                <div class="stat-content">
+                  <div class="stat-value">{{ formatTime(overallStats.thisMonthPlayTime) }}</div>
+                  <div class="stat-label">This Month</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="stats-placeholder">
+              <div class="placeholder-content">
+                <div class="placeholder-icon">📈</div>
+                <p style="color: aliceblue;">Additional charts and visualizations coming soon...</p>
+              </div>
+            </div>
+          </div>
         </div>
       </el-tab-pane>
 
@@ -202,6 +259,25 @@
   const selectedMonth = ref(getCurrentMonthString())
   // Selected year (default is current year)
   const selectedYear = ref(getCurrentYearString())
+
+  // Overall statistics data
+  const overallStats = ref({
+    totalPlayTime: 0,
+    totalSessions: 0,
+    gamesPlayed: 0,
+    todayPlayTime: 0,
+    thisWeekPlayTime: 0,
+    thisMonthPlayTime: 0
+  })
+
+  // Format time from seconds to readable format
+  const formatTime = (seconds: number) => {
+    if (seconds < 60) return `${seconds}s`
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m`
+    const hours = Math.floor(seconds / 3600)
+    const minutes = Math.floor((seconds % 3600) / 60)
+    return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`
+  }
 
   // Chart configuration for the Day tab (Profile chart)
   const dayChartOption = ref<DayChartOption>({
@@ -424,6 +500,7 @@
 
   onMounted(async () => {
     // Initial data load
+    loadOverallStats()
     loadDailyStatistics()
     loadWeeklyStatistics()
     loadMonthlyDailyStats()
@@ -887,6 +964,24 @@
   function onYearChange(value: string | null) {
     if (value) loadYearlyDailyStats()
   }
+
+  // ==========================================
+  // OVERALL STATISTICS (Main Tab)
+  // ==========================================
+
+  // Load overall statistics
+  const loadOverallStats = async () => {
+    try {
+      console.log('Loading overall statistics...')
+      const data = await window.electronAPI?.getOverallStats()
+      if (data) {
+        console.log('Overall stats received:', data)
+        overallStats.value = data
+      }
+    } catch (e) {
+      console.error('Failed to load overall stats', e)
+    }
+  }
 </script>
 
 <style scoped>
@@ -970,5 +1065,84 @@
     justify-content: center;
     color: #666;
     font-size: 16px;
+  }
+
+  /* Main tab styles */
+  .main-stats-container {
+    display: flex;
+    gap: 30px;
+    height: 100%;
+  }
+
+  .stats-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    min-width: 400px;
+  }
+
+  .stat-card {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .stat-icon {
+    font-size: 2.5em;
+    opacity: 0.8;
+  }
+
+  .stat-content {
+    flex: 1;
+  }
+
+  .stat-value {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #2c3e50;
+    line-height: 1.2;
+  }
+
+  .stat-label {
+    font-size: 0.9em;
+    color: #7f8c8d;
+    margin-top: 4px;
+  }
+
+  .stats-placeholder {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    min-height: 300px;
+  }
+
+  .placeholder-content {
+    text-align: center;
+    color: white;
+  }
+
+  .placeholder-icon {
+    font-size: 4em;
+    margin-bottom: 20px;
+    opacity: 0.8;
+  }
+
+  .placeholder-content p {
+    font-size: 1.2em;
+    margin: 0;
+    opacity: 0.9;
   }
 </style>
