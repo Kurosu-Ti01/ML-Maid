@@ -113,6 +113,22 @@ export function setupStatsHandlers(config: StatsModuleConfig) {
     return statsDb.prepare(query).all(yearStr, monthStr)
   })
 
+  // New: Get daily totals for a full year (for Year tab)
+  ipcMain.handle('get-yearly-daily-stats', (_, year?: number) => {
+    const targetYear = (year || new Date().getFullYear()).toString()
+    const query = `
+      SELECT
+        sessionDate,
+        SUM(durationSeconds) as totalSeconds
+      FROM game
+      WHERE isCompleted = 1
+        AND sessionYear = ?
+      GROUP BY sessionDate
+      ORDER BY sessionDate ASC
+    `
+    return statsDb.prepare(query).all(targetYear)
+  })
+
   // Get recent game sessions (updated to include launch method)
   ipcMain.handle('get-recent-sessions', (_, limit: number = 20) => {
     const query = `
