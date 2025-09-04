@@ -44,7 +44,6 @@
         </div>
       </el-tab-pane>
 
-      <!-- Replace Month tab with month selector and chart -->
       <el-tab-pane label="Month" name="month">
         <div class="tab-content">
           <div class="header-section">
@@ -66,8 +65,20 @@
 
       <el-tab-pane label="Year" name="year">
         <div class="tab-content">
-          <h3>Yearly Statistics</h3>
-          <p>Yearly gaming statistics will be displayed here...</p>
+          <div class="header-section">
+            <h3>Yearly Statistics</h3>
+            <div class="year-selector">
+              <el-date-picker v-model="selectedYear" type="year" format="YYYY" value-format="YYYY"
+                placeholder="This Year" @change="onYearChange" />
+            </div>
+          </div>
+          <div class="chart-container">
+            <v-chart v-if="isYearChartReady && activeTab === 'year'" class="chart" :option="yearChartOption"
+              autoresize />
+            <div v-else class="loading-placeholder">
+              Loading chart...
+            </div>
+          </div>
         </div>
       </el-tab-pane>
     </el-tabs>
@@ -78,7 +89,7 @@
   import { ref, onMounted, nextTick, watch } from 'vue'
   import { use } from 'echarts/core'
   import { CanvasRenderer } from 'echarts/renderers'
-  import { BarChart, CustomChart, LineChart } from 'echarts/charts'
+  import { BarChart, CustomChart, LineChart, HeatmapChart } from 'echarts/charts'
   import {
     TitleComponent,
     TooltipComponent,
@@ -86,7 +97,9 @@
     GridComponent,
     DatasetComponent,
     TransformComponent,
-    DataZoomComponent
+    DataZoomComponent,
+    CalendarComponent,
+    VisualMapComponent
   } from 'echarts/components'
   import { graphic } from 'echarts/core'
   import VChart from 'vue-echarts'
@@ -94,7 +107,8 @@
   import type {
     BarSeriesOption,
     CustomSeriesOption,
-    LineSeriesOption
+    LineSeriesOption,
+    HeatmapSeriesOption
   } from 'echarts/charts'
   import type {
     TitleComponentOption,
@@ -102,7 +116,8 @@
     LegendComponentOption,
     GridComponentOption,
     DatasetComponentOption,
-    DataZoomComponentOption
+    DataZoomComponentOption,
+    CalendarComponentOption
   } from 'echarts/components'
 
   // Register required ECharts components
@@ -111,13 +126,16 @@
     BarChart,
     CustomChart,
     LineChart,
+    HeatmapChart,
     TitleComponent,
     TooltipComponent,
     LegendComponent,
     GridComponent,
     DatasetComponent,
     TransformComponent,
-    DataZoomComponent
+    DataZoomComponent,
+    CalendarComponent,
+    VisualMapComponent
   ])
 
   // Create specific ECharts option types for different charts
@@ -148,10 +166,20 @@
     | GridComponentOption
   >
 
+  // New: Year chart option type (calendar heatmap)
+  type YearChartOption = ComposeOption<
+    | HeatmapSeriesOption
+    | TitleComponentOption
+    | TooltipComponentOption
+    | LegendComponentOption
+    | CalendarComponentOption
+  >
+
   const activeTab = ref('main')
   const isChartReady = ref(false)
   const isDayChartReady = ref(false)
   const isMonthChartReady = ref(false)
+  const isYearChartReady = ref(false)
 
   // Get today's date as the default value
   const getTodayDate = () => {
@@ -165,10 +193,15 @@
     return `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}`
   }
 
+  // Get current year string YYYY
+  const getCurrentYearString = () => new Date().getFullYear().toString()
+
   // Selected day (default is today)
   const selectedDay = ref(getTodayDate())
   // Selected month (default is current month)
   const selectedMonth = ref(getCurrentMonthString())
+  // Selected year (default is current year)
+  const selectedYear = ref(getCurrentYearString())
 
   // Chart configuration for the Day tab (Profile chart)
   const dayChartOption = ref<DayChartOption>({
@@ -361,11 +394,40 @@
     series: []
   })
 
+  // Year chart option (calendar heatmap)
+  const yearChartOption = ref<YearChartOption>({
+    title: { text: 'Yearly Daily Play Time', left: 'center' },
+    tooltip: {
+      formatter: (params: any) => {
+        if (!params) return ''
+        const d = params.data
+        return `${d[0]}: ${((d[1] || 0) / 3600).toFixed(2)} hours`
+      }
+    },
+    visualMap: {
+      min: 0,
+      max: 24 * 3600, // up to 24h in seconds
+      orient: 'horizontal',
+      right: 'center',
+      bottom: '40%',
+      itemHeight: 1000,
+      calculable: true,
+      inRange: { color: ['#e0f3ff', '#0066cc'] }
+    },
+    calendar: [{ range: getCurrentYearString(), cellSize: ['auto', 20] }],
+    series: [{
+      type: 'heatmap',
+      coordinateSystem: 'calendar',
+      data: []
+    }]
+  })
+
   onMounted(async () => {
     // Initial data load
     loadDailyStatistics()
     loadWeeklyStatistics()
     loadMonthlyDailyStats()
+    loadYearlyDailyStats()
   })
 
   // Watch for tab changes
@@ -391,11 +453,19 @@
       setTimeout(() => {
         isMonthChartReady.value = true
       }, 300)
+    } else if (newTab === 'year') {
+      // When switching to the Year tab, delay chart initialization
+      isYearChartReady.value = false
+      await nextTick()
+      setTimeout(() => {
+        isYearChartReady.value = true
+      }, 300)
     } else {
       // Hide charts when switching to other tabs
       isDayChartReady.value = false
       isChartReady.value = false
       isMonthChartReady.value = false
+      isYearChartReady.value = false
     }
   }, { immediate: true })
 
@@ -782,11 +852,40 @@
   }
 
   // Handle month selection change
-  const onMonthChange = (value: string | null) => {
+  function onMonthChange(value: string | null) {
     if (value) {
       console.log('Selected month:', value)
       loadMonthlyDailyStats()
     }
+  }
+
+  // ==========================================
+  // YEARLY STATISTICS CHART (Year Tab)
+  // ==========================================
+
+  // Load yearly daily totals
+  const loadYearlyDailyStats = async () => {
+    try {
+      const year = typeof selectedYear.value === 'string' ? parseInt(selectedYear.value, 10) : (selectedYear.value as Date).getFullYear()
+      console.log('Loading yearly daily stats for', year)
+      const data = await window.electronAPI?.getYearlyDailyStats(year)
+      if (data) updateYearChart(year, data)
+    } catch (e) {
+      console.error('Failed to load yearly daily stats', e)
+    }
+  }
+
+  // Update year chart from API data
+  const updateYearChart = (year: number, rows: any[]) => {
+    // Convert rows {sessionDate, totalSeconds} to [dateStr, value] with dateStr 'YYYY-MM-DD'
+    const heatData: [string, number][] = rows.map(r => [r.sessionDate, r.totalSeconds || 0])
+
+    yearChartOption.value.calendar = [{ range: String(year), cellSize: ['auto', 20] }]
+    yearChartOption.value.series = [{ type: 'heatmap', coordinateSystem: 'calendar', data: heatData }]
+  }
+
+  function onYearChange(value: string | null) {
+    if (value) loadYearlyDailyStats()
   }
 </script>
 
@@ -835,6 +934,12 @@
   }
 
   .day-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .year-selector {
     display: flex;
     align-items: center;
     gap: 10px;
