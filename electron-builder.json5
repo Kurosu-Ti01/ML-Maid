@@ -23,13 +23,15 @@
       "zip"
     ],
     "icon": "public/default/favicon.ico",
-    "artifactName": "${productName}-Windows-${arch}-${version}.${ext}"
+    "artifactName": "${productName}-Windows-${arch}-${version}-Portable.${ext}" // for zip
   },
   "nsis": {
     "artifactName": "${productName}-Windows-${arch}-${version}-Setup.${ext}",
     "oneClick": false,
     "perMachine": false,
     "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
     "deleteAppDataOnUninstall": false
   },
   "linux": {
