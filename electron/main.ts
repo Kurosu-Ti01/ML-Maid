@@ -107,8 +107,10 @@ function createWindow() {
 function createTray() {
   // Create tray icon
   const iconPath = path.join(process.env.VITE_PUBLIC, 'default', 'favicon.ico')
+
+  // Load the icon - nativeImage will automatically choose the best resolution from ICO
   const icon = nativeImage.createFromPath(iconPath)
-  tray = new Tray(icon.resize({ width: 16, height: 16 }))
+  tray = new Tray(icon)
 
   // Create context menu
   const contextMenu = Menu.buildFromTemplate([
