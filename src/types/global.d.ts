@@ -137,6 +137,17 @@ interface Window {
       startTime: string,
       endTime: string
     }) => void) => void
+    // settings operations
+    getSettings: () => Promise<any>
+    saveSettings: (settings: any) => Promise<boolean>
+    onSettingsInitial: (callback: (settings: any) => void) => void
+  }
+}
+
+interface Settings {
+  general: {
+    theme?: string
+    language?: string
   }
 }
 

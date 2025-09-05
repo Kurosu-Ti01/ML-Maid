@@ -27,6 +27,7 @@ export interface AppConfig {
   libPath: string
   tempPath: string
   imgPath_game: string
+  configPath: string
 }
 
 export interface DatabaseInstances {

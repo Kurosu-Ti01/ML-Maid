@@ -20,6 +20,7 @@ docs
 
 # files created while running the app
 library
+config
 temp
 
 # TODO

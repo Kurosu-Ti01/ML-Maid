@@ -2,6 +2,7 @@ import { createApp } from "vue"
 import App from './App.vue'
 import router from './router'
 import pinia from './stores'
+import { useSettingsStore } from './stores/settings'
 import 'element-plus/dist/index.css'
 
 // Configure Day.js for Element Plus date components
@@ -93,4 +94,16 @@ initTitlebar()
 // Listen for hash changes to update titlebar when navigating
 window.addEventListener('hashchange', initTitlebar)
 
-createApp(App).use(router).use(pinia).mount('#app')
+const app = createApp(App).use(router).use(pinia)
+
+// Initialize settings store and listen for initial settings from main process
+const settingsStore = useSettingsStore()
+
+// Listen for initial settings from main process
+if (window.electronAPI?.onSettingsInitial) {
+  window.electronAPI.onSettingsInitial((settings: any) => {
+    settingsStore.updateSettings(settings)
+  })
+}
+
+app.mount('#app')
