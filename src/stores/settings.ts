@@ -5,7 +5,8 @@ export const useSettingsStore = defineStore('settings', () => {
   const settings = ref<Settings>({
     general: {
       theme: 'light',
-      language: 'en-US'
+      language: 'en-US',
+      minimizeToTray: true
     }
   })
 

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, protocol } from 'electron'
+import { app, BrowserWindow, protocol, Tray, Menu, nativeImage } from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import fs from 'node:fs'
@@ -11,8 +11,7 @@ import { setupLauncherHandlers } from './modules/gameLauncher.js'
 import { setupFileHandlers } from './modules/fileManager.js'
 import { setupWindowHandlers } from './modules/windowManager.js'
 import { setupProtocol } from './modules/protocolHandler.js'
-import { setupSettingsHandlers, sendSettingsToRenderer } from './modules/settingsManager.js'
-import type { AppConfig, DatabaseInstances } from './types/index.js'
+import { setupSettingsHandlers, sendSettingsToRenderer, settings } from './modules/settingsManager.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -27,6 +26,7 @@ export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist')
 process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 'public') : RENDERER_DIST
 
 let win: BrowserWindow | null
+let tray: Tray | null = null
 
 // App configuration
 const isDev = !app.isPackaged
@@ -93,6 +93,57 @@ function createWindow() {
     // win.loadFile('dist/index.html')
     win.loadFile(path.join(RENDERER_DIST, 'index.html'))
   }
+
+  // Handle window close event
+  win.on('close', (event) => {
+    // Direct access to settings object - super fast!
+    if (settings.general.minimizeToTray && process.platform === 'win32') {
+      event.preventDefault()
+      win?.hide()
+    }
+  })
+}
+
+function createTray() {
+  // Create tray icon
+  const iconPath = path.join(process.env.VITE_PUBLIC, 'default', 'favicon.ico')
+  const icon = nativeImage.createFromPath(iconPath)
+  tray = new Tray(icon.resize({ width: 16, height: 16 }))
+
+  // Create context menu
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Show ML-Maid',
+      click: () => {
+        if (win) {
+          win.show()
+          win.focus()
+        }
+      }
+    },
+    {
+      label: 'Exit',
+      click: () => {
+        // In development mode, kill the entire dev server
+        if (isDev) {
+          process.exit(0)
+        } else {
+          app.quit()
+        }
+      }
+    }
+  ])
+
+  tray.setToolTip('ML-Maid')
+  tray.setContextMenu(contextMenu)
+
+  // Double-click to show window
+  tray.on('double-click', () => {
+    if (win) {
+      win.show()
+      win.focus()
+    }
+  })
 }
 
 function initializeApp() {
@@ -141,7 +192,7 @@ function initializeApp() {
 
   // Send initial settings to renderer when window is ready
   win?.webContents.once('did-finish-load', () => {
-    sendSettingsToRenderer(win!, appConfig.configPath)
+    sendSettingsToRenderer(win!) // Direct access to global settings
   })
 }
 
@@ -149,6 +200,13 @@ function initializeApp() {
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
+  // On Windows, if minimize to tray is enabled, don't quit the app
+  // Direct access to settings object - super fast!
+  if (process.platform === 'win32' && settings.general.minimizeToTray) {
+    // Don't quit, keep running in system tray
+    return
+  }
+
   if (process.platform !== 'darwin') {
     app.quit()
     win = null
@@ -160,6 +218,19 @@ app.on('activate', () => {
   // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow()
+  }
+})
+
+// Clean up tray on app quit
+app.on('before-quit', () => {
+  if (tray) {
+    tray.destroy()
+    tray = null
+  }
+
+  // In development mode, ensure complete shutdown
+  if (isDev) {
+    process.exit(0)
   }
 })
 
@@ -180,5 +251,6 @@ protocol.registerSchemesAsPrivileged([
 app.whenReady().then(() => {
   setupProtocol()
   createWindow()    // create win first
+  createTray()      // create tray for minimize to tray functionality
   initializeApp()   // this require win
 })
