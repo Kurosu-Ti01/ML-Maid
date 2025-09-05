@@ -93,5 +93,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
     endTime: string
   }) => void) => {
     ipcRenderer.on('game-session-ended', (_, data) => callback(data));
+  },
+
+  // settings operations
+  getSettings: () => ipcRenderer.invoke('settings-get'),
+  saveSettings: (settings: any) => ipcRenderer.invoke('settings-save', settings),
+  onSettingsInitial: (callback: (settings: any) => void) => {
+    ipcRenderer.on('settings-initial', (_, settings) => callback(settings));
   }
 });

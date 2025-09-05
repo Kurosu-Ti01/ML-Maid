@@ -11,6 +11,7 @@ import { setupLauncherHandlers } from './modules/gameLauncher.js'
 import { setupFileHandlers } from './modules/fileManager.js'
 import { setupWindowHandlers } from './modules/windowManager.js'
 import { setupProtocol } from './modules/protocolHandler.js'
+import { setupSettingsHandlers, sendSettingsToRenderer } from './modules/settingsManager.js'
 import type { AppConfig, DatabaseInstances } from './types/index.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -53,7 +54,8 @@ const appConfig: AppConfig = {
   appDataPath,
   libPath: path.join(appDataPath, 'library'),
   tempPath: path.join(appDataPath, 'temp'),
-  imgPath_game: path.join(appDataPath, 'library', 'images')
+  imgPath_game: path.join(appDataPath, 'library', 'images'),
+  configPath: path.join(appDataPath, 'config')
 }
 
 // Database instances
@@ -133,6 +135,13 @@ function initializeApp() {
     VITE_DEV_SERVER_URL,
     RENDERER_DIST,
     preloadPath: path.join(__dirname, 'preload.mjs')
+  })
+
+  setupSettingsHandlers(appConfig.configPath)
+
+  // Send initial settings to renderer when window is ready
+  win?.webContents.once('did-finish-load', () => {
+    sendSettingsToRenderer(win!, appConfig.configPath)
   })
 }
 
