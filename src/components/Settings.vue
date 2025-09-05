@@ -18,7 +18,7 @@
         </div>
       </template>
 
-      <el-form :model="settingsStore.settings" label-width="120px" class="settings-form">
+      <el-form :model="settingsStore.settings" label-width="140px" class="settings-form">
         <el-form-item label="Theme">
           <el-select v-model="settingsStore.settings.general.theme" @change="saveSettings" placeholder="Select theme"
             style="width: 200px">
@@ -50,6 +50,11 @@
               <span>🇯🇵 日本語</span>
             </el-option>
           </el-select>
+        </el-form-item>
+
+        <el-form-item label="Minimize to Tray">
+          <el-switch v-model="settingsStore.settings.general.minimizeToTray" @change="saveSettings"
+            active-text="Enabled" inactive-text="Disabled" />
         </el-form-item>
       </el-form>
     </el-card>

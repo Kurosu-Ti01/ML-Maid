@@ -3,55 +3,68 @@ import path from 'node:path'
 import ini from 'ini'
 import { ipcMain, BrowserWindow } from 'electron'
 
-export interface Settings {
-  general: {
-    theme?: string
-    language?: string
-  }
-}
-
 const defaultSettings: Settings = {
   general: {
     theme: 'light',
     language: 'en-US',
+    minimizeToTray: true,
   },
 }
 
-export function getSettings(configDir: string): Settings {
+// Global settings object - directly accessible from main process
+export let settings: Settings = { ...defaultSettings }
+let configDirectory: string | null = null
+
+// Initialize settings from file
+export function initializeSettings(configDir: string): void {
+  configDirectory = configDir
   const configFile = path.join(configDir, 'settings.conf')
-  let settings: Settings = { ...defaultSettings }
+
   if (!fs.existsSync(configFile)) {
     if (!fs.existsSync(configDir)) {
       fs.mkdirSync(configDir, { recursive: true })
     }
     fs.writeFileSync(configFile, ini.stringify(defaultSettings), 'utf-8')
+    // settings already has default values
   } else {
     const iniContent = fs.readFileSync(configFile, 'utf-8')
-    settings = { ...defaultSettings, ...ini.parse(iniContent) }
+    const loadedSettings = ini.parse(iniContent)
+    // Merge loaded settings with defaults
+    settings = { ...defaultSettings, ...loadedSettings }
   }
-  return settings
 }
 
-export function saveSettings(configDir: string, settings: Settings) {
-  const configFile = path.join(configDir, 'settings.conf')
+// Save settings to file
+export function saveSettings(newSettings: Settings): void {
+  if (!configDirectory) {
+    throw new Error('Settings not initialized. Call initializeSettings first.')
+  }
+
+  // Update global settings object
+  settings = { ...newSettings }
+
+  // Write to file
+  const configFile = path.join(configDirectory, 'settings.conf')
   fs.writeFileSync(configFile, ini.stringify(settings), 'utf-8')
 }
 
 export function setupSettingsHandlers(configDir: string) {
+  // Initialize settings on first setup
+  initializeSettings(configDir)
+
   // Read settings
   ipcMain.handle('settings-get', () => {
-    return getSettings(configDir)
+    return settings
   })
 
   // Save settings
-  ipcMain.handle('settings-save', (_, settings: Settings) => {
-    saveSettings(configDir, settings)
+  ipcMain.handle('settings-save', (_, newSettings: Settings) => {
+    saveSettings(newSettings)
     return true
   })
 }
 
 // Send current settings to renderer
-export function sendSettingsToRenderer(win: BrowserWindow, configDir: string) {
-  const settings = getSettings(configDir)
+export function sendSettingsToRenderer(win: BrowserWindow): void {
   win.webContents.send('settings-initial', settings)
 }

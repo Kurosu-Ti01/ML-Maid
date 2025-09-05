@@ -148,6 +148,7 @@ interface Settings {
   general: {
     theme?: string
     language?: string
+    minimizeToTray?: boolean
   }
 }
 
@@ -192,4 +193,19 @@ interface GameListItem {
   genre: string
   lastPlayed: string
   lastPlayedDisplay?: string // Formatted local time for display
+}
+
+// Backend-specific types
+interface AppConfig {
+  isDev: boolean
+  appDataPath: string
+  libPath: string
+  tempPath: string
+  imgPath_game: string
+  configPath: string
+}
+
+interface DatabaseInstances {
+  metaDb: any
+  statsDb: any
 }
