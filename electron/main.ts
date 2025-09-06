@@ -126,12 +126,8 @@ function createTray() {
     {
       label: 'Exit',
       click: () => {
-        // In development mode, kill the entire dev server
-        if (isDev) {
-          process.exit(0)
-        } else {
-          app.quit()
-        }
+        // Use app.quit() to trigger before-quit
+        app.quit()
       }
     }
   ])
@@ -230,10 +226,18 @@ app.on('before-quit', () => {
     tray = null
   }
 
-  // In development mode, ensure complete shutdown
-  if (isDev) {
-    process.exit(0)
+  // Close database connections if they exist
+  if (databases) {
+    try {
+      databases.metaDb?.close()
+      databases.statsDb?.close()
+    } catch (error) {
+      console.error('Error closing databases:', error)
+    }
   }
+
+  // Force exit to ensure complete shutdown (both dev and production)
+  process.exit(0)
 })
 
 // Set protocol privileges before app is ready
