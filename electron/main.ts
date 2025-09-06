@@ -205,8 +205,6 @@ function initializeApp() {
     preloadPath: path.join(__dirname, 'preload.mjs')
   })
 
-  setupSettingsHandlers(appConfig.configPath)
-
   // Send initial settings to renderer when window is ready
   win?.webContents.once('did-finish-load', () => {
     sendSettingsToRenderer(win!) // Direct access to global settings
@@ -303,8 +301,10 @@ protocol.registerSchemesAsPrivileged([
 
 // Register custom protocol for local files
 app.whenReady().then(() => {
+  // First setup settings handlers to initialize settings
+  setupSettingsHandlers(appConfig.configPath)
   setupProtocol()
-  createWindow()    // create win first
+  createWindow()    // create win first, this need settings
   createTray()      // create tray for minimize to tray functionality
   initializeApp()   // this require win
 })
