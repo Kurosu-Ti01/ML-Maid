@@ -34,6 +34,12 @@
               </el-icon>
               <span style="margin-left: 8px">Dark</span>
             </el-option>
+            <el-option label="Follow System" value="auto">
+              <el-icon>
+                <Monitor />
+              </el-icon>
+              <span style="margin-left: 8px">Follow System</span>
+            </el-option>
           </el-select>
         </el-form-item>
 
@@ -63,7 +69,7 @@
 
 <script setup lang="ts" name="Settings">
   import { useSettingsStore } from '../stores/settings'
-  import { Setting, Tools, Sunny, Moon } from '@element-plus/icons-vue'
+  import { Setting, Tools, Sunny, Moon, Monitor } from '@element-plus/icons-vue'
 
   const settingsStore = useSettingsStore()
 
