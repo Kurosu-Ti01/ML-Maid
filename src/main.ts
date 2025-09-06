@@ -102,11 +102,16 @@ const app = createApp(App).use(router).use(pinia)
 // Initialize settings store and listen for initial settings from main process
 const settingsStore = useSettingsStore()
 
-// Listen for initial settings from main process
-if (window.electronAPI?.onSettingsInitial) {
-  window.electronAPI.onSettingsInitial((settings: any) => {
-    settingsStore.updateSettings(settings)
-  })
-}
+// // Listen for initial settings from main process
+// if (window.electronAPI?.onSettingsInitial) {
+//   window.electronAPI.onSettingsInitial((settings: any) => {
+//     settingsStore.updateSettings(settings)
+//   })
+// }
+
+// Await fetch user settings from main process on startup
+// Make sure ever use settings.conf never use default settings
+const userSettings = await window.electronAPI?.getSettings()
+settingsStore.updateSettings(userSettings)
 
 app.mount('#app')
