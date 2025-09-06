@@ -44,9 +44,9 @@
   }
 
   .el-aside {
-    background: #F2F6FC;
+    background: var(--siderbar-nav-bg);
     padding: 12px;
-    border-right: 1px solid #d6d9dc;
+    border-right: 1px solid var(--siderbar-nav-border);
     width: 50px;
   }
 
@@ -55,6 +55,15 @@
     height: 100%;
     min-height: 0;
     overflow: hidden;
-    background-color: #ffffff;
+  }
+
+  /* Dark mode styles */
+  :global(html.dark) .el-aside {
+    background: var(--el-bg-color);
+    border-right-color: var(--el-border-color);
+  }
+
+  :global(html.dark) .el-main {
+    background-color: var(--el-bg-color-page);
   }
 </style>

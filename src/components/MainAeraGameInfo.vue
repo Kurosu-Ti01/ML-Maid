@@ -80,11 +80,11 @@
             </el-dropdown>
             <div class="game-playtime-text">
               <div class="game-playtime">
-                <p style="font-size: 1.1em; color: black;">Time Played</p>
+                <p style="font-size: 1.1em; color: var(--el-text-color-primary);">Time Played</p>
                 <p style="font-weight: bold;">{{ formatTimePlayed(gameData.timePlayed) }}</p>
               </div>
               <div class="game-playtime">
-                <p style="font-size: 1.1em; color: black;">Last Played</p>
+                <p style="font-size: 1.1em; color: var(--el-text-color-primary);">Last Played</p>
                 <p style="font-weight: bold;">{{ gameData.lastPlayedDisplay }}</p>
               </div>
             </div>
@@ -450,12 +450,12 @@
   .game-title {
     font-size: 2em;
     font-weight: 600;
-    color: #ffffff;
+    color: var(--color-title);
     letter-spacing: 1px;
     margin-left: 0.2em;
     text-shadow:
-      0 0 6px rgba(34, 34, 34, 0.40),
-      0 0 4px rgba(34, 34, 34, 0.28);
+      0 0 6px var(--shadow-title-1),
+      0 0 4px var(--shadow-title-2);
   }
 
   .game-icon {
@@ -485,15 +485,14 @@
 
   .action-button-container {
     position: relative;
-    /* 2px for scoller in game list */
     width: calc(100% - 2px);
     height: 100%;
     bottom: 0;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.10);
+    box-shadow: var(--shadow-action-bar);
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    background: rgba(255, 255, 255, 0.92);
+    background: var(--bg-action-bar);
     z-index: 1;
     margin-left: 2px;
   }
@@ -520,7 +519,7 @@
     line-height: 0.5;
     flex-direction: column;
     align-items: center;
-    color: #a174e9;
+    color: var(--color-playtime);
   }
 
   .game-cover {
@@ -580,7 +579,7 @@
   }
 
   .game-link {
-    color: #409eff;
+    color: var(--color-link);
     text-decoration: none;
     font-weight: 500;
     cursor: pointer;
@@ -588,12 +587,12 @@
   }
 
   .game-link:hover {
-    color: #66b1ff;
+    color: var(--color-link-hover);
     text-decoration: underline;
   }
 
   .clickable-path {
-    color: #409eff;
+    color: var(--color-link);
     text-decoration: none;
     font-weight: 500;
     cursor: pointer;
@@ -601,20 +600,20 @@
   }
 
   .clickable-path:hover {
-    color: #66b1ff;
+    color: var(--color-link-hover);
     text-decoration: underline;
   }
 
   .custom-info-table {
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.12);
+    box-shadow: var(--shadow-info-table);
     margin: 10px 0 10px 10px;
   }
 
   .info-row {
     display: flex;
-    border-bottom: 1px solid #ebeef5;
+    border-bottom: 1px solid var(--border-info-row);
   }
 
   .info-row:last-child {
@@ -625,11 +624,11 @@
     width: 100px;
     min-width: 100px;
     padding: 12px;
-    background-color: #fafafa;
-    border-right: 1px solid #ebeef5;
+    background-color: var(--bg-info-label);
+    border-right: 1px solid var(--border-info-row);
     font: 1em;
     font-weight: 600;
-    color: #409eff;
+    color: var(--color-info-label);
     word-break: break-word;
     overflow-wrap: break-word;
   }
@@ -637,7 +636,8 @@
   .info-content {
     flex: 1;
     padding: 12px;
-    background-color: #ffffff;
+    background-color: var(--bg-info-content);
+    color: var(--color-info-content);
     font-size: 0.8em;
     word-break: break-word;
     overflow-wrap: break-word;
@@ -646,7 +646,7 @@
   .info-row-tags {
     display: flex;
     flex-direction: column;
-    border-bottom: 1px solid #ebeef5;
+    border-bottom: 1px solid var(--border-info-row);
   }
 
   .info-label-tags {
@@ -654,7 +654,8 @@
     padding: 12px 12px 8px 12px;
     font: 1em;
     font-weight: 600;
-    color: #409eff;
+    background-color: var(--bg-info-label);
+    color: var(--color-info-label);
     word-break: break-word;
     overflow-wrap: break-word;
   }
@@ -662,7 +663,8 @@
   .info-content-tags {
     width: 100%;
     padding: 8px 12px 12px 12px;
-    background-color: #ffffff;
+    background-color: var(--bg-info-content);
+    color: var(--color-info-content);
     font-size: 0.8em;
     word-break: break-word;
     overflow-wrap: break-word;
@@ -674,7 +676,7 @@
     justify-content: center;
     align-items: center;
     height: 300px;
-    color: #666;
+    color: var(--color-muted);
     font-size: 16px;
   }
 
@@ -687,14 +689,14 @@
     font-size: 24px;
     font-weight: 600;
     margin: 0 0 8px 0;
-    color: #909399;
+    color: var(--color-muted-dark);
     letter-spacing: 0.5px;
   }
 
   .no-game-hint {
     font-size: 14px;
     font-weight: 400;
-    color: #c0c4cc;
+    color: var(--color-muted-light);
     opacity: 0.8;
   }
 </style>

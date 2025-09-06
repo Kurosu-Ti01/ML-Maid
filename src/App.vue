@@ -3,15 +3,41 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { useGameStore } from './stores/game'
+  import { onMounted } from 'vue'
+  import { useGameStore } from './stores/game'
+  import { useTheme } from '@/composables/useTheme'
 
-const gameStore = useGameStore()
+  const gameStore = useGameStore()
+  const { } = useTheme() // Initialize theme system
 
-onMounted(async () => {
-  // Initialize games data when app starts
-  await gameStore.initialize()
-})
+  onMounted(async () => {
+    // Initialize games data when app starts
+    await gameStore.initialize()
+  })
 </script>
 
-<style scoped></style>
+<style>
+
+  /* Global base styles */
+  html,
+  body {
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  #app {
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+  }
+
+  /* Ensure basic styles for dark mode */
+  html.dark {
+    background-color: var(--el-bg-color-page);
+    color: var(--el-text-color-primary);
+  }
+
+  html.light {
+    background-color: #ffffff;
+    color: #303133;
+  }
+</style>

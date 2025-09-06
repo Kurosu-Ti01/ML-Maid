@@ -39,7 +39,7 @@
 
 <style scoped>
   .sidebar-container {
-    background: #f7f8fa;
+    background: var(--siderbar-list-bg);
   }
 
   .sidebar-content {
@@ -52,13 +52,13 @@
     display: flex;
     align-items: center;
     padding: 5px 0;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--game-item-border);
     cursor: pointer;
     transition: background 0.2s;
   }
 
   .game-item:hover {
-    background: #e9ecef;
+    background: var(--game-item-hover-bg);
     border-radius: 4px;
   }
 
@@ -72,7 +72,6 @@
   }
 
   .game-title {
-    color: #222;
     font-size: 16px;
     font-weight: 500;
   }
