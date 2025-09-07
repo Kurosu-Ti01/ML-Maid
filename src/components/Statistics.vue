@@ -15,12 +15,13 @@
               </div>
 
               <div class="stat-card">
-                <div class="stat-icon">🎯</div>
+                <div class="stat-icon">📅</div>
                 <div class="stat-content">
-                  <div class="stat-value">{{ overallStats.totalSessions }}</div>
-                  <div class="stat-label">Total Sessions</div>
+                  <div class="stat-value">{{ formatTime(overallStats.todayPlayTime) }}</div>
+                  <div class="stat-label">Today</div>
                 </div>
               </div>
+
 
               <div class="stat-card">
                 <div class="stat-icon">📚</div>
@@ -30,19 +31,20 @@
                 </div>
               </div>
 
-              <div class="stat-card">
-                <div class="stat-icon">📅</div>
-                <div class="stat-content">
-                  <div class="stat-value">{{ formatTime(overallStats.todayPlayTime) }}</div>
-                  <div class="stat-label">Today</div>
-                </div>
-              </div>
 
               <div class="stat-card">
                 <div class="stat-icon">📊</div>
                 <div class="stat-content">
                   <div class="stat-value">{{ formatTime(overallStats.thisWeekPlayTime) }}</div>
                   <div class="stat-label">This Week</div>
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-content">
+                  <div class="stat-value">{{ overallStats.totalSessions }}</div>
+                  <div class="stat-label">Total Sessions</div>
                 </div>
               </div>
 
@@ -55,12 +57,19 @@
               </div>
             </div>
 
-            <div class="stats-placeholder">
-              <div class="placeholder-content">
-                <div class="placeholder-icon">📈</div>
-                <p style="color: aliceblue;">Additional charts and visualizations coming soon...</p>
+            <el-scrollbar class="stats-recent-sessions-el">
+              <h4>Recent Game Sessions</h4>
+              <div v-if="recentSessions.length > 0" class="recent-session-list-el">
+                <el-card v-for="(session, idx) in recentSessions" :key="idx" class="recent-session-card" shadow="hover">
+                  <div class="recent-session-row">
+                    <span class="recent-session-title-el">{{ session.title }}</span>
+                    <span class="recent-session-time-el">{{ formatSessionTime(session.startTime) }}</span>
+                    <span class="recent-session-duration-el">{{ formatTime(session.durationSeconds) }}</span>
+                  </div>
+                </el-card>
               </div>
-            </div>
+              <div v-else class="recent-session-empty-el">No recent sessions found.</div>
+            </el-scrollbar>
           </div>
         </div>
       </el-tab-pane>
@@ -270,6 +279,9 @@
     thisMonthPlayTime: 0
   })
 
+  // Recent game sessions data
+  const recentSessions = ref<Array<{ title: string; startTime: string; durationSeconds: number }>>([])
+
   // Format time from seconds to readable format
   const formatTime = (seconds: number) => {
     if (seconds < 60) return `${seconds}s`
@@ -277,6 +289,17 @@
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
     return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`
+  }
+
+  // Format session time
+  function formatSessionTime(timeStr: string) {
+    const d = new Date(timeStr + 'Z')
+    const yyyy = d.getFullYear()
+    const mm = (d.getMonth() + 1).toString().padStart(2, '0')
+    const dd = d.getDate().toString().padStart(2, '0')
+    const hh = d.getHours().toString().padStart(2, '0')
+    const min = d.getMinutes().toString().padStart(2, '0')
+    return `${yyyy}-${mm}-${dd} ${hh}:${min}`
   }
 
   // Chart configuration for the Day tab (Profile chart)
@@ -505,6 +528,7 @@
     loadWeeklyStatistics()
     loadMonthlyDailyStats()
     loadYearlyDailyStats()
+    loadRecentSessions()
   })
 
   // Watch for tab changes
@@ -982,6 +1006,25 @@
       console.error('Failed to load overall stats', e)
     }
   }
+
+  // Load recent game sessions
+  async function loadRecentSessions() {
+    try {
+      const data = await window.electronAPI?.getRecentSessions()
+      if (Array.isArray(data)) {
+        recentSessions.value = data.slice(0, 10)
+      }
+    } catch (e) {
+      console.error('Failed to load recent sessions', e)
+    }
+  }
+
+  // Initial data load
+  onMounted(async () => {
+    await loadOverallStats()
+    await loadRecentSessions()
+    // Other initial loads...
+  })
 </script>
 
 <style scoped>
@@ -1077,8 +1120,8 @@
   .stats-cards {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    min-width: 400px;
+    gap: 15px;
+    min-width: 450px;
   }
 
   .stat-card {
@@ -1144,5 +1187,132 @@
     font-size: 1.2em;
     margin: 0;
     opacity: 0.9;
+  }
+
+  /* Recent sessions styles */
+  .stats-recent-sessions {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 20px;
+  }
+
+  .recent-session-list {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 10px;
+  }
+
+  .recent-session-item {
+    padding: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .recent-session-item:last-child {
+    border-bottom: none;
+  }
+
+  .recent-session-title {
+    font-size: 1.1em;
+    color: #fff;
+    margin: 0;
+  }
+
+  .recent-session-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9em;
+    color: #ccc;
+    margin-top: 4px;
+  }
+
+  .recent-session-time,
+  .recent-session-duration {
+    display: inline-block;
+  }
+
+  .recent-session-empty {
+    color: #999;
+    text-align: center;
+    padding: 10px 0;
+  }
+
+  /* Recent Sessions scrollbar and card */
+  :deep(.el-card__body) {
+    padding: 0;
+  }
+
+  .stats-recent-sessions-el {
+    height: 100%;
+    width: 100%;
+    min-width: 260px;
+    margin-left: 10px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(64, 158, 255, 0.08);
+    padding: 18px 12px 12px 12px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stats-recent-sessions-el h4 {
+    margin: 0 0 10px 0;
+    color: #409eff;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 8px;
+  }
+
+  .recent-session-list-el {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .recent-session-card {
+    padding: 7px 12px;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #e3f0ff 0%, #f8fbff 100%);
+    box-shadow: 0 1px 4px rgba(64, 158, 255, 0.07);
+  }
+
+  .recent-session-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .recent-session-title-el {
+    font-weight: 500;
+    color: #409eff;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .recent-session-time-el {
+    color: #666;
+    font-size: 0.95em;
+    min-width: 110px;
+  }
+
+  .recent-session-duration-el {
+    color: #67c23a;
+    font-size: 1em;
+    min-width: 60px;
+    text-align: right;
+  }
+
+  .recent-session-empty-el {
+    color: #999;
+    text-align: center;
+    padding: 10px 0;
+  }
+
+  .main-stats-container {
+    display: flex;
+    gap: 30px;
+    height: 100%;
   }
 </style>
