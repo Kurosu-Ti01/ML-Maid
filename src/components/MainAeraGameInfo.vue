@@ -172,7 +172,8 @@
 </template>
 
 <script setup lang="ts" name="MainAeraGameInfo">
-  import { ref, watch } from 'vue'
+  import { storeToRefs } from 'pinia';
+  import { ref, watch, computed } from 'vue'
   import { useGameStore } from '../stores/game'
   import { Delete, Folder, Link, InfoFilled, Download } from '@element-plus/icons-vue'
   import { ElMessage, ElMessageBox } from 'element-plus'
@@ -180,9 +181,14 @@
   import defaultIcon from '/default/ML-Maid-Icon-W.png'
 
   const gameStore = useGameStore()
-
-  const gameData = ref<gameData | null>(null)
+  const { gameDetailsCache, currentGameUuid } = storeToRefs(gameStore)
+  const gameData = computed(() => {
+    return currentGameUuid.value
+      ? gameDetailsCache.value.get(currentGameUuid.value) || null
+      : null
+  })
   const isLoading = ref(false)
+
 
   // Format time from seconds to hours and minutes
   function formatTimePlayed(seconds: number): string {
@@ -224,51 +230,16 @@
     }
   }
 
-  // Load the current game data
-  async function loadCurrentGameData() {
-    if (!gameStore.currentGameUuid) {
-      return
-    }
-
-    isLoading.value = true
-    try {
-      const data = await gameStore.loadGameDetail(gameStore.currentGameUuid)
-      if (data) {
-        gameData.value = data
-      } else {
-        // If no data found, use default data
-        console.warn('No game data found for UUID:', gameStore.currentGameUuid)
-        gameStore.currentGameUuid = null
-      }
-    } catch (error) {
-      console.error('Failed to load game data:', error)
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  // Watch for changes in currentGameUuid
+  // Watch for changes in currentGameUuid (debugging purpose)
   watch(
-    () => gameStore.currentGameUuid,
+    () => currentGameUuid.value,
     (newUuid) => {
       if (newUuid) {
-        loadCurrentGameData()
+        console.log(newUuid)
+        console.log(gameData.value)
       }
     },
     { immediate: true }
-  )
-
-  // Watch for changes in gameDetailsCache for the current game
-  watch(
-    () => gameStore.currentGameUuid ? gameStore.gameDetailsCache.get(gameStore.currentGameUuid) : null,
-    (newGameData) => {
-      if (newGameData && gameStore.currentGameUuid) {
-        console.log('Game data updated in cache, refreshing display:', newGameData.title)
-        console.log(newGameData)
-        gameData.value = newGameData
-      }
-    },
-    { deep: true }
   )
 
   // handle play game function
@@ -323,8 +294,6 @@
 
       if (result?.success) {
         ElMessage.success(`Game launched successfully!`)
-        // Refresh the game data to update last played time
-        await loadCurrentGameData()
       } else {
         ElMessage.error('Failed to launch game')
       }
@@ -407,7 +376,6 @@
 
         // Clear current selection after deletion
         gameStore.currentGameUuid = null
-        gameData.value = null
       } catch (error) {
         loadingMessage.close()
         console.error('Failed to delete game:', error)

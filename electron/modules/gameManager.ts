@@ -138,9 +138,9 @@ export function setupGameHandlers(config: GameModuleConfig) {
         JSON.stringify(updatedGame.procNames || [])  // Store process names as JSON
       )
 
-      // Notify main window to refresh game list
+      // Notify main window to refresh
       if (win && !win.isDestroyed()) {
-        win.webContents.send('game-list-changed', { action: 'add', game: updatedGame })
+        win.webContents.send('game-store-changed', { action: 'add', game: updatedGame })
       }
 
       return { success: true }
@@ -197,9 +197,9 @@ export function setupGameHandlers(config: GameModuleConfig) {
         updatedGame.uuid
       )
 
-      // Notify main window to refresh game list and game page
+      // Notify main window to refresh
       if (win && !win.isDestroyed()) {
-        win.webContents.send('game-list-changed', { action: 'update', game: updatedGame })
+        win.webContents.send('game-store-changed', { action: 'update', game: updatedGame })
       }
 
       return { success: true, changes: result.changes > 0 }

@@ -33,6 +33,7 @@
 
   function selectGame(uuid: string) {
     gameStore.currentGameUuid = uuid;
+    gameStore.loadGameDetail(uuid)
   }
 </script>
 

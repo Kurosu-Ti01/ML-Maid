@@ -95,18 +95,6 @@ export const useGameStore = defineStore('game', () => {
         // Update database
         await window.electronAPI.addGame(game)
 
-        // Update lightweight list
-        gamesList.value.push({
-          uuid: game.uuid,
-          title: game.title,
-          iconImage: game.iconImage,
-          genre: game.genre,
-          lastPlayed: game.lastPlayed
-        })
-
-        // Add detailed data to cache
-        gameDetailsCache.value.set(game.uuid, game)
-
         listLastUpdated.value = new Date()
         console.log('Game added to store:', game.title)
       } else {
@@ -125,22 +113,6 @@ export const useGameStore = defineStore('game', () => {
         // Update database
         await window.electronAPI.updateGame(updatedGame)
 
-        // Update lightweight list
-        const listIndex = gamesList.value.findIndex(game => game.uuid === updatedGame.uuid)
-        if (listIndex !== -1) {
-          gamesList.value[listIndex] = {
-            uuid: updatedGame.uuid,
-            title: updatedGame.title,
-            iconImage: updatedGame.iconImage,
-            genre: updatedGame.genre,
-            lastPlayed: updatedGame.lastPlayed
-          }
-        }
-
-        // Update detailed data cache
-        gameDetailsCache.value.set(updatedGame.uuid, updatedGame)
-
-        listLastUpdated.value = new Date()
         console.log('Game updated in store:', updatedGame.title)
       } else {
         throw new Error('electronAPI.updateGame not available')
@@ -206,17 +178,17 @@ export const useGameStore = defineStore('game', () => {
 
   // Set up cross-window communication listeners
   function setupCrossWindowListeners() {
-    if (window.electronAPI?.onGameListChanged) {
+    if (window.electronAPI?.onGameStoreChanged) {
       console.log('🔧 Setting up cross-window listener')
 
-      window.electronAPI.onGameListChanged((data) => {
+      window.electronAPI.onGameStoreChanged((data) => {
         console.log('📡 Received game list change notification:', data)
-        handleGameListChange(data)
+        handleGameStoreChange(data)
       })
 
       console.log('✅ Cross-window listener setup complete')
     } else {
-      console.warn('❌ electronAPI.onGameListChanged not available')
+      console.warn('❌ electronAPI.onGameStoreChanged not available')
     }
 
     // Set up game launched listener
@@ -248,10 +220,21 @@ export const useGameStore = defineStore('game', () => {
     }
   }
 
-  // Logic to handle changes in the game list
-  function handleGameListChange(data: { action: string, game?: gameData }) {
+  // Logic to handle changes in the game store
+  function handleGameStoreChange(data: { action: string, game?: gameData }) {
     console.log(`🎮 Processing ${data.action} action for game:`, data.game?.title || 'unknown')
 
+    // —————————————————————
+    //   Change Game Cache
+    // —————————————————————
+    if (data.game) {
+      gameDetailsCache.value.set(data.game.uuid, data.game)
+      console.log('✅ Updated game to Cache via IPC:', data.game.title)
+    }
+
+    // —————————————————————
+    //   Change Game List
+    // —————————————————————
     if (data.action === 'add' && data.game) {
       // Check if the game already exists to avoid duplicate addition
       const existingIndex = gamesList.value.findIndex(g => g.uuid === data.game!.uuid)
