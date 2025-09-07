@@ -644,7 +644,6 @@
   .edit-container {
     height: 100vh;
     padding: 0;
-    background-color: #ffffff;
     display: flex;
     flex-direction: column;
   }
@@ -666,7 +665,6 @@
 
   .tab-form {
     padding: 30px;
-    background-color: #ffffff;
   }
 
   .placeholder-content {
@@ -691,8 +689,8 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background-color: white;
-    border-top: 1px solid #e4e7ed;
+    background-color: var(--titlebar-sub-bg);
+    border-top: 1px solid var(--fixed-bottom-border);
     padding: 15px 20px;
     display: flex;
     justify-content: center;
@@ -703,8 +701,6 @@
   /* Element Plus component style customization */
   :deep(.el-tabs__header) {
     margin: 0;
-    background-color: #ffffff;
-    border-bottom: 1px solid #e4e7ed;
     position: sticky;
     top: 0;
     z-index: 10;
@@ -716,7 +712,6 @@
 
   :deep(.el-tabs__content) {
     padding: 0;
-    background-color: #ffffff;
     flex: 1;
     /* Prevent default scrollbar from appearing */
     overflow: hidden;
@@ -809,7 +804,7 @@
   .section-title {
     font-size: 18px;
     font-weight: 600;
-    color: #303133;
+    color: var(--el-color-primary);
     display: block;
     margin-bottom: 8px;
   }
@@ -824,7 +819,7 @@
   .image-display-area {
     border: 2px dashed #d3d3d3;
     border-radius: 6px;
-    background-color: #f8f9fa;
+    background-color: var(--image-area-bg);
     margin-bottom: 15px;
     display: flex;
     align-items: center;
@@ -860,7 +855,6 @@
   .image-display-area.has-image {
     border: 0;
     border-radius: 0;
-    background-color: #ffffff;
   }
 
   .image-preview {
@@ -901,7 +895,7 @@
     height: 40px;
     border: 1px solid #dcdfe6;
     border-radius: 6px;
-    background-color: white;
+    background-color: var(--ation-btn-bg);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -911,7 +905,7 @@
 
   .action-btn:hover {
     border-color: #409eff;
-    background-color: #ecf5ff;
+    background-color: var(--el-color-primary-light-3);
   }
 
   .btn-icon {
@@ -940,7 +934,7 @@
 
   .actions-header h3 {
     margin: 0;
-    color: #303133;
+    color: var(--el-color-primary);
     font-size: 18px;
   }
 
@@ -954,7 +948,7 @@
     border: 1px solid #e4e7ed;
     border-radius: 8px;
     padding: 20px;
-    background-color: #fafafa;
+    background-color: var(--link-action-item-bg);
     position: relative;
   }
 
@@ -1025,7 +1019,7 @@
 
   .links-header h3 {
     margin: 0;
-    color: #303133;
+    color: var(--el-color-primary);
     font-size: 18px;
   }
 
@@ -1039,7 +1033,7 @@
     border: 1px solid #e4e7ed;
     border-radius: 8px;
     padding: 20px;
-    background-color: #fafafa;
+    background-color: var(--link-action-item-bg);
     position: relative;
   }
 
@@ -1153,5 +1147,10 @@
       width: 160px;
       height: 240px;
     }
+  }
+
+  /* Dark mode: invert SVG colors */
+  html.dark .action-btn img {
+    filter: invert(1);
   }
 </style>
