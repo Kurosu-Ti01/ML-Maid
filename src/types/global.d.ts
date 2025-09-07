@@ -126,7 +126,7 @@ interface Window {
     }[]>
     // event listeners
     onEditGameData: (callback: (data: gameData) => void) => void
-    onGameListChanged: (callback: (data: { action: string, game?: gameData }) => void) => void
+    onGameStoreChanged: (callback: (data: { action: string, game?: gameData }) => void) => void
     onGameLaunched: (callback: (data: { gameUuid: string }) => void) => void
     onGameSessionEnded: (callback: (data: {
       gameUuid: string,

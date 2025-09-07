@@ -72,9 +72,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('load-edit-game-data', (_, data) => callback(data));
   },
 
-  // listen for game list changes
-  onGameListChanged: (callback: (data: { action: string, game?: gameData }) => void) => {
-    ipcRenderer.on('game-list-changed', (_, data) => callback(data));
+  // listen for game store changes
+  onGameStoreChanged: (callback: (data: { action: string, game?: gameData }) => void) => {
+    ipcRenderer.on('game-store-changed', (_, data) => callback(data));
   },
 
   // listen for game launched events
