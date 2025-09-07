@@ -152,8 +152,8 @@
 </template>
 
 <script setup lang="ts" name="Statistics">
-  import { ref, onMounted, nextTick, watch } from 'vue'
-  import { use } from 'echarts/core'
+  import { ref, onMounted, nextTick, watch, computed, provide } from 'vue'
+  import { use, registerTheme } from 'echarts/core'
   import { CanvasRenderer } from 'echarts/renderers'
   import { BarChart, CustomChart, LineChart, HeatmapChart } from 'echarts/charts'
   import {
@@ -168,7 +168,9 @@
     VisualMapComponent
   } from 'echarts/components'
   import { graphic } from 'echarts/core'
-  import VChart from 'vue-echarts'
+  import VChart, { THEME_KEY } from 'vue-echarts'
+  import { useTheme } from '@/composables/useTheme'
+  import { DarkTheme } from '@/assets/echarts/dark-theme'
   import type { ComposeOption } from 'echarts/core'
   import type {
     BarSeriesOption,
@@ -246,6 +248,15 @@
   const isDayChartReady = ref(false)
   const isMonthChartReady = ref(false)
   const isYearChartReady = ref(false)
+
+  // Register custom dark theme
+  registerTheme('dark', DarkTheme)
+
+  // Use theme
+  const { isDark } = useTheme()
+
+  // Provide theme to all child ECharts components
+  provide(THEME_KEY, computed(() => isDark.value ? 'dark' : undefined))
 
   // Get today's date as the default value
   const getTodayDate = () => {
