@@ -26,7 +26,16 @@
     --game-item-hover-bg: #e9ecef;
     --game-item-border: #e0e0e0;
 
-    /* TitleBar */
+    /* Main Win TitleBar */
     --titlebar-main-bg: #f2f6fc;
     --titlebar-border: #dcdfe6;
+
+    /* Sub Win TitleBar */
+    --titlebar-sub-bg: #FFF7E6;
+
+    /* Add & Edit Form */
+    --fixed-bottom-border: #e4e7ed;
+    --image-area-bg: #f8f9fa;
+    --ation-btn-bg: #ffffff;
+    --link-action-item-bg: #fafafa;
 }

@@ -32,4 +32,13 @@ html.dark {
     /* TitleBar */
     --titlebar-main-bg: #333333;
     --titlebar-border: #626060;
+
+    /* Sub Win TitleBar */
+    --titlebar-sub-bg: #333333;
+
+    /* Add & Edit Form */
+    --fixed-bottom-border: #787a7d;
+    --image-area-bg: #272727;
+    --ation-btn-bg: #383838;
+    --link-action-item-bg: #242424;
 }

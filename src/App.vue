@@ -29,15 +29,4 @@
     width: 100vw;
     overflow: hidden;
   }
-
-  /* Ensure basic styles for dark mode */
-  html.dark {
-    background-color: var(--el-bg-color-page);
-    color: var(--el-text-color-primary);
-  }
-
-  html.light {
-    background-color: #ffffff;
-    color: #303133;
-  }
 </style>
