@@ -158,6 +158,9 @@ interface gameData {
   coverImage: string;
   backgroundImage: string;
   iconImage: string;
+  coverImageDisplay?: string;
+  backgroundImageDisplay?: string;
+  iconImageDisplay?: string;
   lastPlayed: string;     // ISO date format "YYYY-MM-DD HH:MM:SS" (UTC)
   lastPlayedDisplay?: string; // Formatted local time for display
   timePlayed: number;
@@ -189,7 +192,7 @@ interface gameData {
 interface GameListItem {
   uuid: string
   title: string
-  iconImage: string
+  iconImageDisplay: string
   genre: string
   lastPlayed: string
   lastPlayedDisplay?: string // Formatted local time for display

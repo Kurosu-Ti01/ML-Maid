@@ -10,6 +10,9 @@ interface GameData {
   coverImage?: string
   backgroundImage?: string
   iconImage?: string
+  coverImageDisplay?: string
+  backgroundImageDisplay?: string
+  iconImageDisplay?: string
   lastPlayed?: string
   timePlayed?: number
   workingDir?: string
@@ -45,8 +48,9 @@ export function setupGameHandlers(config: GameModuleConfig) {
     const result = metaDb.prepare('SELECT * FROM games WHERE uuid = ?').get(gameid)
 
     if (result) {
-      // Parse JSON fields back to objects/arrays
+      // Formate result
       try {
+        // Parse JSON fields back to objects/arrays
         result.tags = result.tags ? JSON.parse(result.tags) : []
         result.links = result.links ? JSON.parse(result.links) : {}
         result.description = result.description ? JSON.parse(result.description) : []
@@ -57,9 +61,9 @@ export function setupGameHandlers(config: GameModuleConfig) {
         result.lastPlayedDisplay = formatISOToLocal(result.lastPlayed || '')
 
         // Convert image paths to custom protocol URLs for production
-        result.iconImage = convertToLocalFileUrl(result.iconImage, appDataPath, isDev)
-        result.coverImage = convertToLocalFileUrl(result.coverImage, appDataPath, isDev)
-        result.backgroundImage = convertToLocalFileUrl(result.backgroundImage, appDataPath, isDev)
+        result.iconImageDisplay = convertToLocalFileUrl(result.iconImage, appDataPath, isDev)
+        result.coverImageDisplay = convertToLocalFileUrl(result.coverImage, appDataPath, isDev)
+        result.backgroundImageDisplay = convertToLocalFileUrl(result.backgroundImage, appDataPath, isDev)
       } catch (error) {
         console.error('Error parsing JSON fields for game:', gameid, error)
         // Fallback to default values if parsing fails
@@ -83,7 +87,7 @@ export function setupGameHandlers(config: GameModuleConfig) {
     return games.map((game: any) => ({
       ...game,
       lastPlayedDisplay: formatISOToLocal(game.lastPlayed || ''),
-      iconImage: convertToLocalFileUrl(game.iconImage, appDataPath, isDev)
+      iconImageDisplay: convertToLocalFileUrl(game.iconImage, appDataPath, isDev)
     }))
   })
 
@@ -137,6 +141,17 @@ export function setupGameHandlers(config: GameModuleConfig) {
           : PROC_MON_MODE.FOLDER,  // Validate and default to folder mode
         JSON.stringify(updatedGame.procNames || [])  // Store process names as JSON
       )
+
+      // For Display
+      if (updatedGame.iconImage) {
+        updatedGame.iconImageDisplay = convertToLocalFileUrl(updatedGame.iconImage, appDataPath, isDev)
+      }
+      if (updatedGame.backgroundImage) {
+        updatedGame.backgroundImageDisplay = convertToLocalFileUrl(updatedGame.backgroundImage, appDataPath, isDev)
+      }
+      if (updatedGame.coverImage) {
+        updatedGame.coverImageDisplay = convertToLocalFileUrl(updatedGame.coverImage, appDataPath, isDev)
+      }
 
       // Notify main window to refresh
       if (win && !win.isDestroyed()) {
@@ -196,6 +211,17 @@ export function setupGameHandlers(config: GameModuleConfig) {
         JSON.stringify(updatedGame.procNames || []),  // Store process names as JSON
         updatedGame.uuid
       )
+
+      // For Display
+      if (updatedGame.iconImage) {
+        updatedGame.iconImageDisplay = convertToLocalFileUrl(updatedGame.iconImage, appDataPath, isDev)
+      }
+      if (updatedGame.backgroundImage) {
+        updatedGame.backgroundImageDisplay = convertToLocalFileUrl(updatedGame.backgroundImage, appDataPath, isDev)
+      }
+      if (updatedGame.coverImage) {
+        updatedGame.coverImageDisplay = convertToLocalFileUrl(updatedGame.coverImage, appDataPath, isDev)
+      }
 
       // Notify main window to refresh
       if (win && !win.isDestroyed()) {
