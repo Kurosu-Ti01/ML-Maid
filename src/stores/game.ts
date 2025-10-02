@@ -242,7 +242,7 @@ export const useGameStore = defineStore('game', () => {
         gamesList.value.push({
           uuid: data.game.uuid,
           title: data.game.title,
-          iconImage: data.game.iconImage,
+          iconImageDisplay: data.game.iconImageDisplay!,
           genre: data.game.genre,
           lastPlayed: data.game.lastPlayed
         })
@@ -258,7 +258,7 @@ export const useGameStore = defineStore('game', () => {
         gamesList.value[existingIndex] = {
           uuid: data.game.uuid,
           title: data.game.title,
-          iconImage: data.game.iconImage,
+          iconImageDisplay: data.game.iconImageDisplay!,
           genre: data.game.genre,
           lastPlayed: data.game.lastPlayed
         }

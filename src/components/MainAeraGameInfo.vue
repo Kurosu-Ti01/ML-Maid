@@ -12,16 +12,16 @@
     <div v-else>
       <!-- Background & Title Container-->
       <div class="background-title-container">
-        <div v-if="gameData.backgroundImage">
-          <img :src="gameData.backgroundImage" alt="Game Background" class="game-background" />
+        <div v-if="gameData.backgroundImageDisplay">
+          <img :src="gameData.backgroundImageDisplay" alt="Game Background" class="game-background" />
         </div>
         <div v-else>
           <img :src="defaultBackground" alt="Default Background" class="game-background" />
         </div>
         <!-- Icon & Title Container -->
         <div class="icon-title-container">
-          <div v-if="gameData.iconImage" class="game-icon-container">
-            <img :src="gameData.iconImage" alt="Game Icon" class="game-icon" />
+          <div v-if="gameData.iconImageDisplay" class="game-icon-container">
+            <img :src="gameData.iconImageDisplay" alt="Game Icon" class="game-icon" />
           </div>
           <div v-else class="game-icon-container">
             <img :src="defaultIcon" alt="Default Icon" class="game-icon" />
@@ -92,8 +92,8 @@
         </div>
         <!-- Cover Container -->
         <div class="game-cover">
-          <div v-if="gameData.coverImage">
-            <img :src="gameData.coverImage" alt="Game Cover">
+          <div v-if="gameData.coverImageDisplay">
+            <img :src="gameData.coverImageDisplay" alt="Game Cover">
           </div>
           <div v-else></div>
         </div>

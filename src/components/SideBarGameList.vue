@@ -9,7 +9,7 @@
       </div>
       <div v-else>
         <div v-for="game in gameStore.gamesForList" :key="game.uuid" class="game-item" @click="selectGame(game.uuid)">
-          <img :src="getIconFin(game.iconImage)" class="game-icon" alt="icon" />
+          <img :src="getIconFin(game.iconImageDisplay)" class="game-icon" alt="icon" />
           <span class="game-title">{{ game.title }}</span>
         </div>
       </div>
