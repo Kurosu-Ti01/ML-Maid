@@ -13,6 +13,9 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'),
     },
   },
+  build: {
+    target: 'esnext', // Support latest ES features, including top-level await
+  },
   plugins: [
     vue(),
     AutoImport({
