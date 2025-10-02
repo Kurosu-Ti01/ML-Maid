@@ -77,5 +77,11 @@
     width: 28px;
     height: 28px;
     object-fit: contain;
+    transition: filter 0.3s;
+  }
+
+  /* Dark mode: invert SVG colors */
+  html.dark .icon-btn img {
+    filter: invert(1);
   }
 </style>

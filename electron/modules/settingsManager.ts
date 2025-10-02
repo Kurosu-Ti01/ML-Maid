@@ -2,10 +2,11 @@ import fs from 'node:fs'
 import path from 'node:path'
 import ini from 'ini'
 import { ipcMain, BrowserWindow } from 'electron'
+import { updateTitleBarColor } from '../main.js'
 
 const defaultSettings: Settings = {
   general: {
-    theme: 'light',
+    theme: 'auto',
     language: 'en-US',
     minimizeToTray: true,
   },
@@ -59,7 +60,14 @@ export function setupSettingsHandlers(configDir: string) {
 
   // Save settings
   ipcMain.handle('settings-save', (_, newSettings: Settings) => {
+    const oldTheme = settings.general?.theme
     saveSettings(newSettings)
+
+    // Update title bar color if theme changed
+    if (oldTheme !== newSettings.general?.theme) {
+      updateTitleBarColor()
+    }
+
     return true
   })
 }

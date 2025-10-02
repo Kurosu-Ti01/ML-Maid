@@ -1,0 +1,44 @@
+html.dark {
+    /* Element Plus Dark Theme Variables */
+    --el-bg-color-page: #1e1e1e;
+    --el-card-bg-color: #232323;
+
+    /* Main Aera */
+    --color-title: #ffffff;
+    --shadow-title-1: rgba(34, 34, 34, 0.40);
+    --shadow-title-2: rgba(34, 34, 34, 0.28);
+    --shadow-action-bar: 0 2px 4px rgba(0, 0, 0, 0.32);
+    --bg-action-bar: rgba(34, 34, 34, 0.92);
+    --color-playtime: #b48be6;
+    --color-link: #79bbff;
+    --color-link-hover: #a0cfff;
+    --shadow-info-table: 0 2px 12px 0 rgba(0, 0, 0, 0.32);
+    --border-info-row: #363637;
+    --bg-info-label: #232323;
+    --color-info-label: #79bbff;
+    --bg-info-content: #1e1e1e;
+    --color-info-content: #e5eaf3;
+    --color-muted: #a3a6ad;
+    --color-muted-dark: #6c6e72;
+    --color-muted-light: #414243;
+
+    /* SideBar (Temporary)*/
+    --siderbar-nav-bg: #333333;
+    --siderbar-nav-border: #626060;
+    --siderbar-list-bg: #252526;
+    --game-item-hover-bg: #4a555f;
+    --game-item-border: #757272;
+
+    /* TitleBar */
+    --titlebar-main-bg: #333333;
+    --titlebar-border: #626060;
+
+    /* Sub Win TitleBar */
+    --titlebar-sub-bg: #333333;
+
+    /* Add & Edit Form */
+    --fixed-bottom-border: #787a7d;
+    --image-area-bg: #272727;
+    --ation-btn-bg: #383838;
+    --link-action-item-bg: #242424;
+}

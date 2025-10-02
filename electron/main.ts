@@ -1,4 +1,4 @@
-import { app, BrowserWindow, protocol, Tray, Menu, nativeImage } from 'electron'
+import { app, BrowserWindow, protocol, Tray, Menu, nativeImage, nativeTheme } from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import fs from 'node:fs'
@@ -62,6 +62,25 @@ const appConfig: AppConfig = {
 let databases: DatabaseInstances
 
 function createWindow() {
+  // Get initial titlebar color based on theme
+  const getTitleBarColor = () => {
+    const theme = settings.general?.theme || 'auto'
+    let isDark = false
+
+    if (theme === 'dark') {
+      isDark = true
+    } else if (theme === 'light') {
+      isDark = false
+    } else { // auto
+      isDark = nativeTheme.shouldUseDarkColors
+    }
+
+    return {
+      color: isDark ? '#333333' : '#F2F6FC',
+      symbolColor: isDark ? '#ffffff' : '#000000'
+    }
+  }
+
   win = new BrowserWindow({
     width: 1300,
     height: 800,
@@ -72,7 +91,7 @@ function createWindow() {
     // expose window controls in Windows/Linux
     ...(process.platform !== 'darwin' ? {
       titleBarOverlay: {
-        color: '#F2F6FC',
+        ...getTitleBarColor(),
         height: 50
       }
     } : {}),
@@ -186,12 +205,39 @@ function initializeApp() {
     preloadPath: path.join(__dirname, 'preload.mjs')
   })
 
-  setupSettingsHandlers(appConfig.configPath)
-
   // Send initial settings to renderer when window is ready
   win?.webContents.once('did-finish-load', () => {
     sendSettingsToRenderer(win!) // Direct access to global settings
   })
+
+  // Listen for system theme changes (for auto mode)
+  nativeTheme.on('updated', () => {
+    if (settings.general?.theme === 'auto') {
+      updateTitleBarColor()
+    }
+  })
+}
+
+// Function to update title bar color when theme changes
+export function updateTitleBarColor() {
+  if (win && process.platform !== 'darwin') {
+    const theme = settings.general?.theme || 'auto'
+    let isDark = false
+
+    if (theme === 'dark') {
+      isDark = true
+    } else if (theme === 'light') {
+      isDark = false
+    } else { // auto
+      isDark = nativeTheme.shouldUseDarkColors
+    }
+
+    win.setTitleBarOverlay({
+      color: isDark ? '#333333' : '#F2F6FC',
+      symbolColor: isDark ? '#ffffff' : '#000000',
+      height: 50
+    })
+  }
 }
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -255,8 +301,10 @@ protocol.registerSchemesAsPrivileged([
 
 // Register custom protocol for local files
 app.whenReady().then(() => {
+  // First setup settings handlers to initialize settings
+  setupSettingsHandlers(appConfig.configPath)
   setupProtocol()
-  createWindow()    // create win first
+  createWindow()    // create win first, this need settings
   createTray()      // create tray for minimize to tray functionality
   initializeApp()   // this require win
 })
