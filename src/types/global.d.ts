@@ -146,7 +146,7 @@ interface Window {
 
 interface Settings {
   general: {
-    theme?: string
+    theme?: 'light' | 'dark' | 'auto'
     language?: string
     minimizeToTray?: boolean
   }

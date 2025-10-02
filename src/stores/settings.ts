@@ -4,7 +4,7 @@ import { ref } from 'vue'
 export const useSettingsStore = defineStore('settings', () => {
   const settings = ref<Settings>({
     general: {
-      theme: 'light',
+      theme: 'auto',
       language: 'en-US',
       minimizeToTray: true
     }

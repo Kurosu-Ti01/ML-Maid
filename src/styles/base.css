@@ -1,0 +1,41 @@
+/* Base theme styles */
+:root {
+    /* Main Aera */
+    --color-title: #ffffff;
+    --shadow-title-1: rgba(34, 34, 34, 0.40);
+    --shadow-title-2: rgba(34, 34, 34, 0.28);
+    --shadow-action-bar: 0 2px 4px rgba(0, 0, 0, 0.10);
+    --bg-action-bar: rgba(255, 255, 255, 0.92);
+    --color-playtime: #a174e9;
+    --color-link: #409eff;
+    --color-link-hover: #66b1ff;
+    --shadow-info-table: 0 2px 12px 0 rgba(0, 0, 0, 0.12);
+    --border-info-row: #ebeef5;
+    --bg-info-label: #fafafa;
+    --color-info-label: #409eff;
+    --bg-info-content: #ffffff;
+    --color-info-content: #303133;
+    --color-muted: #666;
+    --color-muted-dark: #909399;
+    --color-muted-light: #c0c4cc;
+
+    /* SideBar */
+    --siderbar-nav-bg: #f2f6fc;
+    --siderbar-nav-border: #d6d9dc;
+    --siderbar-list-bg: #f7f8fa;
+    --game-item-hover-bg: #e9ecef;
+    --game-item-border: #e0e0e0;
+
+    /* Main Win TitleBar */
+    --titlebar-main-bg: #f2f6fc;
+    --titlebar-border: #dcdfe6;
+
+    /* Sub Win TitleBar */
+    --titlebar-sub-bg: #FFF7E6;
+
+    /* Add & Edit Form */
+    --fixed-bottom-border: #e4e7ed;
+    --image-area-bg: #f8f9fa;
+    --ation-btn-bg: #ffffff;
+    --link-action-item-bg: #fafafa;
+}
