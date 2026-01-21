@@ -10,6 +10,10 @@ const defaultSettings: Settings = {
     language: 'en-US',
     minimizeToTray: true,
   },
+  sorting: {
+    sortBy: 'name',
+    sortOrder: 'ascending',
+  },
 }
 
 // Global settings object - directly accessible from main process

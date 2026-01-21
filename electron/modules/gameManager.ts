@@ -29,6 +29,7 @@ interface GameData {
   actions?: string[]
   procMonMode?: number  // 0: file, 1: folder, 2: process
   procNames?: string[]  // Process names to monitor when procMonMode=2
+  dateAdded?: string
 }
 
 interface GameModuleConfig {
@@ -81,7 +82,7 @@ export function setupGameHandlers(config: GameModuleConfig) {
   // Get games list (lightweight - only fields needed for list display)
   ipcMain.handle('get-games-list', () => {
     // Only select the fields needed for list display - much faster!
-    const games = metaDb.prepare('SELECT uuid, title, iconImage, genre, lastPlayed FROM games').all()
+    const games = metaDb.prepare('SELECT uuid, title, iconImage, genre, lastPlayed, dateAdded, personalScore FROM games').all()
 
     // Add formatted display date and convert icon paths for each game
     return games.map((game: any) => ({
@@ -108,12 +109,17 @@ export function setupGameHandlers(config: GameModuleConfig) {
         updateGameImagePaths(updatedGame, imageResult.movedFiles, appDataPath)
       }
 
+      // Set dateAdded to current timestamp if not provided
+      if (!updatedGame.dateAdded) {
+        updatedGame.dateAdded = new Date().toISOString().replace('T', ' ').substring(0, 19)
+      }
+
       const stmt = metaDb.prepare(
         `INSERT INTO games (
         uuid, title, coverImage, backgroundImage, iconImage, lastPlayed, timePlayed,
         workingDir, folderSize, genre, developer, publisher, releaseDate,
-        communityScore, personalScore, tags, links, description, actions, procMonMode, procNames
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        communityScore, personalScore, tags, links, description, actions, procMonMode, procNames, dateAdded
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
 
       stmt.run(
@@ -139,7 +145,8 @@ export function setupGameHandlers(config: GameModuleConfig) {
         (updatedGame.procMonMode === 0 || updatedGame.procMonMode === 1 || updatedGame.procMonMode === 2)
           ? updatedGame.procMonMode
           : PROC_MON_MODE.FOLDER,  // Validate and default to folder mode
-        JSON.stringify(updatedGame.procNames || [])  // Store process names as JSON
+        JSON.stringify(updatedGame.procNames || []),  // Store process names as JSON
+        updatedGame.dateAdded
       )
 
       // For Display

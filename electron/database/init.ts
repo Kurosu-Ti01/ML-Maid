@@ -56,8 +56,27 @@ export function initializeDatabases(config: DatabaseConfig) {
       description TEXT,                   -- use JSON.stringify to store, use JSON.parse to retrieve
       actions TEXT,                       -- use JSON.stringify to store, use JSON.parse to retrieve
       procMonMode NUMERIC DEFAULT 1,      -- file:0 / folder:1 / process:2
-      procNames TEXT                      -- use JSON.stringify to store process names array when procMonMode=2
+      procNames TEXT,                     -- use JSON.stringify to store process names array when procMonMode=2
+      dateAdded TEXT                      -- ISO 8601 format: YYYY-MM-DD HH:MM:SS (UTC)
     )
+  `).run()
+
+  // Migrate existing database: add dateAdded column if it doesn't exist
+  try {
+    metaDb.prepare(`ALTER TABLE games ADD COLUMN dateAdded TEXT`).run()
+    console.log('Added dateAdded column to games table')
+  } catch (error: any) {
+    // Column already exists or other error - this is expected on first run after migration
+    if (error.message && !error.message.includes('duplicate column name')) {
+      console.error('Error adding dateAdded column:', error)
+    }
+  }
+
+  // Set current timestamp for existing games that don't have dateAdded
+  metaDb.prepare(`
+    UPDATE games 
+    SET dateAdded = datetime('now') 
+    WHERE dateAdded IS NULL OR dateAdded = ''
   `).run()
 
   // Initialize statistics database schema
