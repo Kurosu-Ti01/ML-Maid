@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { useSettingsStore } from './settings'
 
 export const useGameStore = defineStore('game', () => {
   // State - Only cache lightweight list data and a small amount of full data
@@ -23,8 +24,48 @@ export const useGameStore = defineStore('game', () => {
     return gamesList.value.filter(game => game.genre === genre)
   })
 
-  // Lightweight data for list display
-  const gamesForList = computed(() => gamesList.value)
+  // Lightweight data for list display with sorting
+  const gamesForList = computed(() => {
+    const settingsStore = useSettingsStore()
+    const sorting = settingsStore.settings.sorting
+
+    // If no sorting settings, return original list
+    if (!sorting) {
+      return gamesList.value
+    }
+
+    // Create a copy to avoid mutating the original array
+    const sortedList = [...gamesList.value]
+
+    // Sort based on settings
+    sortedList.sort((a, b) => {
+      let compareResult = 0
+
+      switch (sorting.sortBy) {
+        case 'name':
+          compareResult = a.title.localeCompare(b.title)
+          break
+        case 'dateAdded':
+          // Compare dates (ISO format can be compared as strings)
+          compareResult = (a.dateAdded || '').localeCompare(b.dateAdded || '')
+          break
+        case 'lastPlayed':
+          // Compare dates (ISO format can be compared as strings)
+          compareResult = (a.lastPlayed || '').localeCompare(b.lastPlayed || '')
+          break
+        case 'score':
+          compareResult = (a.personalScore || 0) - (b.personalScore || 0)
+          break
+        default:
+          compareResult = 0
+      }
+
+      // Apply sort order
+      return sorting.sortOrder === 'ascending' ? compareResult : -compareResult
+    })
+
+    return sortedList
+  })
 
   // Actions
   // Load lightweight game list (called at startup)
@@ -244,7 +285,9 @@ export const useGameStore = defineStore('game', () => {
           title: data.game.title,
           iconImageDisplay: data.game.iconImageDisplay!,
           genre: data.game.genre,
-          lastPlayed: data.game.lastPlayed
+          lastPlayed: data.game.lastPlayed,
+          dateAdded: data.game.dateAdded,
+          personalScore: data.game.personalScore
         })
         console.log('✅ Added game to list via IPC:', data.game.title)
         console.log('📊 New list length:', gamesList.value.length)
@@ -260,7 +303,9 @@ export const useGameStore = defineStore('game', () => {
           title: data.game.title,
           iconImageDisplay: data.game.iconImageDisplay!,
           genre: data.game.genre,
-          lastPlayed: data.game.lastPlayed
+          lastPlayed: data.game.lastPlayed,
+          dateAdded: data.game.dateAdded,
+          personalScore: data.game.personalScore
         }
         gameDetailsCache.value.set(data.game.uuid, data.game)
         console.log('✅ Updated game in list via IPC:', data.game.title)

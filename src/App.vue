@@ -1,11 +1,13 @@
 <template>
   <RouterView />
+  <SortDialog />
 </template>
 
 <script setup lang="ts">
   import { onMounted } from 'vue'
   import { useGameStore } from './stores/game'
   import { useTheme } from '@/composables/useTheme'
+  import SortDialog from '@/components/SortDialog.vue'
 
   const gameStore = useGameStore()
   const { } = useTheme() // Initialize theme system

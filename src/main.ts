@@ -65,6 +65,18 @@ function initTitlebar() {
         }
         buttonsContainer.appendChild(addGameButton)
 
+        // Add "Sort" button
+        const sortButton = document.createElement('button')
+        sortButton.className = 'titlebar-button'
+        sortButton.title = 'Sort Games'
+        sortButton.innerHTML = `
+          <img src="icons/sort.svg" width="20" height="20" alt="Sort" style="filter: brightness(0) invert(1);">
+        `
+        sortButton.onclick = () => {
+          window.dispatchEvent(new CustomEvent('open-sort-dialog'))
+        }
+        buttonsContainer.appendChild(sortButton)
+
         // Append title and buttons to titlebar
         titlebar.appendChild(titleElement)
         titlebar.appendChild(buttonsContainer)

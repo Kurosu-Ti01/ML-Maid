@@ -14,6 +14,7 @@ declare module 'vue' {
     ElCol: typeof import('element-plus/es')['ElCol']
     ElContainer: typeof import('element-plus/es')['ElContainer']
     ElDatePicker: typeof import('element-plus/es')['ElDatePicker']
+    ElDialog: typeof import('element-plus/es')['ElDialog']
     ElDropdown: typeof import('element-plus/es')['ElDropdown']
     ElDropdownItem: typeof import('element-plus/es')['ElDropdownItem']
     ElDropdownMenu: typeof import('element-plus/es')['ElDropdownMenu']
@@ -25,6 +26,8 @@ declare module 'vue' {
     ElMain: typeof import('element-plus/es')['ElMain']
     ElOption: typeof import('element-plus/es')['ElOption']
     ElPageHeader: typeof import('element-plus/es')['ElPageHeader']
+    ElRadioButton: typeof import('element-plus/es')['ElRadioButton']
+    ElRadioGroup: typeof import('element-plus/es')['ElRadioGroup']
     ElRow: typeof import('element-plus/es')['ElRow']
     ElScrollbar: typeof import('element-plus/es')['ElScrollbar']
     ElSelect: typeof import('element-plus/es')['ElSelect']
@@ -43,6 +46,7 @@ declare module 'vue' {
     Settings: typeof import('./src/components/Settings.vue')['default']
     SideBarGameList: typeof import('./src/components/SideBarGameList.vue')['default']
     SideBarNav: typeof import('./src/components/SideBarNav.vue')['default']
+    SortDialog: typeof import('./src/components/SortDialog.vue')['default']
     Statistics: typeof import('./src/components/Statistics.vue')['default']
   }
   export interface GlobalDirectives {

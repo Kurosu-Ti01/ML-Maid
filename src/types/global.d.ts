@@ -150,6 +150,10 @@ interface Settings {
     language?: string
     minimizeToTray?: boolean
   }
+  sorting?: {
+    sortBy: 'name' | 'dateAdded' | 'lastPlayed' | 'score'
+    sortOrder: 'ascending' | 'descending'
+  }
 }
 
 interface gameData {
@@ -186,6 +190,7 @@ interface gameData {
   }[];
   procMonMode: number;    // 0: file, 1: folder, 2: process
   procNames?: string[];   // Process names to monitor when procMonMode=2
+  dateAdded: string;      // ISO date format "YYYY-MM-DD HH:MM:SS" (UTC)
 }
 
 // For lightweight game list items
@@ -196,6 +201,8 @@ interface GameListItem {
   genre: string
   lastPlayed: string
   lastPlayedDisplay?: string // Formatted local time for display
+  dateAdded: string
+  personalScore: number
 }
 
 // Backend-specific types
