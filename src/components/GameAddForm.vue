@@ -402,7 +402,8 @@
     description: [],
     actions: [],
     procMonMode: 1,  // Default to folder mode
-    procNames: []    // Default to empty array
+    procNames: [],   // Default to empty array
+    dateAdded: new Date().toISOString().replace('T', ' ').substring(0, 19)  // Set current timestamp
   })
 
   const saving = ref(false)
