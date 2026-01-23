@@ -396,7 +396,8 @@
     description: [],
     actions: [],
     procMonMode: 1,  // Default to folder mode
-    procNames: []    // Default to empty array
+    procNames: [],   // Default to empty array
+    dateAdded: ''    // Will be set from received data
   })
 
   const saving = ref(false)
@@ -698,6 +699,7 @@
         gameForm.value.actions = Array.isArray(data.actions) ? data.actions : []
         gameForm.value.procMonMode = data.procMonMode ?? PROC_MON_MODE.FOLDER  // Default to folder mode
         gameForm.value.procNames = Array.isArray(data.procNames) ? data.procNames : []  // Default to empty array
+        gameForm.value.dateAdded = data.dateAdded || ''  // Set dateAdded from data
         // Load existing image previews
         if (data.iconImage) {
           loadExistingImagePreview(data.iconImage, 'icon')
