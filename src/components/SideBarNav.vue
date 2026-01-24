@@ -30,6 +30,8 @@
 
 <style scoped>
   .sidebar-nav {
+    padding: 4px;
+    margin-bottom: 4px;
     width: 100%;
     height: 100%;
     display: flex;
@@ -42,7 +44,7 @@
   .top-buttons {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 18px;
     align-items: center;
   }
 

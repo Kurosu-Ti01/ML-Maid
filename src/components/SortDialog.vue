@@ -1,28 +1,26 @@
 <template>
-  <el-dialog v-model="visible" title="Sort Games" width="400px" align-center class="sort-dialog">
-    <el-form :model="form" label-width="80px">
-      <el-form-item label="Sort By">
-        <el-select v-model="form.sortBy" placeholder="Select">
-          <el-option v-for="item in sortByOptions" :key="item.value" :label="item.label" :value="item.value" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="Order">
-        <el-radio-group v-model="form.sortOrder">
-          <el-radio-button v-for="item in sortOrderOptions" :key="item.value" :value="item.value" :label="item.value">
+  <n-modal v-model:show="visible" preset="dialog" title="Sort Games" style="width: 400px;" class="sort-dialog">
+    <n-form :model="form" label-width="80" label-placement="left">
+      <n-form-item label="Sort By">
+        <n-select v-model:value="form.sortBy" placeholder="Select" :options="sortByOptions" />
+      </n-form-item>
+      <n-form-item label="Order">
+        <n-radio-group v-model:value="form.sortOrder">
+          <n-radio-button v-for="item in sortOrderOptions" :key="item.value" :value="item.value">
             {{ item.label }}
-          </el-radio-button>
-        </el-radio-group>
-      </el-form-item>
-    </el-form>
-    <template #footer>
-      <span class="dialog-footer">
-        <el-button @click="visible = false">Cancel</el-button>
-        <el-button type="primary" @click="save">
+          </n-radio-button>
+        </n-radio-group>
+      </n-form-item>
+    </n-form>
+    <template #action>
+      <div class="dialog-footer">
+        <n-button @click="visible = false">Cancel</n-button>
+        <n-button type="primary" @click="save">
           Confirm
-        </el-button>
-      </span>
+        </n-button>
+      </div>
     </template>
-  </el-dialog>
+  </n-modal>
 </template>
 
 <script setup lang="ts">

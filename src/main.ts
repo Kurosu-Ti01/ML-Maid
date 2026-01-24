@@ -3,13 +3,11 @@ import App from './App.vue'
 import router from './router'
 import pinia from './stores'
 import { useSettingsStore } from './stores/settings'
-import 'element-plus/dist/index.css'
-import 'element-plus/theme-chalk/dark/css-vars.css'
 import './styles/base.css'
 import './styles/dark-theme.css'
 
-// Configure Day.js for Element Plus date components
-import { dayjs } from 'element-plus'
+// Configure Day.js for date components
+import dayjs from 'dayjs'
 import weekOfYear from 'dayjs/plugin/weekOfYear'
 import isoWeek from 'dayjs/plugin/isoWeek'
 

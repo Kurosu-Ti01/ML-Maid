@@ -1,5 +1,5 @@
 <template>
-  <el-scrollbar class="sidebar-container">
+  <n-scrollbar class="sidebar-container">
     <div class="sidebar-content">
       <div v-if="gameStore.isLoadingList" class="loading-container">
         <span>Loading games...</span>
@@ -14,10 +14,11 @@
         </div>
       </div>
     </div>
-  </el-scrollbar>
+  </n-scrollbar>
 </template>
 
 <script setup lang="ts" name="SideBarGameList">
+  import { NScrollbar } from 'naive-ui'
   import { useGameStore } from '@/stores/game'
   import defaultIcon from '/default/ML-Maid-Icon-W.png'
 
@@ -40,6 +41,7 @@
 <style scoped>
   .sidebar-container {
     background: var(--siderbar-list-bg);
+    height: 100%;
   }
 
   .sidebar-content {

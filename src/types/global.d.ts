@@ -165,7 +165,7 @@ interface gameData {
   coverImageDisplay?: string;
   backgroundImageDisplay?: string;
   iconImageDisplay?: string;
-  lastPlayed: string;     // ISO date format "YYYY-MM-DD HH:MM:SS" (UTC)
+  lastPlayed: string | null;     // ISO date format "YYYY-MM-DD HH:MM:SS" (UTC)
   lastPlayedDisplay?: string; // Formatted local time for display
   timePlayed: number;
   workingDir: string;
@@ -173,7 +173,7 @@ interface gameData {
   genre: string;
   developer: string;
   publisher: string;
-  releaseDate: string;    // ISO date format "YYYY-MM-DD"
+  releaseDate: string | null;    // ISO date format "YYYY-MM-DD"
   communityScore: number;
   personalScore: number;
   tags: string[];

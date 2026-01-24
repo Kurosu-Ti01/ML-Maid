@@ -1,182 +1,153 @@
 <template>
-  <el-scrollbar>
-    <div v-if="isLoading" class="loading-container" v-loading="true" element-loading-text="Loading game data...">
-      <!-- Loading content will be handled by v-loading directive -->
-    </div>
-    <div v-else-if="(!gameStore.currentGameUuid) || (!gameData)" class="no-game-container">
-      <div class="no-game-text">
-        <p>No game selected</p>
-        <span class="no-game-hint">Please select a game from the sidebar</span>
-      </div>
-    </div>
-    <div v-else>
-      <!-- Background & Title Container-->
-      <div class="background-title-container">
-        <div v-if="gameData.backgroundImageDisplay">
-          <img :src="gameData.backgroundImageDisplay" alt="Game Background" class="game-background" />
-        </div>
-        <div v-else>
-          <img :src="defaultBackground" alt="Default Background" class="game-background" />
-        </div>
-        <!-- Icon & Title Container -->
-        <div class="icon-title-container">
-          <div v-if="gameData.iconImageDisplay" class="game-icon-container">
-            <img :src="gameData.iconImageDisplay" alt="Game Icon" class="game-icon" />
-          </div>
-          <div v-else class="game-icon-container">
-            <img :src="defaultIcon" alt="Default Icon" class="game-icon" />
-          </div>
-          <span class="game-title">{{ gameData.title }}</span>
+  <n-scrollbar class="game-info-container">
+    <n-spin :show="isLoading" description="Loading game data...">
+      <div v-if="!isLoading && ((!gameStore.currentGameUuid) || (!gameData))" class="no-game-container">
+        <div class="no-game-text">
+          <p>No game selected</p>
+          <span class="no-game-hint">Please select a game from the sidebar</span>
         </div>
       </div>
-      <!-- Main Info & Actions Container  -->
-      <div class="main-info-action-container">
-        <!-- Action Button Container -->
-        <div class="action-button-container">
-          <div class="button-group">
-            <el-button type="primary" size="large"
-              style="font-weight: bold; font-size: 1.2em; margin: 10px 5px; padding: 0 40px;"
-              @click="handlePlayGame">Play</el-button>
-            <el-button type="primary" size="large" style="font-weight: bold; font-size: 1.2em; margin: 10px 5px;"
-              @click="openEditWindow">Edit</el-button>
-            <el-dropdown trigger="click" @command="handleMenuCommand">
-              <el-button type="primary" size="large" style="font-weight: bold; font-size: 1.2em; margin: 10px 5px;">
-                ...
-              </el-button>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item command="openFolder">
-                    <el-icon>
-                      <Folder />
-                    </el-icon>
-                    Open Install Path
-                  </el-dropdown-item>
-                  <el-dropdown-item command="createShortcut">
-                    <el-icon>
-                      <Link />
-                    </el-icon>
-                    Create Shortcut
-                  </el-dropdown-item>
-                  <el-dropdown-item command="gameInfo">
-                    <el-icon>
-                      <InfoFilled />
-                    </el-icon>
-                    Game Info
-                  </el-dropdown-item>
-                  <el-dropdown-item command="backup" divided>
-                    <el-icon>
-                      <Download />
-                    </el-icon>
-                    Backup Save
-                  </el-dropdown-item>
-                  <el-dropdown-item command="delete">
-                    <el-icon>
-                      <Delete />
-                    </el-icon>
-                    Delete
-                  </el-dropdown-item>
-                </el-dropdown-menu>
+      <div v-else-if="!isLoading && gameData">
+        <!-- Background & Title Container-->
+        <div class="background-title-container">
+          <div v-if="gameData.backgroundImageDisplay">
+            <img :src="gameData.backgroundImageDisplay" alt="Game Background" class="game-background" />
+          </div>
+          <div v-else>
+            <img :src="defaultBackground" alt="Default Background" class="game-background" />
+          </div>
+          <!-- Icon & Title Container -->
+          <div class="icon-title-container">
+            <div v-if="gameData.iconImageDisplay" class="game-icon-container">
+              <img :src="gameData.iconImageDisplay" alt="Game Icon" class="game-icon" />
+            </div>
+            <div v-else class="game-icon-container">
+              <img :src="defaultIcon" alt="Default Icon" class="game-icon" />
+            </div>
+            <span class="game-title">{{ gameData.title }}</span>
+          </div>
+        </div>
+        <!-- Main Info & Actions Container  -->
+        <div class="main-info-action-container">
+          <!-- Action Button Container -->
+          <div class="action-button-container">
+            <div class="button-group">
+              <n-button type="primary" size="large" color="#4080ff"
+                style="font-weight: bold; font-size: 1.2em; margin: 10px 5px; padding: 0 40px;"
+                @click="handlePlayGame">Play</n-button>
+              <n-button type="primary" size="large" color="#4080ff"
+                style="font-weight: bold; font-size: 1.2em; margin: 10px 5px;" @click="openEditWindow">Edit</n-button>
+              <n-dropdown trigger="click" :options="dropdownOptions" @select="handleMenuCommand">
+                <n-button type="primary" size="large" color="#4080ff"
+                  style="font-weight: bold; font-size: 1.2em; margin: 10px 5px;">
+                  ...
+                </n-button>
+              </n-dropdown>
+              <div class="game-playtime-text">
+                <div class="game-playtime">
+                  <p style="font-size: 1.1em;">Time Played</p>
+                  <p style="font-weight: bold;">{{ formatTimePlayed(gameData.timePlayed) }}</p>
+                </div>
+                <div class="game-playtime">
+                  <p style="font-size: 1.1em;">Last Played</p>
+                  <p style="font-weight: bold;">{{ gameData.lastPlayedDisplay }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Cover Container -->
+          <div class="game-cover">
+            <div v-if="gameData.coverImageDisplay">
+              <img :src="gameData.coverImageDisplay" alt="Game Cover">
+            </div>
+            <div v-else></div>
+          </div>
+        </div>
+        <!-- Detail Info & Description container -->
+        <div class="info-row-container">
+          <div class="detail-info-container">
+            <div class="custom-info-table">
+              <div class="info-row">
+                <div class="info-label">Working Path</div>
+                <div class="info-content">
+                  <span class="clickable-path" @click="openworkingDir" :title="gameData.workingDir">
+                    {{ gameData.workingDir }}
+                  </span>
+                </div>
+              </div>
+              <div class="info-row">
+                <div class="info-label">Folder Size</div>
+                <div class="info-content">{{ formatFileSize(gameData.folderSize) }}</div>
+              </div>
+              <div class="info-row">
+                <div class="info-label">Genre</div>
+                <div class="info-content">{{ gameData.genre }}</div>
+              </div>
+              <div class="info-row">
+                <div class="info-label">Developer</div>
+                <div class="info-content">{{ gameData.developer }}</div>
+              </div>
+              <div class="info-row">
+                <div class="info-label">Publisher</div>
+                <div class="info-content">{{ gameData.publisher }}</div>
+              </div>
+              <div class="info-row">
+                <div class="info-label">Release Date</div>
+                <div class="info-content">{{ gameData.releaseDate }}</div>
+              </div>
+              <div class="info-row">
+                <div class="info-label">Community Score</div>
+                <div class="info-content">{{ gameData.communityScore }}</div>
+              </div>
+              <div class="info-row">
+                <div class="info-label">User Score</div>
+                <div class="info-content">{{ gameData.personalScore }}</div>
+              </div>
+              <div class="info-row">
+                <div class="info-label">Links</div>
+                <div class="info-content"
+                  style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+                  <div v-for="(link, index) in gameData.links" :key="index">
+                    <a @click.prevent="openExternalLink(link.url)" class="game-link">{{ link.name }}</a>
+                  </div>
+                </div>
+              </div>
+              <div class="info-row-tags">
+                <div class="info-label-tags">Tags</div>
+                <div class="info-content-tags">
+                  <div class="tags-flex-wrap">
+                    <n-tag
+                      :color="{ color: 'rgba(64, 128, 255, 0.1)', textColor: '#4080ff', borderColor: 'rgba(64, 128, 255, 0.2)' }"
+                      v-for="(tag, index) in gameData.tags" :key="index" style="margin: 2px 6px 2px 0;">
+                      {{ tag }}
+                    </n-tag>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="description-container">
+            <n-card style="margin:10px;">
+              <template #header>
+                <span style="font-size: 1.5em; color: #409eff; font-weight: bold;">Description</span>
               </template>
-            </el-dropdown>
-            <div class="game-playtime-text">
-              <div class="game-playtime">
-                <p style="font-size: 1.1em; color: var(--el-text-color-primary);">Time Played</p>
-                <p style="font-weight: bold;">{{ formatTimePlayed(gameData.timePlayed) }}</p>
-              </div>
-              <div class="game-playtime">
-                <p style="font-size: 1.1em; color: var(--el-text-color-primary);">Last Played</p>
-                <p style="font-weight: bold;">{{ gameData.lastPlayedDisplay }}</p>
-              </div>
-            </div>
+              <p v-for="(line, index) in gameData.description" :key="index" class="description-text">{{ line }}</p>
+            </n-card>
           </div>
-        </div>
-        <!-- Cover Container -->
-        <div class="game-cover">
-          <div v-if="gameData.coverImageDisplay">
-            <img :src="gameData.coverImageDisplay" alt="Game Cover">
-          </div>
-          <div v-else></div>
         </div>
       </div>
-      <!-- Detail Info & Description container -->
-      <div class="info-row-container">
-        <div class="detail-info-container">
-          <div class="custom-info-table">
-            <div class="info-row">
-              <div class="info-label">Working Path</div>
-              <div class="info-content">
-                <span class="clickable-path" @click="openworkingDir" :title="gameData.workingDir">
-                  {{ gameData.workingDir }}
-                </span>
-              </div>
-            </div>
-            <div class="info-row">
-              <div class="info-label">Folder Size</div>
-              <div class="info-content">{{ formatFileSize(gameData.folderSize) }}</div>
-            </div>
-            <div class="info-row">
-              <div class="info-label">Genre</div>
-              <div class="info-content">{{ gameData.genre }}</div>
-            </div>
-            <div class="info-row">
-              <div class="info-label">Developer</div>
-              <div class="info-content">{{ gameData.developer }}</div>
-            </div>
-            <div class="info-row">
-              <div class="info-label">Publisher</div>
-              <div class="info-content">{{ gameData.publisher }}</div>
-            </div>
-            <div class="info-row">
-              <div class="info-label">Release Date</div>
-              <div class="info-content">{{ gameData.releaseDate }}</div>
-            </div>
-            <div class="info-row">
-              <div class="info-label">Community Score</div>
-              <div class="info-content">{{ gameData.communityScore }}</div>
-            </div>
-            <div class="info-row">
-              <div class="info-label">User Score</div>
-              <div class="info-content">{{ gameData.personalScore }}</div>
-            </div>
-            <div class="info-row">
-              <div class="info-label">Links</div>
-              <div class="info-content">
-                <div v-for="(link, index) in gameData.links" :key="index">
-                  <a @click.prevent="openExternalLink(link.url)" class="game-link">{{ link.name }}</a>
-                </div>
-              </div>
-            </div>
-            <div class="info-row-tags">
-              <div class="info-label-tags">Tags</div>
-              <div class="info-content-tags">
-                <div class="tags-flex-wrap">
-                  <el-tag v-for="(tag, index) in gameData.tags" :key="index" style="margin: 2px 6px 2px 0;">
-                    {{ tag }}
-                  </el-tag>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="description-container">
-          <el-card style="margin:10px;">
-            <template #header>
-              <span style="font-size: 1.5em; color: #409eff; font-weight: bold;">Description</span>
-            </template>
-            <p v-for="(line, index) in gameData.description" :key="index" class="description-text">{{ line }}</p>
-          </el-card>
-        </div>
-      </div>
-    </div>
-  </el-scrollbar>
+    </n-spin>
+  </n-scrollbar>
 </template>
 
 <script setup lang="ts" name="MainAeraGameInfo">
   import { storeToRefs } from 'pinia';
-  import { ref, watch, computed } from 'vue'
+  import { ref, watch, computed, h } from 'vue'
   import { useGameStore } from '../stores/game'
-  import { Delete, Folder, Link, InfoFilled, Download } from '@element-plus/icons-vue'
-  import { ElMessage, ElMessageBox } from 'element-plus'
+  import { useMessage, useDialog } from 'naive-ui'
+  import type { DropdownOption } from 'naive-ui'
+  import { NIcon } from 'naive-ui'
+  import { Delete16Regular, Folder16Regular, Link16Regular, Info16Regular, ArrowDownload16Regular } from '@vicons/fluent'
   import defaultBackground from '/default/ML-Maid-Background.png'
   import defaultIcon from '/default/ML-Maid-Icon-W.png'
 
@@ -188,6 +159,45 @@
       : null
   })
   const isLoading = ref(false)
+  const message = useMessage()
+  const dialog = useDialog()
+
+  // Dropdown menu options
+  const renderIcon = (icon: any) => {
+    return () => h(NIcon, null, { default: () => h(icon) })
+  }
+
+  const dropdownOptions: DropdownOption[] = [
+    {
+      label: 'Open Install Path',
+      key: 'openFolder',
+      icon: renderIcon(Folder16Regular)
+    },
+    {
+      label: 'Create Shortcut',
+      key: 'createShortcut',
+      icon: renderIcon(Link16Regular)
+    },
+    {
+      label: 'Game Info',
+      key: 'gameInfo',
+      icon: renderIcon(Info16Regular)
+    },
+    {
+      type: 'divider',
+      key: 'divider1'
+    },
+    {
+      label: 'Backup Save',
+      key: 'backup',
+      icon: renderIcon(ArrowDownload16Regular)
+    },
+    {
+      label: 'Delete',
+      key: 'delete',
+      icon: renderIcon(Delete16Regular)
+    }
+  ]
 
 
   // Format time from seconds to hours and minutes
@@ -245,17 +255,13 @@
   // handle play game function
   async function handlePlayGame() {
     if (!gameData.value) {
-      ElMessage.error('No game data available')
+      message.error('No game data available')
       return
     }
 
     try {
       // Show loading message
-      const loadingMessage = ElMessage({
-        message: 'Launching game...',
-        type: 'info',
-        duration: 0
-      })
+      const loadingMsg = message.loading('Launching game...', { duration: 0 })
 
       // Launch the game using the electronAPI
       // First try to find a File type action
@@ -271,8 +277,8 @@
       }
 
       if (!executablePath) {
-        loadingMessage.close()
-        ElMessage.error('No executable path configured. Please edit the game and add an action.')
+        loadingMsg.destroy()
+        message.error('No executable path configured. Please edit the game and add an action.')
         return
       }
 
@@ -290,16 +296,16 @@
 
       const result = await window.electronAPI?.launchGame(launchParams)
 
-      loadingMessage.close()
+      loadingMsg.destroy()
 
       if (result?.success) {
-        ElMessage.success(`Game launched successfully!`)
+        message.success(`Game launched successfully!`)
       } else {
-        ElMessage.error('Failed to launch game')
+        message.error('Failed to launch game')
       }
     } catch (error) {
       console.error('Failed to launch game:', error)
-      ElMessage.error('Failed to launch game: ' + (error instanceof Error ? error.message : 'Unknown error'))
+      message.error('Failed to launch game: ' + (error instanceof Error ? error.message : 'Unknown error'))
     }
   }
 
@@ -318,79 +324,67 @@
   }
 
   // handle dropdown menu command
-  async function handleMenuCommand(command: string) {
-    switch (command) {
+  async function handleMenuCommand(key: string) {
+    switch (key) {
       case 'delete':
         await handleDeleteGame()
         break
       case 'openFolder':
-        ElMessage.info('This function is not implemented yet')
+        message.info('This function is not implemented yet')
         break
       case 'createShortcut':
-        ElMessage.info('This is just a placeholder.\nMay not be implemented in the future.')
+        message.info('This is just a placeholder.\nMay not be implemented in the future.')
         break
       case 'gameInfo':
-        ElMessage.info('This is just a placeholder.\nMay not be implemented in the future.')
+        message.info('This is just a placeholder.\nMay not be implemented in the future.')
         break
       case 'backup':
-        ElMessage.info('This function is not implemented yet')
+        message.info('This function is not implemented yet')
         break
       default:
-        console.log('Unknown command:', command)
+        console.log('Unknown command:', key)
     }
   }
 
   // handle delete game with confirmation
   async function handleDeleteGame() {
     if (!gameData.value) {
-      ElMessage.error('No game data available')
+      message.error('No game data available')
       return
     }
 
-    try {
-      await ElMessageBox.confirm(
-        `Are you sure you want to delete the game <br>"${gameData.value.title}"?`,
-        'Confirm Deletion',
-        {
-          confirmButtonText: 'Delete',
-          cancelButtonText: 'Cancel',
-          type: 'warning',
-          confirmButtonClass: 'el-button--danger',
-          // Lock the scroll will make the scroll background turn white
-          lockScroll: false,
-          dangerouslyUseHTMLString: true
+    dialog.warning({
+      title: 'Confirm Deletion',
+      content: `Are you sure you want to delete the game "${gameData.value.title}"?`,
+      positiveText: 'Delete',
+      negativeText: 'Cancel',
+      onPositiveClick: async () => {
+        // Show loading message
+        const loadingMsg = message.loading('Deleting Game...', { duration: 0 })
+
+        try {
+          await gameStore.deleteGame(gameData.value!.uuid)
+          loadingMsg.destroy()
+          message.success('Delete Game Successfully')
+
+          // Clear current selection after deletion
+          gameStore.currentGameUuid = null
+        } catch (error) {
+          loadingMsg.destroy()
+          console.error('Failed to delete game:', error)
+          message.error('Failed to delete game: ' + (error instanceof Error ? error.message : '未知错误'))
         }
-      )
-
-      // Show loading message
-      const loadingMessage = ElMessage({
-        message: 'Deleting Game...',
-        type: 'info',
-        duration: 0
-      })
-
-      try {
-        await gameStore.deleteGame(gameData.value.uuid)
-        loadingMessage.close()
-        ElMessage.success('Delete Game Successfully')
-
-        // Clear current selection after deletion
-        gameStore.currentGameUuid = null
-      } catch (error) {
-        loadingMessage.close()
-        console.error('Failed to delete game:', error)
-        ElMessage.error('Failed to delete game: ' + (error instanceof Error ? error.message : '未知错误'))
+      },
+      onNegativeClick: () => {
+        console.log('User cancelled game deletion')
       }
-    } catch {
-      // User cancelled the deletion
-      console.log('User cancelled game deletion')
-    }
+    })
   }
 
   // Open external link in default browser
   async function openExternalLink(url: string) {
     if (!url) {
-      ElMessage.warning('No URL provided')
+      message.warning('No URL provided')
       return
     }
 
@@ -399,36 +393,40 @@
         await window.electronAPI.openExternalLink(url)
       } else {
         // Fallback: try to open with window.open (might not work in Electron)
-        ElMessage.warning('External link API not available')
+        message.warning('External link API not available')
       }
     } catch (error) {
       console.error('Failed to open external link:', error)
-      ElMessage.error('Failed to open link: ' + (error instanceof Error ? error.message : 'Unknown error'))
+      message.error('Failed to open link: ' + (error instanceof Error ? error.message : 'Unknown error'))
     }
   }
 
   // Open install path in file explorer
   async function openworkingDir() {
     if (!gameData.value?.workingDir) {
-      ElMessage.warning('No install path specified')
+      message.warning('No install path specified')
       return
     }
 
     try {
       if (window.electronAPI?.openFolder) {
         await window.electronAPI.openFolder(gameData.value.workingDir)
-        ElMessage.success('Opened install path in file explorer')
+        message.success('Opened install path in file explorer')
       } else {
-        ElMessage.warning('Folder opening API not available')
+        message.warning('Folder opening API not available')
       }
     } catch (error) {
       console.error('Failed to open install path:', error)
-      ElMessage.error('Failed to open folder: ' + (error instanceof Error ? error.message : 'Unknown error'))
+      message.error('Failed to open folder: ' + (error instanceof Error ? error.message : 'Unknown error'))
     }
   }
 </script>
 
 <style scoped>
+  .game-info-container {
+    height: 100%;
+  }
+
   .background-title-container {
     position: relative;
     width: 100%;
@@ -638,9 +636,10 @@
     padding: 12px;
     background-color: var(--bg-info-content);
     color: var(--color-info-content);
-    font-size: 0.8em;
     word-break: break-word;
     overflow-wrap: break-word;
+    display: flex;
+    align-items: center;
   }
 
   .info-row-tags {
@@ -661,7 +660,6 @@
   }
 
   .info-content-tags {
-    width: 100%;
     padding: 8px 12px 12px 12px;
     background-color: var(--bg-info-content);
     color: var(--color-info-content);
@@ -670,7 +668,6 @@
     overflow-wrap: break-word;
   }
 
-  .loading-container,
   .no-game-container {
     display: flex;
     justify-content: center;
@@ -698,14 +695,5 @@
     font-weight: 400;
     color: var(--color-muted-light);
     opacity: 0.8;
-  }
-</style>
-
-<style>
-
-  /* Hide overlay of ElMessageBox  */
-  /* The overlay can't work on window controls */
-  .el-overlay {
-    background-color: transparent !important;
   }
 </style>

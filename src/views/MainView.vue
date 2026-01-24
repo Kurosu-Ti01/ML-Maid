@@ -1,24 +1,25 @@
 <template>
-  <el-container>
-    <el-aside>
+  <div class="main-container">
+    <div class="sidebar-nav-container">
       <SideBarNav />
-    </el-aside>
-    <el-main>
+    </div>
+    <div class="main-content">
       <!-- Main List -->
-      <el-splitter v-if="currentPage === 'list'">
-        <el-splitter-panel size="25%" min="10%" max="40%">
+      <n-split v-if="currentPage === 'list'" direction="horizontal" :default-size="0.25" :min="0.1" :max="0.4"
+        style="height: 100%">
+        <template #1>
           <SideBarGameList />
-        </el-splitter-panel>
-        <el-splitter-panel>
+        </template>
+        <template #2>
           <MainAeraGameInfo />
-        </el-splitter-panel>
-      </el-splitter>
+        </template>
+      </n-split>
       <!-- Statistics -->
       <Statistics v-else-if="currentPage === 'statistics'" />
       <!-- Settings -->
       <Settings v-else-if="currentPage === 'settings'" />
-    </el-main>
-  </el-container>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -35,22 +36,25 @@
 </script>
 
 <style scoped>
-  .el-container {
+  .main-container {
     width: 100%;
     height: 100%;
     min-height: 0;
     min-width: 0;
     overflow: hidden;
+    display: flex;
   }
 
-  .el-aside {
+  .sidebar-nav-container {
     background: var(--siderbar-nav-bg);
-    padding: 12px;
+    padding: 4px;
     border-right: 1px solid var(--siderbar-nav-border);
     width: 50px;
+    flex-shrink: 0;
   }
 
-  .el-main {
+  .main-content {
+    flex: 1;
     padding: 0;
     height: 100%;
     min-height: 0;
@@ -58,12 +62,12 @@
   }
 
   /* Dark mode styles */
-  :global(html.dark) .el-aside {
+  :global(html.dark) .sidebar-nav-container {
     background: var(--el-bg-color);
     border-right-color: var(--el-border-color);
   }
 
-  :global(html.dark) .el-main {
+  :global(html.dark) .main-content {
     background-color: var(--el-bg-color-page);
   }
 </style>

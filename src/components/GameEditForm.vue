@@ -1,150 +1,160 @@
 <template>
   <div class="edit-container">
     <!-- Tab Navigation -->
-    <el-tabs v-model="activeTab" class="tabs-container">
+    <n-tabs v-model:value="activeTab" class="tabs-container" type="line">
       <!-- General Tab -->
-      <el-tab-pane label="General" name="general">
-        <el-scrollbar class="tab-scrollbar">
-          <el-form :model="gameForm" label-width="120px" class="tab-form">
-            <el-form-item label="Title">
-              <el-input v-model="gameForm.title" placeholder="Enter game title" />
-            </el-form-item>
+      <n-tab-pane name="general" tab="General">
+        <n-scrollbar class="tab-scrollbar">
+          <n-form :model="gameForm" label-width="120" class="tab-form">
+            <n-form-item label="Title">
+              <n-input v-model:value="gameForm.title" placeholder="Enter game title" />
+            </n-form-item>
 
             <!-- Genre and Release Date in one row -->
-            <el-row :gutter="20">
-              <el-col :span="12">
-                <el-form-item label="Genre">
-                  <el-input v-model="gameForm.genre" placeholder="Game genre" />
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="Release Date">
-                  <el-date-picker v-model="gameForm.releaseDate" placeholder="Release date (e.g., 2017-07-20)"
+            <n-grid :cols="2" :x-gap="20">
+              <n-gi>
+                <n-form-item label="Genre">
+                  <n-input v-model:value="gameForm.genre" placeholder="Game genre" />
+                </n-form-item>
+              </n-gi>
+              <n-gi>
+                <n-form-item label="Release Date">
+                  <n-date-picker v-model:value="gameForm.releaseDate" placeholder="Release date (e.g., 2017-07-20)"
                     type="date" style="width: 100%;" />
-                </el-form-item>
-              </el-col>
-            </el-row>
+                </n-form-item>
+              </n-gi>
+            </n-grid>
 
             <!-- Developer and Publisher in one row -->
-            <el-row :gutter="20">
-              <el-col :span="12">
-                <el-form-item label="Developer">
-                  <el-input v-model="gameForm.developer" placeholder="Game developer" />
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="Publisher">
-                  <el-input v-model="gameForm.publisher" placeholder="Game publisher" />
-                </el-form-item>
-              </el-col>
-            </el-row>
+            <n-grid :cols="2" :x-gap="20">
+              <n-gi>
+                <n-form-item label="Developer">
+                  <n-input v-model:value="gameForm.developer" placeholder="Game developer" />
+                </n-form-item>
+              </n-gi>
+              <n-gi>
+                <n-form-item label="Publisher">
+                  <n-input v-model:value="gameForm.publisher" placeholder="Game publisher" />
+                </n-form-item>
+              </n-gi>
+            </n-grid>
 
             <!-- Community Score and User Score in one row -->
-            <el-row :gutter="20">
-              <el-col :span="12">
-                <el-form-item label="Community Score">
-                  <el-input v-model="gameForm.communityScore" placeholder="Community score (0-100)" type="number" />
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="User Score">
-                  <el-input v-model="gameForm.personalScore" placeholder="User score (0-100)" type="number" />
-                </el-form-item>
-              </el-col>
-            </el-row>
+            <n-grid :cols="2" :x-gap="20">
+              <n-gi>
+                <n-form-item label="Community Score">
+                  <n-input-number v-model:value="gameForm.communityScore" placeholder="Community score (0-100)" :min="0"
+                    :max="100" style="width: 100%;" />
+                </n-form-item>
+              </n-gi>
+              <n-gi>
+                <n-form-item label="User Score">
+                  <n-input-number v-model:value="gameForm.personalScore" placeholder="User score (0-100)" :min="0"
+                    :max="100" style="width: 100%;" />
+                </n-form-item>
+              </n-gi>
+            </n-grid>
 
-            <el-form-item label="Tags">
-              <el-input v-model="tagsInput" type="textarea" :rows="4"
+            <n-form-item label="Tags">
+              <n-input v-model:value="tagsInput" type="textarea" :rows="4"
                 placeholder="Separate tags with commas (e.g., Romance, Visual Novel, Drama)"
                 :autosize="{ minRows: 3, maxRows: 6 }" />
-            </el-form-item>
+            </n-form-item>
 
-            <el-form-item label="Description">
-              <el-input v-model="descriptionInput" type="textarea" :rows="8" placeholder="Each line is a new paragraph"
-                :autosize="{ minRows: 6, maxRows: 12 }" />
-            </el-form-item>
-          </el-form>
-        </el-scrollbar>
-      </el-tab-pane>
+            <n-form-item label="Description">
+              <n-input v-model:value="descriptionInput" type="textarea" :rows="8"
+                placeholder="Each line is a new paragraph" :autosize="{ minRows: 6, maxRows: 12 }" />
+            </n-form-item>
+          </n-form>
+        </n-scrollbar>
+      </n-tab-pane>
 
       <!-- Advanced Tab -->
-      <el-tab-pane label="Advanced" name="advanced">
-        <el-scrollbar class="tab-scrollbar">
-          <el-form :model="gameForm" label-width="120px" class="tab-form">
-            <el-form-item label="UUID">
-              <el-input v-model="gameForm.uuid" placeholder="Unique identifier for the game" disabled />
-            </el-form-item>
+      <n-tab-pane name="advanced" tab="Advanced">
+        <n-scrollbar class="tab-scrollbar">
+          <n-form :model="gameForm" label-width="120" class="tab-form">
+            <n-form-item label="UUID">
+              <n-input v-model:value="gameForm.uuid" placeholder="Unique identifier for the game" disabled />
+            </n-form-item>
 
-            <el-form-item label="Install Path">
+            <n-form-item label="Install Path">
               <div class="install-path-input">
-                <el-input v-model="gameForm.workingDir" placeholder="Game installation path" />
-                <el-button @click="selectworkingDir" style="margin-left: 8px;">
+                <n-input v-model:value="gameForm.workingDir" placeholder="Game installation path" />
+                <n-button @click="selectworkingDir" style="margin-left: 8px;">
                   Browse
-                </el-button>
+                </n-button>
               </div>
-            </el-form-item>
+            </n-form-item>
 
             <!-- Install Size and Time Played in one row -->
-            <el-row :gutter="20">
-              <el-col :span="12">
-                <el-form-item label="Install Size">
-                  <el-input v-model="gameForm.folderSize" placeholder="Installation size in bytes" type="number" />
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="Time Played">
-                  <el-input v-model="gameForm.timePlayed" placeholder="Time played in seconds" type="number" />
-                </el-form-item>
-              </el-col>
-            </el-row>
+            <n-grid :cols="2" :x-gap="20">
+              <n-gi>
+                <n-form-item label="Install Size">
+                  <n-input-number v-model:value="gameForm.folderSize" placeholder="Installation size in bytes" :min="0"
+                    style="width: 100%;" />
+                </n-form-item>
+              </n-gi>
+              <n-gi>
+                <n-form-item label="Time Played">
+                  <n-input-number v-model:value="gameForm.timePlayed" placeholder="Time played in seconds" :min="0"
+                    style="width: 100%;" />
+                </n-form-item>
+              </n-gi>
+            </n-grid>
 
-            <el-form-item label="Last Played">
-              <el-date-picker v-model="gameForm.lastPlayed" type="date" placeholder="Select last played date"
-                format="YYYY-MM-DD" value-format="YYYY-MM-DD" style="width: 100%;" />
-            </el-form-item>
+            <n-form-item label="Last Played">
+              <n-date-picker v-model:value="gameForm.lastPlayed" type="date" placeholder="Select last played date"
+                format="yyyy-MM-dd" value-format="yyyy-MM-dd" style="width: 100%;" />
+            </n-form-item>
 
-            <el-form-item label="Monitor Mode">
+            <n-form-item label="Monitor Mode">
               <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-                <el-select v-model="gameForm.procMonMode" placeholder="Select process monitoring mode"
-                  style="width: calc(100% - 32px);">
-                  <el-option label="File Mode" :value="PROC_MON_MODE.FILE" />
-                  <el-option label="Folder Mode" :value="PROC_MON_MODE.FOLDER" />
-                  <el-option label="Process Mode" :value="PROC_MON_MODE.PROCESS" />
-                </el-select>
-                <el-tooltip placement="top" :show-after="300" popper-style="max-width: 300px;">
-                  <template #content>
-                    <div style="max-width: 280px; line-height: 1.5;">
-                      This option affects how game statistics are recorded:<br>
-                      • <strong>File mode:</strong> monitors only the process launched by actions<br>
-                      • <strong>Folder mode:</strong> monitors all executable processes created in the game's working
-                      directory<br>
-                      • <strong>Process mode:</strong> for handling extreme cases - enter process names to monitor
-                      specific process activities
-                    </div>
+                <n-select v-model:value="gameForm.procMonMode" placeholder="Select process monitoring mode"
+                  style="width: calc(100% - 32px);" :options="procMonModeOptions" />
+                <n-tooltip trigger="hover" placement="top">
+                  <template #trigger>
+                    <n-icon size="24" style="color: #909399; cursor: help; flex-shrink: 0;">
+                      <Info16Regular />
+                    </n-icon>
                   </template>
-                  <el-icon style="color: #909399; cursor: help; width: 24px; height: 24px; flex-shrink: 0;">
-                    <InfoFilled />
-                  </el-icon>
-                </el-tooltip>
+                  <div style="max-width: 280px; line-height: 1.5;">
+                    This option affects how game statistics are recorded:<br>
+                    • <strong>File mode:</strong> monitors only the process launched by actions<br>
+                    • <strong>Folder mode:</strong> monitors all executable processes created in the game's working
+                    directory<br>
+                    • <strong>Process mode:</strong> for handling extreme cases - enter process names to monitor
+                    specific process activities
+                  </div>
+                </n-tooltip>
               </div>
-            </el-form-item>
+            </n-form-item>
 
             <!-- Process Names - Only show when Process Monitor is selected -->
-            <el-form-item v-if="gameForm.procMonMode === PROC_MON_MODE.PROCESS" label="Process Names">
+            <n-form-item v-if="gameForm.procMonMode === PROC_MON_MODE.PROCESS" label="Process Names">
               <div class="process-names-container">
                 <div class="process-names-header">
                   <span class="hint-text">Enter process names to monitor (e.g., game.exe, launcher.exe)</span>
-                  <el-button type="primary" size="small" :icon="Plus" @click="addProcessName">
+                  <n-button type="primary" size="small" @click="addProcessName">
+                    <template #icon>
+                      <n-icon>
+                        <component :is="Add16Regular" />
+                      </n-icon>
+                    </template>
                     Add Process
-                  </el-button>
+                  </n-button>
                 </div>
 
                 <div v-if="gameForm.procNames && gameForm.procNames.length > 0" class="process-names-list">
                   <div v-for="(_, index) in gameForm.procNames" :key="index" class="process-name-item">
-                    <el-input v-model="gameForm.procNames[index]" placeholder="Enter process name (e.g., game.exe)"
+                    <n-input v-model:value="gameForm.procNames[index]" placeholder="Enter process name (e.g., game.exe)"
                       style="flex: 1;" />
-                    <el-button type="danger" size="small" :icon="Delete" @click="removeProcessName(index)"
-                      style="margin-left: 8px;" />
+                    <n-button type="error" size="small" @click="removeProcessName(index)" style="margin-left: 8px;">
+                      <template #icon>
+                        <n-icon>
+                          <component :is="Delete16Regular" />
+                        </n-icon>
+                      </template>
+                    </n-button>
                   </div>
                 </div>
 
@@ -153,14 +163,14 @@
                   </p>
                 </div>
               </div>
-            </el-form-item>
-          </el-form>
-        </el-scrollbar>
-      </el-tab-pane>
+            </n-form-item>
+          </n-form>
+        </n-scrollbar>
+      </n-tab-pane>
 
       <!-- Media Tab -->
-      <el-tab-pane label="Media" name="media">
-        <el-scrollbar class="tab-scrollbar">
+      <n-tab-pane name="media" tab="Media">
+        <n-scrollbar class="tab-scrollbar">
           <div class="media-container">
             <!-- Left Column -->
             <div class="media-column left-column">
@@ -239,33 +249,46 @@
               </div>
             </div>
           </div>
-        </el-scrollbar>
-      </el-tab-pane>
+        </n-scrollbar>
+      </n-tab-pane>
 
       <!-- Links Tab -->
-      <el-tab-pane label="Links" name="links">
-        <el-scrollbar class="tab-scrollbar">
-          <el-form :model="gameForm" label-width="120px" class="tab-form">
+      <n-tab-pane name="links" tab="Links">
+        <n-scrollbar class="tab-scrollbar">
+          <n-form :model="gameForm" label-width="120" class="tab-form">
             <div class="links-container">
               <div class="links-header">
                 <h3>Game Links</h3>
-                <el-button type="primary" :icon="Plus" @click="addLink">Add Link</el-button>
+                <n-button type="primary" @click="addLink">
+                  <template #icon>
+                    <n-icon>
+                      <component :is="Add16Regular" />
+                    </n-icon>
+                  </template>
+                  Add Link
+                </n-button>
               </div>
 
               <div v-if="gameForm.links && gameForm.links.length > 0" class="links-list">
                 <div v-for="(link, index) in gameForm.links" :key="index" class="link-item">
                   <div class="link-header">
                     <div class="link-index">{{ index + 1 }}</div>
-                    <el-button type="danger" size="small" :icon="Delete" @click="removeLink(index)" circle />
+                    <n-button type="error" size="small" circle @click="removeLink(index)">
+                      <template #icon>
+                        <n-icon>
+                          <component :is="Delete16Regular" />
+                        </n-icon>
+                      </template>
+                    </n-button>
                   </div>
 
-                  <el-form-item label="Link Name" :prop="`links.${index}.name`">
-                    <el-input v-model="link.name" placeholder="Enter link name (e.g., VNDB, Official Site)" />
-                  </el-form-item>
+                  <n-form-item label="Link Name" :path="`links.${index}.name`">
+                    <n-input v-model:value="link.name" placeholder="Enter link name (e.g., VNDB, Official Site)" />
+                  </n-form-item>
 
-                  <el-form-item label="URL" :prop="`links.${index}.url`">
-                    <el-input v-model="link.url" placeholder="Enter URL (e.g., https://vndb.org/...)" />
-                  </el-form-item>
+                  <n-form-item label="URL" :path="`links.${index}.url`">
+                    <n-input v-model:value="link.url" placeholder="Enter URL (e.g., https://vndb.org/...)" />
+                  </n-form-item>
                 </div>
               </div>
 
@@ -274,100 +297,118 @@
                 <p class="hint-text">Add links to external sites like VNDB, official websites, etc.</p>
               </div>
             </div>
-          </el-form>
-        </el-scrollbar>
-      </el-tab-pane>
+          </n-form>
+        </n-scrollbar>
+      </n-tab-pane>
 
       <!-- Actions Tab -->
-      <el-tab-pane label="Actions" name="actions">
-        <el-scrollbar class="tab-scrollbar">
-          <el-form :model="gameForm" label-width="120px" class="tab-form">
+      <n-tab-pane name="actions" tab="Actions">
+        <n-scrollbar class="tab-scrollbar">
+          <n-form :model="gameForm" label-width="120" class="tab-form">
             <div class="actions-container">
               <div class="actions-header">
                 <h3>Game Actions</h3>
-                <el-button type="primary" size="small" @click="addAction">
-                  <el-icon>
-                    <Plus />
-                  </el-icon>
+                <n-button type="primary" size="small" @click="addAction">
+                  <template #icon>
+                    <n-icon>
+                      <component :is="Add16Regular" />
+                    </n-icon>
+                  </template>
                   Add Action
-                </el-button>
+                </n-button>
               </div>
 
               <div v-if="gameForm.actions && gameForm.actions.length > 0" class="actions-list">
                 <div v-for="(action, index) in gameForm.actions" :key="index" class="action-item">
                   <div class="action-header">
                     <span class="action-index">{{ index + 1 }}</span>
-                    <el-button type="danger" size="small" text @click="removeAction(index)">
-                      <el-icon>
-                        <Delete />
-                      </el-icon>
-                    </el-button>
+                    <n-button type="error" size="small" text @click="removeAction(index)">
+                      <template #icon>
+                        <n-icon>
+                          <component :is="Delete16Regular" />
+                        </n-icon>
+                      </template>
+                    </n-button>
                   </div>
 
-                  <el-form-item label="Action Name">
-                    <el-input v-model="action.name" placeholder="Enter action name (e.g., Play)" />
-                  </el-form-item>
+                  <n-form-item label="Action Name">
+                    <n-input v-model:value="action.name" placeholder="Enter action name (e.g., Play)" />
+                  </n-form-item>
 
-                  <el-form-item label="Type">
-                    <el-select v-model="action.type" placeholder="Select action type" style="width: 100%">
-                      <el-option label="File" value="File" />
-                      <el-option label="Link" value="Link" disabled />
-                      <el-option label="Script" value="Script" disabled />
-                    </el-select>
-                  </el-form-item>
+                  <n-form-item label="Type">
+                    <n-select v-model:value="action.type" placeholder="Select action type" style="width: 100%"
+                      :options="actionTypeOptions" />
+                  </n-form-item>
 
-                  <el-form-item v-if="action.type === 'File'" label="Executable Path">
+                  <n-form-item v-if="action.type === 'File'" label="Executable Path">
                     <div class="executable-path-input">
-                      <el-input v-model="action.executablePath" placeholder="Path to executable file" />
-                      <el-button @click="selectExecutablePath(index)" style="margin-left: 8px;">
+                      <n-input v-model:value="action.executablePath" placeholder="Path to executable file" />
+                      <n-button @click="selectExecutablePath(index)" style="margin-left: 8px;">
                         Browse
-                      </el-button>
+                      </n-button>
                     </div>
-                  </el-form-item>
+                  </n-form-item>
 
-                  <el-form-item v-if="action.type === 'File'" label="Parameters">
-                    <el-input v-model="action.parameters"
+                  <n-form-item v-if="action.type === 'File'" label="Parameters">
+                    <n-input v-model:value="action.parameters"
                       placeholder="Optional command line parameters (NOT AVAILAVLE YET)" />
-                  </el-form-item>
+                  </n-form-item>
                 </div>
               </div>
 
               <div v-else class="no-actions">
-                <el-empty description="No actions configured" />
+                <n-empty description="No actions configured" />
                 <p class="hint-text">Add actions to define how to launch or interact with this game.</p>
               </div>
             </div>
-          </el-form>
-        </el-scrollbar>
-      </el-tab-pane>
+          </n-form>
+        </n-scrollbar>
+      </n-tab-pane>
 
       <!-- Script Tab (TODO) -->
-      <el-tab-pane label="Script" name="script">
-        <el-scrollbar class="tab-scrollbar">
+      <n-tab-pane name="script" tab="Script">
+        <n-scrollbar class="tab-scrollbar">
           <div class="placeholder-content">
-            <el-empty description="Script configuration coming soon..." />
+            <n-empty description="Script configuration coming soon..." />
           </div>
-        </el-scrollbar>
-      </el-tab-pane>
-    </el-tabs>
+        </n-scrollbar>
+      </n-tab-pane>
+    </n-tabs>
 
     <!-- Buttons fixed at the bottom -->
     <div class="fixed-buttons">
-      <el-button type="primary" @click="saveGame" :loading="saving">Save</el-button>
-      <el-button @click="closeWindow">Cancel</el-button>
+      <n-button type="primary" @click="saveGame" :loading="saving">Save</n-button>
+      <n-button type="error" @click="closeWindow">Cancel</n-button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts" name="GameEditForm">
   import { ref, onMounted, computed, toRaw } from 'vue'
-  import { ElMessage } from 'element-plus'
-  import { Plus, Delete, InfoFilled } from '@element-plus/icons-vue'
+  import { useMessage } from 'naive-ui'
+  import { NIcon } from 'naive-ui'
+  import type { SelectOption } from 'naive-ui'
+  import { Add16Regular, Delete16Regular, Info16Regular } from '@vicons/fluent'
   import { useGameStore } from '../stores/game'
   import { PROC_MON_MODE } from '../constants/procMonMode'
 
   // Use game store
   const gameStore = useGameStore()
+  const message = useMessage()
+
+  // Process monitor mode options
+  const procMonModeOptions: SelectOption[] = [
+    { label: 'File Mode', value: PROC_MON_MODE.FILE },
+    { label: 'Folder Mode', value: PROC_MON_MODE.FOLDER },
+    { label: 'Process Mode', value: PROC_MON_MODE.PROCESS }
+  ]
+
+  // Action type options
+  const actionTypeOptions: SelectOption[] = [
+    { label: 'File', value: 'File' },
+    { label: 'Link', value: 'Link', disabled: true },
+    { label: 'Script', value: 'Script', disabled: true }
+  ]
 
   // Active tab
   const activeTab = ref('general')
@@ -381,14 +422,14 @@
     coverImageDisplay: '',
     backgroundImageDisplay: '',
     iconImageDisplay: '',
-    lastPlayed: '',
+    lastPlayed: null,
     timePlayed: 0,
     workingDir: '',
     folderSize: 0,
     genre: '',
     developer: '',
     publisher: '',
-    releaseDate: '',
+    releaseDate: null,
     communityScore: 0,
     personalScore: 0,
     tags: [],
@@ -419,11 +460,11 @@
           await processSelectedImage(selectedPath, imageType)
         }
       } else {
-        ElMessage.error('File selection API not available')
+        message.error('File selection API not available')
       }
     } catch (error) {
       console.error('Error selecting image:', error)
-      ElMessage.error('Failed to select image')
+      message.error('Failed to select image')
     }
   }
 
@@ -460,16 +501,16 @@
               break
           }
 
-          ElMessage.success(`${imageType} image updated successfully!`)
+          message.success(`${imageType} image updated successfully!`)
         } else {
-          ElMessage.error(result.error || 'Failed to process image')
+          message.error(result.error || 'Failed to process image')
         }
       } else {
-        ElMessage.error('Image processing API not available')
+        message.error('Image processing API not available')
       }
     } catch (error) {
       console.error('Error processing image:', error)
-      ElMessage.error('Failed to process image')
+      message.error('Failed to process image')
     }
   }
 
@@ -489,7 +530,7 @@
         coverPreview.value = ''
         break
     }
-    ElMessage.success(`${imageType} image removed`)
+    message.success(`${imageType} image removed`)
   }  // Actions management functions
   function addAction() {
     if (!gameForm.value.actions) {
@@ -501,13 +542,13 @@
       executablePath: '',
       parameters: ''
     })
-    ElMessage.success('Action added')
+    message.success('Action added')
   }
 
   function removeAction(index: number) {
     if (gameForm.value.actions && index >= 0 && index < gameForm.value.actions.length) {
       gameForm.value.actions.splice(index, 1)
-      ElMessage.success('Action removed')
+      message.success('Action removed')
     }
   }
 
@@ -520,15 +561,15 @@
           const selectedPath = result.filePaths[0]
           if (gameForm.value.actions && gameForm.value.actions[index]) {
             gameForm.value.actions[index].executablePath = selectedPath
-            ElMessage.success('Executable path updated')
+            message.success('Executable path updated')
           }
         }
       } else {
-        ElMessage.error('File selection API not available')
+        message.error('File selection API not available')
       }
     } catch (error) {
       console.error('Error selecting executable:', error)
-      ElMessage.error('Failed to select executable')
+      message.error('Failed to select executable')
     }
   }
 
@@ -540,14 +581,14 @@
         if (result && !result.canceled && result.filePaths.length > 0) {
           const selectedPath = result.filePaths[0]
           gameForm.value.workingDir = selectedPath
-          ElMessage.success('Install path updated')
+          message.success('Install path updated')
         }
       } else {
-        ElMessage.error('Folder selection API not available')
+        message.error('Folder selection API not available')
       }
     } catch (error) {
       console.error('Error selecting folder:', error)
-      ElMessage.error('Failed to select folder')
+      message.error('Failed to select folder')
     }
   }
 
@@ -560,13 +601,13 @@
       name: '',
       url: ''
     })
-    ElMessage.success('Link added')
+    message.success('Link added')
   }
 
   function removeLink(index: number) {
     if (gameForm.value.links && index >= 0 && index < gameForm.value.links.length) {
       gameForm.value.links.splice(index, 1)
-      ElMessage.success('Link removed')
+      message.success('Link removed')
     }
   }
 
@@ -576,13 +617,13 @@
       gameForm.value.procNames = []
     }
     gameForm.value.procNames.push('')
-    ElMessage.success('Process name added')
+    message.success('Process name added')
   }
 
   function removeProcessName(index: number) {
     if (gameForm.value.procNames && index >= 0 && index < gameForm.value.procNames.length) {
       gameForm.value.procNames.splice(index, 1)
-      ElMessage.success('Process name removed')
+      message.success('Process name removed')
     }
   }
 
@@ -649,7 +690,7 @@
 
       // Use the store to update the game (which will also update the database)
       await gameStore.updateGame(plainGameData)
-      ElMessage.success('Game information saved successfully!')
+      message.success('Game information saved successfully!')
 
       // delay close window
       setTimeout(() => {
@@ -657,7 +698,7 @@
       }, 1000)
     } catch (error) {
       console.error('Save Error:', error)
-      ElMessage.error('Failed to save game information')
+      message.error('Failed to save game information')
     } finally {
       saving.value = false
     }
@@ -726,20 +767,76 @@
   .tabs-container {
     flex: 1;
     background-color: transparent;
-    padding: 0;
-    /* space for button */
-    margin-bottom: 80px;
+    padding: 0 15px;
     display: flex;
     flex-direction: column;
+    min-height: 0;
+    /* Crucial for flex scrolling */
+    overflow: hidden;
+
+    --n-tab-text-color-active: #409eff !important;
+    --n-tab-text-color-hover: #409eff !important;
+    --n-bar-color: #409eff !important;
+
+    :deep(.n-tabs-nav) {
+      flex-shrink: 0;
+    }
+
+    :deep(.n-tabs-pane-wrapper) {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      /* Crucial */
+    }
+
+    :deep(.n-tab-pane) {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+      /* Ensure pane height is constrained */
+    }
+
+    :deep(.n-tabs-bar) {
+      background-color: #409eff !important;
+    }
+
+    :deep(.n-tabs-tab--active) {
+      color: #409eff !important;
+      --n-tab-text-color-active: #409eff !important;
+    }
+
+    :deep(.n-tabs-tab:hover) {
+      color: #409eff !important;
+      --n-tab-text-color-hover: #409eff !important;
+    }
   }
 
   .tab-scrollbar {
-    /* Subtract the height of the tab header and bottom buttons */
-    height: calc(100vh - 160px);
+    flex: 1;
+    height: 60%;
+    min-height: 0;
+  }
+
+  /* Force constraints on scrollbar container */
+  :deep(.n-scrollbar-container) {
+    height: calc(100%) !important;
+  }
+
+  :deep(.n-tab-pane) {
+    height: calc(100%) !important;
+  }
+
+  :deep(.n-scrollbar-content) {
+    /* Add bottom padding to prevent content from being hidden behind fixed buttons */
+    padding-bottom: 160px;
   }
 
   .tab-form {
-    padding: 30px;
+    padding: 10px 30px;
   }
 
   .placeholder-content {
@@ -773,85 +870,12 @@
     z-index: 100;
   }
 
-  /* Element Plus component style customization */
-  :deep(.el-tabs__header) {
-    margin: 0;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-
-  :deep(.el-tabs__nav-wrap) {
-    padding: 0 30px;
-  }
-
-  :deep(.el-tabs__content) {
-    padding: 0;
-    flex: 1;
-    /* Prevent default scrollbar from appearing */
-    overflow: hidden;
-  }
-
-  /* El-scrollbar customization */
-  :deep(.el-scrollbar__view) {
-    height: 100%;
-  }
-
-  :deep(.el-scrollbar__bar) {
-    opacity: 0.6;
-  }
-
-  :deep(.el-scrollbar__bar:hover) {
-    opacity: 1;
-  }
-
-  :deep(.el-scrollbar__thumb) {
-    background-color: #c1c4cd;
-    border-radius: 4px;
-  }
-
-  :deep(.el-scrollbar__thumb:hover) {
-    background-color: #a6a9ad;
-  }
-
-  :deep(.el-form-item__label) {
-    color: #606266;
-    font-weight: 500;
-  }
-
-  :deep(.el-input__wrapper) {
-    border-radius: 6px;
-  }
-
-  :deep(.el-textarea__inner) {
-    border-radius: 6px;
-    /* Disable native scrollbar */
-    overflow: hidden;
-  }
-
-  :deep(.el-button) {
-    border-radius: 6px;
-    padding: 12px 24px;
-  }
-
-  :deep(.el-tabs__item) {
-    font-weight: 500;
-  }
-
-  :deep(.el-tabs__item.is-active) {
-    color: #409eff;
-  }
-
-  /* Link icon styles */
-  :deep(.el-input-group__prepend) {
-    background-color: #f5f7fa;
-  }
-
   /* Media tab specific styles */
   .media-container {
     display: flex;
     gap: 0;
     padding: 0 10px;
+    margin-bottom: 30px;
     height: 100%;
   }
 
@@ -1081,6 +1105,7 @@
   /* Links tab specific styles */
   .links-container {
     max-width: 800px;
+    margin-bottom: 30px;
   }
 
   .links-header {
