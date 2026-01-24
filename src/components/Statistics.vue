@@ -1,13 +1,17 @@
 <template>
   <div class="statistics">
-    <el-tabs v-model="activeTab" class="statistics-tabs">
-      <el-tab-pane label="Main" name="main">
+    <n-tabs v-model:value="activeTab" default-value="main" class="statistics-tabs" type="line">
+      <n-tab-pane name="main" tab="Main">
         <div class="tab-content">
           <h3>Overall Statistics</h3>
           <div class="main-stats-container">
             <div class="stats-cards">
               <div class="stat-card">
-                <div class="stat-icon">🎮</div>
+                <div class="stat-icon-wrapper">
+                  <n-icon size="40">
+                    <Timer24Regular />
+                  </n-icon>
+                </div>
                 <div class="stat-content">
                   <div class="stat-value">{{ formatTime(overallStats.totalPlayTime) }}</div>
                   <div class="stat-label">Total Play Time</div>
@@ -15,7 +19,11 @@
               </div>
 
               <div class="stat-card">
-                <div class="stat-icon">📅</div>
+                <div class="stat-icon-wrapper">
+                  <n-icon size="40">
+                    <CalendarToday24Regular />
+                  </n-icon>
+                </div>
                 <div class="stat-content">
                   <div class="stat-value">{{ formatTime(overallStats.todayPlayTime) }}</div>
                   <div class="stat-label">Today</div>
@@ -24,7 +32,11 @@
 
 
               <div class="stat-card">
-                <div class="stat-icon">📚</div>
+                <div class="stat-icon-wrapper">
+                  <n-icon size="40">
+                    <Games24Regular />
+                  </n-icon>
+                </div>
                 <div class="stat-content">
                   <div class="stat-value">{{ overallStats.gamesPlayed }}</div>
                   <div class="stat-label">Games Played</div>
@@ -33,7 +45,11 @@
 
 
               <div class="stat-card">
-                <div class="stat-icon">📊</div>
+                <div class="stat-icon-wrapper">
+                  <n-icon size="40">
+                    <Poll24Regular />
+                  </n-icon>
+                </div>
                 <div class="stat-content">
                   <div class="stat-value">{{ formatTime(overallStats.thisWeekPlayTime) }}</div>
                   <div class="stat-label">This Week</div>
@@ -41,7 +57,11 @@
               </div>
 
               <div class="stat-card">
-                <div class="stat-icon">🎯</div>
+                <div class="stat-icon-wrapper">
+                  <n-icon size="40">
+                    <TargetArrow24Regular />
+                  </n-icon>
+                </div>
                 <div class="stat-content">
                   <div class="stat-value">{{ overallStats.totalSessions }}</div>
                   <div class="stat-label">Total Sessions</div>
@@ -49,7 +69,11 @@
               </div>
 
               <div class="stat-card">
-                <div class="stat-icon">🗓️</div>
+                <div class="stat-icon-wrapper">
+                  <n-icon size="40">
+                    <CalendarMonth24Regular />
+                  </n-icon>
+                </div>
                 <div class="stat-content">
                   <div class="stat-value">{{ formatTime(overallStats.thisMonthPlayTime) }}</div>
                   <div class="stat-label">This Month</div>
@@ -57,24 +81,26 @@
               </div>
             </div>
 
-            <el-scrollbar class="stats-recent-sessions-el">
+            <div class="stats-recent-sessions-el">
               <h4>Recent Game Sessions</h4>
-              <div v-if="recentSessions.length > 0" class="recent-session-list-el">
-                <el-card v-for="(session, idx) in recentSessions" :key="idx" class="recent-session-card" shadow="hover">
-                  <div class="recent-session-row">
-                    <span class="recent-session-title-el">{{ session.title }}</span>
-                    <span class="recent-session-time-el">{{ formatSessionTime(session.startTime) }}</span>
-                    <span class="recent-session-duration-el">{{ formatTime(session.durationSeconds) }}</span>
-                  </div>
-                </el-card>
-              </div>
-              <div v-else class="recent-session-empty-el">No recent sessions found.</div>
-            </el-scrollbar>
+              <n-scrollbar class="recent-sessions-scroll">
+                <div v-if="recentSessions.length > 0" class="recent-session-list-el">
+                  <n-card v-for="(session, idx) in recentSessions" :key="idx" class="recent-session-card" hoverable>
+                    <div class="recent-session-row">
+                      <span class="recent-session-title-el">{{ session.title }}</span>
+                      <span class="recent-session-time-el">{{ formatSessionTime(session.startTime) }}</span>
+                      <span class="recent-session-duration-el">{{ formatTime(session.durationSeconds) }}</span>
+                    </div>
+                  </n-card>
+                </div>
+                <div v-else class="recent-session-empty-el">No recent sessions found.</div>
+              </n-scrollbar>
+            </div>
           </div>
         </div>
-      </el-tab-pane>
+      </n-tab-pane>
 
-      <el-tab-pane label="Day" name="day">
+      <n-tab-pane name="day" tab="Day">
         <div class="tab-content">
           <div class="header-section">
             <h3>Daily Statistics</h3>
@@ -90,15 +116,15 @@
             </div>
           </div>
         </div>
-      </el-tab-pane>
+      </n-tab-pane>
 
-      <el-tab-pane label="Week" name="week">
+      <n-tab-pane name="week" tab="Week">
         <div class="tab-content">
           <div class="header-section">
             <h3>Weekly Statistics</h3>
             <div class="week-selector">
-              <el-date-picker v-model="selectedWeek" type="week" format="YYYY [Week] ww" value-format="YYYY-MM-DD"
-                placeholder="This Week" :first-day-of-week="1" @change="onWeekChange" />
+              <n-date-picker v-model:value="selectedWeek" type="week" format="yyyy 'Week' w" value-format="yyyy-MM-dd"
+                placeholder="This Week" :first-day-of-week="1" @update:value="onWeekChange" />
             </div>
           </div>
           <div class="chart-container">
@@ -108,9 +134,9 @@
             </div>
           </div>
         </div>
-      </el-tab-pane>
+      </n-tab-pane>
 
-      <el-tab-pane label="Month" name="month">
+      <n-tab-pane name="month" tab="Month">
         <div class="tab-content">
           <div class="header-section">
             <h3>Monthly Statistics</h3>
@@ -127,15 +153,15 @@
             </div>
           </div>
         </div>
-      </el-tab-pane>
+      </n-tab-pane>
 
-      <el-tab-pane label="Year" name="year">
+      <n-tab-pane name="year" tab="Year">
         <div class="tab-content">
           <div class="header-section">
             <h3>Yearly Statistics</h3>
             <div class="year-selector">
-              <el-date-picker v-model="selectedYear" type="year" format="YYYY" value-format="YYYY"
-                placeholder="This Year" @change="onYearChange" />
+              <n-date-picker v-model:value="selectedYear" type="year" format="yyyy" value-format="yyyy"
+                placeholder="This Year" @update:value="onYearChange" />
             </div>
           </div>
           <div class="chart-container">
@@ -146,13 +172,22 @@
             </div>
           </div>
         </div>
-      </el-tab-pane>
-    </el-tabs>
+      </n-tab-pane>
+    </n-tabs>
   </div>
 </template>
 
 <script setup lang="ts" name="Statistics">
   import { ref, onMounted, nextTick, watch, computed, provide } from 'vue'
+  import { NIcon } from 'naive-ui'
+  import {
+    Timer24Regular,
+    CalendarToday24Regular,
+    Games24Regular,
+    Poll24Regular,
+    TargetArrow24Regular,
+    CalendarMonth24Regular
+  } from '@vicons/fluent'
   import { use, registerTheme } from 'echarts/core'
   import { CanvasRenderer } from 'echarts/renderers'
   import { BarChart, CustomChart, LineChart, HeatmapChart } from 'echarts/charts'
@@ -1041,6 +1076,11 @@
 <style scoped>
   .statistics {
     padding: 0 20px;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
   .statistics h2 {
@@ -1051,10 +1091,44 @@
 
   .statistics-tabs {
     margin-top: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    --n-tab-text-color-active: #4080ff !important;
+    --n-tab-text-color-hover: #4080ff !important;
+    --n-bar-color: #4080ff !important;
+
+    :deep(.n-tabs-pane-wrapper) {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    :deep(.n-tab-pane) {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    :deep(.n-tabs-bar) {
+      background-color: #4080ff !important;
+    }
+
+    :deep(.n-tabs-tab--active) {
+      color: #4080ff !important;
+      --n-tab-text-color-active: #4080ff !important;
+    }
+
+    :deep(.n-tabs-tab:hover) {
+      color: #4080ff !important;
+      --n-tab-text-color-hover: #4080ff !important;
+    }
   }
 
   .tab-content {
-    min-height: 400px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
   .tab-content h3 {
@@ -1125,35 +1199,69 @@
   .main-stats-container {
     display: flex;
     gap: 30px;
-    height: 100%;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
   }
 
   .stats-cards {
+    flex: 1;
+    overflow-y: auto;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 15px;
     min-width: 450px;
+    align-content: start;
+    /* Don't stretch rows */
   }
 
   .stat-card {
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    border-radius: 12px;
-    padding: 20px;
+    background: var(--bg-info-content, #fff);
+    border: 1px solid rgba(64, 128, 255, 0.15);
+    border-radius: 4px;
+    padding: 24px 20px;
     display: flex;
     align-items: center;
-    gap: 15px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    gap: 20px;
+    box-shadow: 0 4px 12px rgba(64, 128, 255, 0.05);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: #4080ff;
+    opacity: 0.8;
   }
 
   .stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(64, 128, 255, 0.15);
+    border-color: rgba(64, 128, 255, 0.4);
   }
 
-  .stat-icon {
-    font-size: 2.5em;
-    opacity: 0.8;
+  .stat-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(64, 128, 255, 0.1);
+    color: #4080ff;
+    transition: all 0.3s ease;
+  }
+
+  .stat-card:hover .stat-icon-wrapper {
+    background: #4080ff;
+    color: #fff;
+    transform: scale(1.1);
   }
 
   .stat-content {
@@ -1162,15 +1270,22 @@
 
   .stat-value {
     font-size: 1.8em;
-    font-weight: bold;
+    font-weight: 700;
     color: #2c3e50;
     line-height: 1.2;
+    margin-bottom: 4px;
+  }
+
+  /* Dark mode adaptation if needed, assuming generic variables */
+  :global(html.dark) .stat-value {
+    color: #eee;
   }
 
   .stat-label {
-    font-size: 0.9em;
-    color: #7f8c8d;
-    margin-top: 4px;
+    font-size: 0.95em;
+    color: #888;
+    font-weight: 500;
+    letter-spacing: 0.5px;
   }
 
   .stats-placeholder {
@@ -1179,7 +1294,7 @@
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 12px;
+    border-radius: 4px;
     min-height: 300px;
   }
 
@@ -1203,7 +1318,7 @@
   /* Recent sessions styles */
   .stats-recent-sessions {
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
+    border-radius: 4px;
     padding: 20px;
     margin-top: 20px;
   }
@@ -1249,19 +1364,15 @@
   }
 
   /* Recent Sessions scrollbar and card */
-  :deep(.el-card__body) {
-    padding: 0;
-  }
-
   .stats-recent-sessions-el {
-    height: 100%;
-    width: 100%;
-    min-width: 260px;
+    height: 80%;
+    width: 55%;
     margin-left: 10px;
     background: #fff;
-    border-radius: 12px;
+    border-radius: 4px;
     box-shadow: 0 2px 8px rgba(64, 158, 255, 0.08);
     padding: 18px 12px 12px 12px;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
   }
@@ -1271,6 +1382,12 @@
     color: #409eff;
     border-bottom: 2px solid #f0f0f0;
     padding-bottom: 8px;
+    flex-shrink: 0;
+  }
+
+  .recent-sessions-scroll {
+    flex: 1;
+    min-height: 0;
   }
 
   .recent-session-list-el {
@@ -1280,10 +1397,13 @@
   }
 
   .recent-session-card {
-    padding: 7px 12px;
-    border-radius: 8px;
+    border-radius: 4px;
     background: linear-gradient(90deg, #e3f0ff 0%, #f8fbff 100%);
     box-shadow: 0 1px 4px rgba(64, 158, 255, 0.07);
+  }
+
+  :deep(.recent-session-card .n-card__content) {
+    padding: 12px 12px;
   }
 
   .recent-session-row {
@@ -1319,11 +1439,5 @@
     color: #999;
     text-align: center;
     padding: 10px 0;
-  }
-
-  .main-stats-container {
-    display: flex;
-    gap: 30px;
-    height: 100%;
   }
 </style>
