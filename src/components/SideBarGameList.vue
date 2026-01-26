@@ -7,6 +7,9 @@
       <div v-else-if="gameStore.error" class="error-container">
         <span>Error: {{ gameStore.error }}</span>
       </div>
+      <div v-else-if="!gameStore.gamesForList || gameStore.gamesForList.length === 0" class="no-games-container">
+        <span>No games here (x_x)</span>
+      </div>
       <div v-else>
         <div v-for="game in gameStore.gamesForList" :key="game.uuid" class="game-item" @click="selectGame(game.uuid)">
           <img :src="getIconFin(game.iconImageDisplay)" class="game-icon" alt="icon" />
@@ -87,7 +90,8 @@
   }
 
   .loading-container,
-  .error-container {
+  .error-container,
+  .no-games-container {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -98,5 +102,10 @@
 
   .error-container {
     color: #d32f2f;
+  }
+
+  .no-games-container {
+    color: #999;
+    font-style: italic;
   }
 </style>

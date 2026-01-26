@@ -14,6 +14,12 @@ const defaultSettings: Settings = {
     sortBy: 'name',
     sortOrder: 'ascending',
   },
+  filtering: {
+    genres: [],
+    developers: [],
+    publishers: [],
+    tags: [],
+  },
 }
 
 // Global settings object - directly accessible from main process

@@ -84,23 +84,29 @@
     font-weight: bold;
   }
 
+  .titlebar-divider {
+    width: 1px;
+    height: 28px;
+    background: rgba(0, 0, 0, 0.1);
+    margin: 0 15px;
+  }
+
   .titlebar-buttons {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-left: 30px;
+    gap: 5px;
+    margin-left: -3px;
     -webkit-app-region: no-drag;
   }
 
   .titlebar-button {
-    background: #4080ff;
-    color: white;
+    background: transparent;
+    color: var(--titlebar-button);
     border: none;
     border-radius: 4px;
-    padding: 8px;
-    font-size: 0.8rem;
+    padding: 0;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s;
     -webkit-app-region: no-drag;
     display: flex;
     align-items: center;
@@ -109,12 +115,29 @@
     height: 32px;
   }
 
+  .titlebar-button img {
+    opacity: 0.8;
+  }
+
+  .titlebar-button-active {
+    background: rgba(64, 128, 255, 0.15);
+    width: auto;
+    padding: 0 10px;
+  }
+
+  .filter-badge {
+    font-size: 0.8rem;
+    color: #4080ff;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
   .titlebar-button:hover {
-    background: #337ecc;
+    background: #72aaff;
   }
 
   .titlebar-button:active {
-    background: #2968a3;
+    background: #409EFF;
   }
 
 

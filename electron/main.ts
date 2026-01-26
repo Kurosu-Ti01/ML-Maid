@@ -76,7 +76,7 @@ function createWindow() {
     }
 
     return {
-      color: isDark ? '#333333' : '#F2F6FC',
+      color: 'rgba(0, 0, 0, 0)', // Transparent to show custom titlebar
       symbolColor: isDark ? '#ffffff' : '#000000'
     }
   }
@@ -233,7 +233,7 @@ export function updateTitleBarColor() {
     }
 
     win.setTitleBarOverlay({
-      color: isDark ? '#333333' : '#F2F6FC',
+      color: 'rgba(0, 0, 0, 0)', // Transparent to show custom titlebar
       symbolColor: isDark ? '#ffffff' : '#000000',
       height: 50
     })

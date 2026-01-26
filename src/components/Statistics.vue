@@ -9,7 +9,7 @@
               <div class="stat-card">
                 <div class="stat-icon-wrapper">
                   <n-icon size="40">
-                    <Timer24Regular />
+                    <TimerOutlined />
                   </n-icon>
                 </div>
                 <div class="stat-content">
@@ -21,7 +21,7 @@
               <div class="stat-card">
                 <div class="stat-icon-wrapper">
                   <n-icon size="40">
-                    <CalendarToday24Regular />
+                    <TodayOutlined />
                   </n-icon>
                 </div>
                 <div class="stat-content">
@@ -34,7 +34,7 @@
               <div class="stat-card">
                 <div class="stat-icon-wrapper">
                   <n-icon size="40">
-                    <Games24Regular />
+                    <VideogameAssetOutlined />
                   </n-icon>
                 </div>
                 <div class="stat-content">
@@ -47,7 +47,7 @@
               <div class="stat-card">
                 <div class="stat-icon-wrapper">
                   <n-icon size="40">
-                    <Poll24Regular />
+                    <PollOutlined />
                   </n-icon>
                 </div>
                 <div class="stat-content">
@@ -59,7 +59,7 @@
               <div class="stat-card">
                 <div class="stat-icon-wrapper">
                   <n-icon size="40">
-                    <TargetArrow24Regular />
+                    <PlayArrowOutlined />
                   </n-icon>
                 </div>
                 <div class="stat-content">
@@ -71,7 +71,7 @@
               <div class="stat-card">
                 <div class="stat-icon-wrapper">
                   <n-icon size="40">
-                    <CalendarMonth24Regular />
+                    <CalendarMonthOutlined />
                   </n-icon>
                 </div>
                 <div class="stat-content">
@@ -181,13 +181,13 @@
   import { ref, onMounted, nextTick, watch, computed, provide } from 'vue'
   import { NIcon } from 'naive-ui'
   import {
-    Timer24Regular,
-    CalendarToday24Regular,
-    Games24Regular,
-    Poll24Regular,
-    TargetArrow24Regular,
-    CalendarMonth24Regular
-  } from '@vicons/fluent'
+    TimerOutlined,
+    TodayOutlined,
+    VideogameAssetOutlined,
+    PollOutlined,
+    PlayArrowOutlined,
+    CalendarMonthOutlined
+  } from '@vicons/material'
   import { use, registerTheme } from 'echarts/core'
   import { CanvasRenderer } from 'echarts/renderers'
   import { BarChart, CustomChart, LineChart, HeatmapChart } from 'echarts/charts'
@@ -1398,7 +1398,7 @@
 
   .recent-session-card {
     border-radius: 4px;
-    background: linear-gradient(90deg, #e3f0ff 0%, #f8fbff 100%);
+    background: #ecf4fd;
     box-shadow: 0 1px 4px rgba(64, 158, 255, 0.07);
   }
 

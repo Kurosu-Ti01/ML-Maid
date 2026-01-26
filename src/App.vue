@@ -3,7 +3,7 @@
     <n-message-provider>
       <n-dialog-provider>
         <RouterView />
-        <SortDialog />
+        <FilterDialog />
       </n-dialog-provider>
     </n-message-provider>
   </n-config-provider>
@@ -13,7 +13,7 @@
   import { onMounted } from 'vue'
   import { useGameStore } from './stores/game'
   import { useTheme } from '@/composables/useTheme'
-  import SortDialog from '@/components/SortDialog.vue'
+  import FilterDialog from '@/components/FilterDialog.vue'
   import type { GlobalThemeOverrides } from 'naive-ui'
 
   const gameStore = useGameStore()
