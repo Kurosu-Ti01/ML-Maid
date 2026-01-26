@@ -2,7 +2,7 @@
   <div class="settings-view">
     <div class="settings-header">
       <n-icon size="24" style="margin-right: 8px;">
-        <component :is="Settings16Regular" />
+        <component :is="SettingsOutlined" />
       </n-icon>
       <h1 class="header-title">Settings</h1>
     </div>
@@ -20,7 +20,7 @@
       <n-form :model="settingsStore.settings" label-width="140" class="settings-form">
         <n-form-item label="Theme">
           <n-select v-model:value="settingsStore.settings.general.theme" @update:value="saveSettings"
-            placeholder="Select theme" style="width: 200px" :options="themeOptions" />
+            placeholder="Select theme" style="width: 200px" :options="themeOptions" :render-label="renderLabel" />
         </n-form-item>
 
         <n-form-item label="Language">
@@ -46,37 +46,56 @@
 <script setup lang="ts" name="Settings">
   import { h } from 'vue'
   import { NIcon } from 'naive-ui'
-  import type { SelectOption } from 'naive-ui'
+  import type { SelectOption, SelectRenderLabel } from 'naive-ui'
   import { useSettingsStore } from '../stores/settings'
-  import { Settings16Regular, Wrench16Regular, WeatherSunny16Regular, WeatherMoon16Regular, Desktop16Regular } from '@vicons/fluent'
+  import { SettingsOutlined, DesktopWindowsOutlined } from '@vicons/material'
+  import { Wrench16Regular, WeatherSunny16Regular, WeatherMoon16Regular } from '@vicons/fluent'
 
   const settingsStore = useSettingsStore()
+
+  // Render label with icon
+  const renderLabel: SelectRenderLabel = (option) => {
+    const iconMap: Record<string, any> = {
+      'light': WeatherSunny16Regular,
+      'dark': WeatherMoon16Regular,
+      'auto': DesktopWindowsOutlined
+    }
+
+    return h(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          alignItems: 'center'
+        }
+      },
+      [
+        h(NIcon, {
+          size: 16,
+          style: {
+            marginRight: '8px'
+          }
+        }, {
+          default: () => h(iconMap[option.value as string])
+        }),
+        h('span', null, option.label as string)
+      ]
+    )
+  }
 
   // Theme options with custom render
   const themeOptions: SelectOption[] = [
     {
       label: 'Light',
-      value: 'light',
-      renderLabel: () => h('div', { style: 'display: flex; align-items: center;' }, [
-        h(NIcon, { size: 16, style: 'margin-right: 8px;' }, { default: () => h(WeatherSunny16Regular) }),
-        h('span', 'Light')
-      ])
+      value: 'light'
     },
     {
       label: 'Dark',
-      value: 'dark',
-      renderLabel: () => h('div', { style: 'display: flex; align-items: center;' }, [
-        h(NIcon, { size: 16, style: 'margin-right: 8px;' }, { default: () => h(WeatherMoon16Regular) }),
-        h('span', 'Dark')
-      ])
+      value: 'dark'
     },
     {
       label: 'Follow System',
-      value: 'auto',
-      renderLabel: () => h('div', { style: 'display: flex; align-items: center;' }, [
-        h(NIcon, { size: 16, style: 'margin-right: 8px;' }, { default: () => h(Desktop16Regular) }),
-        h('span', 'Follow System')
-      ])
+      value: 'auto'
     }
   ]
 

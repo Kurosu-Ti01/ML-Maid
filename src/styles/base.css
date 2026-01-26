@@ -29,6 +29,7 @@
     /* Main Win TitleBar */
     --titlebar-main-bg: #f2f6fc;
     --titlebar-border: #dcdfe6;
+    --titlebar-button: #000000;
 
     /* Sub Win TitleBar */
     --titlebar-sub-bg: #FFF7E6;

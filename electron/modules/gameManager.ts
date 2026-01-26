@@ -82,7 +82,7 @@ export function setupGameHandlers(config: GameModuleConfig) {
   // Get games list (lightweight - only fields needed for list display)
   ipcMain.handle('get-games-list', () => {
     // Only select the fields needed for list display - much faster!
-    const games = metaDb.prepare('SELECT uuid, title, iconImage, genre, lastPlayed, dateAdded, personalScore FROM games').all()
+    const games = metaDb.prepare('SELECT uuid, title, iconImage, genre, developer, publisher, tags, lastPlayed, dateAdded, personalScore FROM games').all()
 
     // Add formatted display date and convert icon paths for each game
     return games.map((game: any) => ({
@@ -304,6 +304,50 @@ export function setupGameHandlers(config: GameModuleConfig) {
     } catch (error) {
       console.error('Error deleting game:', error)
       throw error
+    }
+  })
+
+  // Get all genres from metadata table
+  ipcMain.handle('get-all-genres', () => {
+    try {
+      const genres = metaDb.prepare('SELECT name FROM genres ORDER BY name').all()
+      return genres.map((row: any) => row.name)
+    } catch (error) {
+      console.error('Error fetching genres:', error)
+      return []
+    }
+  })
+
+  // Get all developers from metadata table
+  ipcMain.handle('get-all-developers', () => {
+    try {
+      const developers = metaDb.prepare('SELECT name FROM developers ORDER BY name').all()
+      return developers.map((row: any) => row.name)
+    } catch (error) {
+      console.error('Error fetching developers:', error)
+      return []
+    }
+  })
+
+  // Get all publishers from metadata table
+  ipcMain.handle('get-all-publishers', () => {
+    try {
+      const publishers = metaDb.prepare('SELECT name FROM publishers ORDER BY name').all()
+      return publishers.map((row: any) => row.name)
+    } catch (error) {
+      console.error('Error fetching publishers:', error)
+      return []
+    }
+  })
+
+  // Get all tags from metadata table
+  ipcMain.handle('get-all-tags', () => {
+    try {
+      const tags = metaDb.prepare('SELECT name FROM tags ORDER BY name').all()
+      return tags.map((row: any) => row.name)
+    } catch (error) {
+      console.error('Error fetching tags:', error)
+      return []
     }
   })
 }

@@ -2,15 +2,21 @@
   <div class="sidebar-nav">
     <div class="top-buttons">
       <button class="icon-btn" :class="{ active: currentPage === 'list' }" @click="setPage('list')">
-        <img src="/icons/list.svg" alt="icon" />
+        <n-icon size="28">
+          <component :is="TextBulletListLtr24Filled" />
+        </n-icon>
       </button>
       <button class="icon-btn" :class="{ active: currentPage === 'statistics' }" @click="setPage('statistics')">
-        <img src="/icons/pie-chart.svg" alt="icon" />
+        <n-icon size="28">
+          <component :is="DataPie24Regular" />
+        </n-icon>
       </button>
     </div>
     <div class="bottom-button">
       <button class="icon-btn" :class="{ active: currentPage === 'settings' }" @click="setPage('settings')">
-        <img src="/icons/settings.svg" alt="icon" />
+        <n-icon size="28">
+          <component :is="Settings24Regular" />
+        </n-icon>
       </button>
     </div>
   </div>
@@ -19,6 +25,7 @@
 <script setup lang="ts" name="SideBarNav">
   import { usePageStore, type PageType } from '@/stores/page'
   import { storeToRefs } from 'pinia'
+  import { TextBulletListLtr24Filled, DataPie24Regular, Settings24Regular } from '@vicons/fluent'
 
   const pageStore = usePageStore()
   const { currentPage } = storeToRefs(pageStore)
@@ -63,7 +70,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 12px;
+    border-radius: 6px;
     transition: background 0.2s;
   }
 
@@ -75,15 +82,5 @@
     background: #409EFF;
   }
 
-  .icon-btn img {
-    width: 28px;
-    height: 28px;
-    object-fit: contain;
-    transition: filter 0.3s;
-  }
 
-  /* Dark mode: invert SVG colors */
-  html.dark .icon-btn img {
-    filter: invert(1);
-  }
 </style>

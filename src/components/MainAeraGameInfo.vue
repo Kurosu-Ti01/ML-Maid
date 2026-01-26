@@ -147,7 +147,7 @@
   import { useMessage, useDialog } from 'naive-ui'
   import type { DropdownOption } from 'naive-ui'
   import { NIcon } from 'naive-ui'
-  import { Delete16Regular, Folder16Regular, Link16Regular, Info16Regular, ArrowDownload16Regular } from '@vicons/fluent'
+  import { DeleteOutlined, FolderOutlined, LinkOutlined, InfoOutlined, DownloadOutlined } from '@vicons/material'
   import defaultBackground from '/default/ML-Maid-Background.png'
   import defaultIcon from '/default/ML-Maid-Icon-W.png'
 
@@ -171,17 +171,17 @@
     {
       label: 'Open Install Path',
       key: 'openFolder',
-      icon: renderIcon(Folder16Regular)
+      icon: renderIcon(FolderOutlined)
     },
     {
       label: 'Create Shortcut',
       key: 'createShortcut',
-      icon: renderIcon(Link16Regular)
+      icon: renderIcon(LinkOutlined)
     },
     {
       label: 'Game Info',
       key: 'gameInfo',
-      icon: renderIcon(Info16Regular)
+      icon: renderIcon(InfoOutlined)
     },
     {
       type: 'divider',
@@ -190,12 +190,12 @@
     {
       label: 'Backup Save',
       key: 'backup',
-      icon: renderIcon(ArrowDownload16Regular)
+      icon: renderIcon(DownloadOutlined)
     },
     {
       label: 'Delete',
       key: 'delete',
-      icon: renderIcon(Delete16Regular)
+      icon: renderIcon(DeleteOutlined)
     }
   ]
 

@@ -114,7 +114,7 @@
                 <n-tooltip trigger="hover" placement="top">
                   <template #trigger>
                     <n-icon size="24" style="color: #909399; cursor: help; flex-shrink: 0;">
-                      <Info16Regular />
+                      <InfoOutlined />
                     </n-icon>
                   </template>
                   <div style="max-width: 280px; line-height: 1.5;">
@@ -124,6 +124,8 @@
                     directory<br>
                     • <strong>Process mode:</strong> for handling extreme cases - enter process names to monitor
                     specific process activities
+                    <hr>
+                    <strong>Attention: Only Folder mode is well maintained and reliable Now.</strong>
                   </div>
                 </n-tooltip>
               </div>
@@ -137,7 +139,7 @@
                   <n-button type="primary" size="small" @click="addProcessName">
                     <template #icon>
                       <n-icon>
-                        <component :is="Add16Regular" />
+                        <component :is="AddFilled" />
                       </n-icon>
                     </template>
                     Add Process
@@ -151,7 +153,7 @@
                     <n-button type="error" size="small" @click="removeProcessName(index)" style="margin-left: 8px;">
                       <template #icon>
                         <n-icon>
-                          <component :is="Delete16Regular" />
+                          <component :is="DeleteOutlined" />
                         </n-icon>
                       </template>
                     </n-button>
@@ -186,13 +188,19 @@
                 </div>
                 <div class="action-buttons">
                   <button class="action-btn" title="Select from path" @click="selectImageFromPath('icon')">
-                    <img src="/icons/plus.svg" alt="Path" class="btn-icon" />
+                    <n-icon size="20">
+                      <component :is="FolderOpenOutlined" />
+                    </n-icon>
                   </button>
                   <button class="action-btn" title="Add from URL">
-                    <img src="/icons/link.svg" alt="URL" class="btn-icon" />
+                    <n-icon size="20">
+                      <component :is="LinkOutlined" />
+                    </n-icon>
                   </button>
                   <button class="action-btn" title="Remove" @click="removeImage('icon')">
-                    <img src="/icons/trash-2.svg" alt="Remove" class="btn-icon" />
+                    <n-icon size="20">
+                      <component :is="DeleteOutlined" />
+                    </n-icon>
                   </button>
                 </div>
               </div>
@@ -210,13 +218,19 @@
                 </div>
                 <div class="action-buttons">
                   <button class="action-btn" title="Select from path" @click="selectImageFromPath('background')">
-                    <img src="/icons/plus.svg" alt="Path" class="btn-icon" />
+                    <n-icon size="20">
+                      <component :is="FolderOpenOutlined" />
+                    </n-icon>
                   </button>
                   <button class="action-btn" title="Add from URL">
-                    <img src="/icons/link.svg" alt="URL" class="btn-icon" />
+                    <n-icon size="20">
+                      <component :is="LinkOutlined" />
+                    </n-icon>
                   </button>
                   <button class="action-btn" title="Remove" @click="removeImage('background')">
-                    <img src="/icons/trash-2.svg" alt="Remove" class="btn-icon" />
+                    <n-icon size="20">
+                      <component :is="DeleteOutlined" />
+                    </n-icon>
                   </button>
                 </div>
               </div>
@@ -237,13 +251,19 @@
                 </div>
                 <div class="action-buttons">
                   <button class="action-btn" title="Select from path" @click="selectImageFromPath('cover')">
-                    <img src="/icons/plus.svg" alt="Path" class="btn-icon" />
+                    <n-icon size="20">
+                      <component :is="FolderOpenOutlined" />
+                    </n-icon>
                   </button>
                   <button class="action-btn" title="Add from URL">
-                    <img src="/icons/link.svg" alt="URL" class="btn-icon" />
+                    <n-icon size="20">
+                      <component :is="LinkOutlined" />
+                    </n-icon>
                   </button>
                   <button class="action-btn" title="Remove" @click="removeImage('cover')">
-                    <img src="/icons/trash-2.svg" alt="Remove" class="btn-icon" />
+                    <n-icon size="20">
+                      <component :is="DeleteOutlined" />
+                    </n-icon>
                   </button>
                 </div>
               </div>
@@ -262,7 +282,7 @@
                 <n-button type="primary" @click="addLink">
                   <template #icon>
                     <n-icon>
-                      <component :is="Add16Regular" />
+                      <component :is="AddFilled" />
                     </n-icon>
                   </template>
                   Add Link
@@ -276,7 +296,7 @@
                     <n-button type="error" size="small" circle @click="removeLink(index)">
                       <template #icon>
                         <n-icon>
-                          <component :is="Delete16Regular" />
+                          <component :is="DeleteOutlined" />
                         </n-icon>
                       </template>
                     </n-button>
@@ -311,7 +331,7 @@
                 <n-button type="primary" size="small" @click="addAction">
                   <template #icon>
                     <n-icon>
-                      <component :is="Add16Regular" />
+                      <component :is="AddFilled" />
                     </n-icon>
                   </template>
                   Add Action
@@ -325,7 +345,7 @@
                     <n-button type="error" size="small" text @click="removeAction(index)">
                       <template #icon>
                         <n-icon>
-                          <component :is="Delete16Regular" />
+                          <component :is="DeleteOutlined" />
                         </n-icon>
                       </template>
                     </n-button>
@@ -388,7 +408,7 @@
   import { useMessage } from 'naive-ui'
   import { NIcon } from 'naive-ui'
   import type { SelectOption } from 'naive-ui'
-  import { Add16Regular, Delete16Regular, Info16Regular } from '@vicons/fluent'
+  import { AddFilled, DeleteOutlined, InfoOutlined, FolderOpenOutlined, LinkOutlined } from '@vicons/material'
   import { useGameStore } from '../stores/game'
   import { PROC_MON_MODE } from '../constants/procMonMode'
 
@@ -774,10 +794,6 @@
     /* Crucial for flex scrolling */
     overflow: hidden;
 
-    --n-tab-text-color-active: #409eff !important;
-    --n-tab-text-color-hover: #409eff !important;
-    --n-bar-color: #409eff !important;
-
     :deep(.n-tabs-nav) {
       flex-shrink: 0;
     }
@@ -798,20 +814,6 @@
       min-height: 0;
       overflow: hidden;
       /* Ensure pane height is constrained */
-    }
-
-    :deep(.n-tabs-bar) {
-      background-color: #409eff !important;
-    }
-
-    :deep(.n-tabs-tab--active) {
-      color: #409eff !important;
-      --n-tab-text-color-active: #409eff !important;
-    }
-
-    :deep(.n-tabs-tab:hover) {
-      color: #409eff !important;
-      --n-tab-text-color-hover: #409eff !important;
     }
   }
 
@@ -1247,10 +1249,5 @@
       width: 160px;
       height: 240px;
     }
-  }
-
-  /* Dark mode: invert SVG colors */
-  html.dark .action-btn img {
-    filter: invert(1);
   }
 </style>

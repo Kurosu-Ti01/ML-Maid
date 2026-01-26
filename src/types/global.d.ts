@@ -141,6 +141,11 @@ interface Window {
     getSettings: () => Promise<any>
     saveSettings: (settings: any) => Promise<boolean>
     onSettingsInitial: (callback: (settings: any) => void) => void
+    // metadata operations
+    getAllGenres: () => Promise<string[]>
+    getAllDevelopers: () => Promise<string[]>
+    getAllPublishers: () => Promise<string[]>
+    getAllTags: () => Promise<string[]>
   }
 }
 
@@ -153,6 +158,12 @@ interface Settings {
   sorting?: {
     sortBy: 'name' | 'dateAdded' | 'lastPlayed' | 'score'
     sortOrder: 'ascending' | 'descending'
+  }
+  filtering?: {
+    genres: string[]
+    developers: string[]
+    publishers: string[]
+    tags: string[]
   }
 }
 
@@ -199,6 +210,9 @@ interface GameListItem {
   title: string
   iconImageDisplay: string
   genre: string
+  developer: string // JSON array stored as string
+  publisher: string // JSON array stored as string
+  tags: string // JSON array stored as string
   lastPlayed: string
   lastPlayedDisplay?: string // Formatted local time for display
   dateAdded: string

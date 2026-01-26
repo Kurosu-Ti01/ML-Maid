@@ -98,6 +98,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // settings operations
   getSettings: () => ipcRenderer.invoke('settings-get'),
   saveSettings: (settings: any) => ipcRenderer.invoke('settings-save', settings),
+
+  // metadata operations
+  getAllGenres: () => ipcRenderer.invoke('get-all-genres'),
+  getAllDevelopers: () => ipcRenderer.invoke('get-all-developers'),
+  getAllPublishers: () => ipcRenderer.invoke('get-all-publishers'),
+  getAllTags: () => ipcRenderer.invoke('get-all-tags'),
+
   onSettingsInitial: (callback: (settings: any) => void) => {
     ipcRenderer.on('settings-initial', (_, settings) => callback(settings));
   }

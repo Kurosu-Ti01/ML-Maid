@@ -21,7 +21,7 @@ dayjs.locale({
 })
 
 // initialize the title bar based on the current route
-function initTitlebar() {
+async function initTitlebar() {
   const titlebar = document.getElementById('titlebar')
   if (titlebar) {
     const currentRoute = window.location.hash
@@ -49,12 +49,16 @@ function initTitlebar() {
         const buttonsContainer = document.createElement('div')
         buttonsContainer.className = 'titlebar-buttons'
 
+        // Create vertical divider
+        const divider = document.createElement('div')
+        divider.className = 'titlebar-divider'
+
         // Add "Add Game" button
         const addGameButton = document.createElement('button')
         addGameButton.className = 'titlebar-button'
-        addGameButton.title = 'Add Game' // tooltip
+        addGameButton.title = 'Add' // tooltip
         addGameButton.innerHTML = `
-          <img src="icons/plus-square.svg" width="20" height="20" alt="Add Game" style="filter: brightness(0) invert(1);">
+          <img src="icons/AddOutlined.svg" width="30" height="30" alt="Add">
         `
         addGameButton.onclick = () => {
           if (window.electronAPI) {
@@ -63,20 +67,45 @@ function initTitlebar() {
         }
         buttonsContainer.appendChild(addGameButton)
 
-        // Add "Sort" button
-        const sortButton = document.createElement('button')
-        sortButton.className = 'titlebar-button'
-        sortButton.title = 'Sort Games'
-        sortButton.innerHTML = `
-          <img src="icons/sort.svg" width="20" height="20" alt="Sort" style="filter: brightness(0) invert(1);">
-        `
-        sortButton.onclick = () => {
-          window.dispatchEvent(new CustomEvent('open-sort-dialog'))
+        // Check if filters are active
+        let activeFilterCount = 0
+        try {
+          const settings = await window.electronAPI?.getSettings()
+          if (settings?.filtering) {
+            const { genres, developers, publishers, tags } = settings.filtering
+            if (genres?.length > 0) activeFilterCount++
+            if (developers?.length > 0) activeFilterCount++
+            if (publishers?.length > 0) activeFilterCount++
+            if (tags?.length > 0) activeFilterCount++
+          }
+        } catch (error) {
+          console.error('Failed to get settings for filter status:', error)
         }
-        buttonsContainer.appendChild(sortButton)
+
+        // Add Filter button with dynamic state
+        const filterButton = document.createElement('button')
+        filterButton.className = activeFilterCount > 0 ? 'titlebar-button titlebar-button-active' : 'titlebar-button'
+        filterButton.title = activeFilterCount > 0 ? `${activeFilterCount} active filter(s)` : 'Filter'
+
+        if (activeFilterCount > 0) {
+          filterButton.innerHTML = `
+            <img src="icons/FilterAltOffOutlined.svg" width="30" height="30" alt="Filter Active">
+            <span class="filter-badge">Active filters: ${activeFilterCount}</span>
+          `
+        } else {
+          filterButton.innerHTML = `
+            <img src="icons/FilterAltOutlined.svg" width="30" height="30" alt="Filter">
+          `
+        }
+
+        filterButton.onclick = () => {
+          window.dispatchEvent(new CustomEvent('open-filter-dialog'))
+        }
+        buttonsContainer.appendChild(filterButton)
 
         // Append title and buttons to titlebar
         titlebar.appendChild(titleElement)
+        titlebar.appendChild(divider)
         titlebar.appendChild(buttonsContainer)
         break
 
@@ -106,6 +135,9 @@ initTitlebar()
 
 // Listen for hash changes to update titlebar when navigating
 window.addEventListener('hashchange', initTitlebar)
+
+// Listen for filter changes to update titlebar
+window.addEventListener('filters-updated', initTitlebar)
 
 const app = createApp(App).use(router).use(pinia)
 

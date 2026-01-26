@@ -24,21 +24,78 @@ export const useGameStore = defineStore('game', () => {
     return gamesList.value.filter(game => game.genre === genre)
   })
 
-  // Lightweight data for list display with sorting
+  // Lightweight data for list display with filtering and sorting
   const gamesForList = computed(() => {
     const settingsStore = useSettingsStore()
     const sorting = settingsStore.settings.sorting
+    const filtering = settingsStore.settings.filtering
 
-    // If no sorting settings, return original list
-    if (!sorting) {
-      return gamesList.value
+    let filteredList = [...gamesList.value]
+
+    // Apply filtering if any filters are set
+    if (filtering) {
+      const hasGenreFilter = filtering.genres && filtering.genres.length > 0
+      const hasDeveloperFilter = filtering.developers && filtering.developers.length > 0
+      const hasPublisherFilter = filtering.publishers && filtering.publishers.length > 0
+      const hasTagsFilter = filtering.tags && filtering.tags.length > 0
+
+      if (hasGenreFilter || hasDeveloperFilter || hasPublisherFilter || hasTagsFilter) {
+        filteredList = filteredList.filter(game => {
+          let matchesGenre = true
+          let matchesDeveloper = true
+          let matchesPublisher = true
+          let matchesTags = true
+
+          // Genre filter: game.genre is a comma-separated string from TEXT column
+          if (hasGenreFilter) {
+            const gameGenres = game.genre ? game.genre.split(',').map(g => g.trim()) : []
+            matchesGenre = filtering.genres!.some(filterGenre =>
+              gameGenres.some(gameGenre => gameGenre === filterGenre)
+            )
+          }
+
+          // Developer filter: for now using TEXT column (will use junction table later)
+          if (hasDeveloperFilter) {
+            const gameDevelopers = game.developer ? game.developer.split(',').map(d => d.trim()) : []
+            matchesDeveloper = filtering.developers!.some(filterDev =>
+              gameDevelopers.some(gameDev => gameDev === filterDev)
+            )
+          }
+
+          // Publisher filter: for now using TEXT column (will use junction table later)
+          if (hasPublisherFilter) {
+            const gamePublishers = game.publisher ? game.publisher.split(',').map(p => p.trim()) : []
+            matchesPublisher = filtering.publishers!.some(filterPub =>
+              gamePublishers.some(gamePub => gamePub === filterPub)
+            )
+          }
+
+          // Tags filter: game.tags is a JSON array stored as string
+          if (hasTagsFilter) {
+            let gameTags: string[] = []
+            try {
+              gameTags = game.tags ? JSON.parse(game.tags) : []
+            } catch (e) {
+              gameTags = []
+            }
+            matchesTags = filtering.tags!.some(filterTag =>
+              gameTags.some(gameTag => gameTag === filterTag)
+            )
+          }
+
+          // Game must match ALL active filters (AND logic)
+          return matchesGenre && matchesDeveloper && matchesPublisher && matchesTags
+        })
+      }
     }
 
-    // Create a copy to avoid mutating the original array
-    const sortedList = [...gamesList.value]
+    // If no sorting settings, return filtered list
+    if (!sorting) {
+      return filteredList
+    }
 
-    // Sort based on settings
-    sortedList.sort((a, b) => {
+    // Sort the filtered list
+    filteredList.sort((a, b) => {
       let compareResult = 0
 
       switch (sorting.sortBy) {
@@ -64,7 +121,7 @@ export const useGameStore = defineStore('game', () => {
       return sorting.sortOrder === 'ascending' ? compareResult : -compareResult
     })
 
-    return sortedList
+    return filteredList
   })
 
   // Actions
@@ -285,7 +342,10 @@ export const useGameStore = defineStore('game', () => {
           title: data.game.title,
           iconImageDisplay: data.game.iconImageDisplay!,
           genre: data.game.genre,
-          lastPlayed: data.game.lastPlayed,
+          developer: data.game.developer || '',
+          publisher: data.game.publisher || '',
+          tags: Array.isArray(data.game.tags) ? JSON.stringify(data.game.tags) : (data.game.tags || '[]'),
+          lastPlayed: data.game.lastPlayed || '',
           dateAdded: data.game.dateAdded,
           personalScore: data.game.personalScore
         })
@@ -303,7 +363,10 @@ export const useGameStore = defineStore('game', () => {
           title: data.game.title,
           iconImageDisplay: data.game.iconImageDisplay!,
           genre: data.game.genre,
-          lastPlayed: data.game.lastPlayed,
+          developer: data.game.developer || '',
+          publisher: data.game.publisher || '',
+          tags: Array.isArray(data.game.tags) ? JSON.stringify(data.game.tags) : (data.game.tags || '[]'),
+          lastPlayed: data.game.lastPlayed || '',
           dateAdded: data.game.dateAdded,
           personalScore: data.game.personalScore
         }
