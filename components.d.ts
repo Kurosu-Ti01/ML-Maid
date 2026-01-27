@@ -31,7 +31,6 @@ declare module 'vue' {
     NInputNumber: typeof import('naive-ui')['NInputNumber']
     NMessageProvider: typeof import('naive-ui')['NMessageProvider']
     NModal: typeof import('naive-ui')['NModal']
-    NOption: typeof import('naive-ui')['NOption']
     NRadioButton: typeof import('naive-ui')['NRadioButton']
     NRadioGroup: typeof import('naive-ui')['NRadioGroup']
     NScrollbar: typeof import('naive-ui')['NScrollbar']
@@ -48,7 +47,6 @@ declare module 'vue' {
     Settings: typeof import('./src/components/Settings.vue')['default']
     SideBarGameList: typeof import('./src/components/SideBarGameList.vue')['default']
     SideBarNav: typeof import('./src/components/SideBarNav.vue')['default']
-    SortDialog: typeof import('./src/components/SortDialog.vue')['default']
     Statistics: typeof import('./src/components/Statistics.vue')['default']
   }
 }

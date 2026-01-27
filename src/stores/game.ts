@@ -21,7 +21,14 @@ export const useGameStore = defineStore('game', () => {
   })
 
   const gamesByGenre = computed(() => (genre: string) => {
-    return gamesList.value.filter(game => game.genre === genre)
+    return gamesList.value.filter(game => {
+      try {
+        const genres = game.genre ? JSON.parse(game.genre) : []
+        return genres.includes(genre)
+      } catch (e) {
+        return false
+      }
+    })
   })
 
   // Lightweight data for list display with filtering and sorting
@@ -46,25 +53,40 @@ export const useGameStore = defineStore('game', () => {
           let matchesPublisher = true
           let matchesTags = true
 
-          // Genre filter: game.genre is a comma-separated string from TEXT column
+          // Genre filter: game.genre is a JSON array stored as string
           if (hasGenreFilter) {
-            const gameGenres = game.genre ? game.genre.split(',').map(g => g.trim()) : []
+            let gameGenres: string[] = []
+            try {
+              gameGenres = game.genre ? JSON.parse(game.genre) : []
+            } catch (e) {
+              gameGenres = []
+            }
             matchesGenre = filtering.genres!.some(filterGenre =>
               gameGenres.some(gameGenre => gameGenre === filterGenre)
             )
           }
 
-          // Developer filter: for now using TEXT column (will use junction table later)
+          // Developer filter: game.developer is a JSON array stored as string
           if (hasDeveloperFilter) {
-            const gameDevelopers = game.developer ? game.developer.split(',').map(d => d.trim()) : []
+            let gameDevelopers: string[] = []
+            try {
+              gameDevelopers = game.developer ? JSON.parse(game.developer) : []
+            } catch (e) {
+              gameDevelopers = []
+            }
             matchesDeveloper = filtering.developers!.some(filterDev =>
               gameDevelopers.some(gameDev => gameDev === filterDev)
             )
           }
 
-          // Publisher filter: for now using TEXT column (will use junction table later)
+          // Publisher filter: game.publisher is a JSON array stored as string
           if (hasPublisherFilter) {
-            const gamePublishers = game.publisher ? game.publisher.split(',').map(p => p.trim()) : []
+            let gamePublishers: string[] = []
+            try {
+              gamePublishers = game.publisher ? JSON.parse(game.publisher) : []
+            } catch (e) {
+              gamePublishers = []
+            }
             matchesPublisher = filtering.publishers!.some(filterPub =>
               gamePublishers.some(gamePub => gamePub === filterPub)
             )
@@ -341,9 +363,9 @@ export const useGameStore = defineStore('game', () => {
           uuid: data.game.uuid,
           title: data.game.title,
           iconImageDisplay: data.game.iconImageDisplay!,
-          genre: data.game.genre,
-          developer: data.game.developer || '',
-          publisher: data.game.publisher || '',
+          genre: Array.isArray(data.game.genre) ? JSON.stringify(data.game.genre) : (data.game.genre || '[]'),
+          developer: Array.isArray(data.game.developer) ? JSON.stringify(data.game.developer) : (data.game.developer || '[]'),
+          publisher: Array.isArray(data.game.publisher) ? JSON.stringify(data.game.publisher) : (data.game.publisher || '[]'),
           tags: Array.isArray(data.game.tags) ? JSON.stringify(data.game.tags) : (data.game.tags || '[]'),
           lastPlayed: data.game.lastPlayed || '',
           dateAdded: data.game.dateAdded,
@@ -362,9 +384,9 @@ export const useGameStore = defineStore('game', () => {
           uuid: data.game.uuid,
           title: data.game.title,
           iconImageDisplay: data.game.iconImageDisplay!,
-          genre: data.game.genre,
-          developer: data.game.developer || '',
-          publisher: data.game.publisher || '',
+          genre: Array.isArray(data.game.genre) ? JSON.stringify(data.game.genre) : (data.game.genre || '[]'),
+          developer: Array.isArray(data.game.developer) ? JSON.stringify(data.game.developer) : (data.game.developer || '[]'),
+          publisher: Array.isArray(data.game.publisher) ? JSON.stringify(data.game.publisher) : (data.game.publisher || '[]'),
           tags: Array.isArray(data.game.tags) ? JSON.stringify(data.game.tags) : (data.game.tags || '[]'),
           lastPlayed: data.game.lastPlayed || '',
           dateAdded: data.game.dateAdded,

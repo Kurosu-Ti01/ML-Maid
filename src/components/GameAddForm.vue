@@ -10,34 +10,31 @@
               <n-input v-model:value="gameForm.title" placeholder="Enter game title" />
             </n-form-item>
 
-            <!-- Genre and Release Date in one row -->
-            <n-grid :cols="2" :x-gap="20">
-              <n-gi>
-                <n-form-item label="Genre">
-                  <n-input v-model:value="gameForm.genre" placeholder="Game genre" />
-                </n-form-item>
-              </n-gi>
-              <n-gi>
-                <n-form-item label="Release Date">
-                  <n-date-picker v-model:value="gameForm.releaseDate" placeholder="Release date (e.g., 2017-07-20)"
-                    type="date" style="width: 100%;" />
-                </n-form-item>
-              </n-gi>
-            </n-grid>
+            <n-form-item label="Genre">
+              <n-select ref="genreSelectRef" v-model:value="gameForm.genre" filterable multiple tag
+                :options="genreOptions" placeholder="Select or create genres (comma-separated)" :loading="loadingGenres"
+                :render-tag="renderTag" :show-arrow="false"
+                @create="(label: string) => handleCreateTag(label, 'genre')" />
+            </n-form-item>
 
-            <!-- Developer and Publisher in one row -->
-            <n-grid :cols="2" :x-gap="20">
-              <n-gi>
-                <n-form-item label="Developer">
-                  <n-input v-model:value="gameForm.developer" placeholder="Game developer" />
-                </n-form-item>
-              </n-gi>
-              <n-gi>
-                <n-form-item label="Publisher">
-                  <n-input v-model:value="gameForm.publisher" placeholder="Game publisher" />
-                </n-form-item>
-              </n-gi>
-            </n-grid>
+            <n-form-item label="Developer">
+              <n-select ref="developerSelectRef" v-model:value="gameForm.developer" filterable multiple tag
+                :options="developerOptions" placeholder="Select or create developers (comma-separated)"
+                :loading="loadingDevelopers" :render-tag="renderTag" :show-arrow="false"
+                @create="(label: string) => handleCreateTag(label, 'developer')" />
+            </n-form-item>
+
+            <n-form-item label="Publisher">
+              <n-select ref="publisherSelectRef" v-model:value="gameForm.publisher" filterable multiple tag
+                :options="publisherOptions" placeholder="Select or create publishers (comma-separated)"
+                :loading="loadingPublishers" :render-tag="renderTag" :show-arrow="false"
+                @create="(label: string) => handleCreateTag(label, 'publisher')" />
+            </n-form-item>
+
+            <n-form-item label="Release Date">
+              <n-date-picker v-model:value="gameForm.releaseDate" placeholder="Release date (e.g., 2017-07-20)"
+                type="date" style="width: 100%;" />
+            </n-form-item>
 
             <!-- Community Score and User Score in one row -->
             <n-grid :cols="2" :x-gap="20">
@@ -56,9 +53,9 @@
             </n-grid>
 
             <n-form-item label="Tags">
-              <n-input v-model:value="tagsInput" type="textarea" :rows="4"
-                placeholder="Separate tags with commas (e.g., Romance, Visual Novel, Drama)"
-                :autosize="{ minRows: 3, maxRows: 6 }" />
+              <n-select ref="tagSelectRef" v-model:value="gameForm.tags" filterable multiple tag :options="tagOptions"
+                placeholder="Select or create tags (comma-separated)" :loading="loadingTags" :render-tag="renderTag"
+                :show-arrow="false" @create="(label: string) => handleCreateTag(label, 'tag')" />
             </n-form-item>
 
             <n-form-item label="Description">
@@ -392,7 +389,7 @@
 </template>
 
 <script setup lang="ts" name="GameAddForm">
-  import { ref, computed, toRaw } from 'vue'
+  import { ref, computed, toRaw, onMounted, nextTick } from 'vue'
   import { useMessage } from 'naive-ui'
   import { NIcon } from 'naive-ui'
   import type { SelectOption } from 'naive-ui'
@@ -419,6 +416,18 @@
     { label: 'Script', value: 'Script', disabled: true }
   ]
 
+  // Options for select components
+  const genreOptions = ref<SelectOption[]>([])
+  const developerOptions = ref<SelectOption[]>([])
+  const publisherOptions = ref<SelectOption[]>([])
+  const tagOptions = ref<SelectOption[]>([])
+
+  // Loading states
+  const loadingGenres = ref(false)
+  const loadingDevelopers = ref(false)
+  const loadingPublishers = ref(false)
+  const loadingTags = ref(false)
+
   // Active tab
   const activeTab = ref('general')
 
@@ -440,9 +449,9 @@
     timePlayed: 0,
     workingDir: '',
     folderSize: 0,
-    genre: '',
-    developer: '',
-    publisher: '',
+    genre: [],
+    developer: [],
+    publisher: [],
     releaseDate: null,
     communityScore: 0,
     personalScore: 0,
@@ -461,6 +470,12 @@
   const iconPreview = ref('')
   const backgroundPreview = ref('')
   const coverPreview = ref('')
+
+  // Refs for select components
+  const genreSelectRef = ref()
+  const developerSelectRef = ref()
+  const publisherSelectRef = ref()
+  const tagSelectRef = ref()
 
   // Handle image selection from file system
   async function selectImageFromPath(imageType: 'icon' | 'background' | 'cover') {
@@ -641,13 +656,135 @@
     }
   }
 
-  // deal with tags input
-  const tagsInput = computed({
-    get: () => gameForm.value.tags.join(', '),
-    set: (value: string) => {
-      gameForm.value.tags = value.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
+  // Fetch options from database on component mount
+  onMounted(async () => {
+    try {
+      // Fetch genres
+      loadingGenres.value = true
+      if (window.electronAPI?.getAllGenres) {
+        const genres = await window.electronAPI.getAllGenres()
+        genreOptions.value = genres.map(name => ({ label: name, value: name }))
+      }
+    } catch (error) {
+      console.error('Error fetching genres:', error)
+    } finally {
+      loadingGenres.value = false
+    }
+
+    try {
+      // Fetch developers
+      loadingDevelopers.value = true
+      if (window.electronAPI?.getAllDevelopers) {
+        const developers = await window.electronAPI.getAllDevelopers()
+        developerOptions.value = developers.map(name => ({ label: name, value: name }))
+      }
+    } catch (error) {
+      console.error('Error fetching developers:', error)
+    } finally {
+      loadingDevelopers.value = false
+    }
+
+    try {
+      // Fetch publishers
+      loadingPublishers.value = true
+      if (window.electronAPI?.getAllPublishers) {
+        const publishers = await window.electronAPI.getAllPublishers()
+        publisherOptions.value = publishers.map(name => ({ label: name, value: name }))
+      }
+    } catch (error) {
+      console.error('Error fetching publishers:', error)
+    } finally {
+      loadingPublishers.value = false
+    }
+
+    try {
+      // Fetch tags
+      loadingTags.value = true
+      if (window.electronAPI?.getAllTags) {
+        const tags = await window.electronAPI.getAllTags()
+        tagOptions.value = tags.map(name => ({ label: name, value: name }))
+      }
+    } catch (error) {
+      console.error('Error fetching tags:', error)
+    } finally {
+      loadingTags.value = false
     }
   })
+
+  // Render tag function (not used currently)
+  const renderTag = undefined
+
+  // Handle tag creation with comma-separated support
+  function handleCreateTag(label: string, fieldType: 'genre' | 'developer' | 'publisher' | 'tag') {
+    // Check if the label contains commas
+    if (label && label.includes(',')) {
+      // Split by comma and process each value
+      const newValues = label
+        .split(',')
+        .map(v => v.trim())
+        .filter(v => v.length > 0)
+
+      if (newValues.length > 0) {
+        // Get current values
+        let currentValues: string[] = []
+        let selectRef: any = null
+        switch (fieldType) {
+          case 'genre':
+            currentValues = [...(gameForm.value.genre || [])]
+            selectRef = genreSelectRef.value
+            break
+          case 'developer':
+            currentValues = [...(gameForm.value.developer || [])]
+            selectRef = developerSelectRef.value
+            break
+          case 'publisher':
+            currentValues = [...(gameForm.value.publisher || [])]
+            selectRef = publisherSelectRef.value
+            break
+          case 'tag':
+            currentValues = [...(gameForm.value.tags || [])]
+            selectRef = tagSelectRef.value
+            break
+        }
+
+        // Merge with existing values, avoiding duplicates
+        const merged = [...new Set([...currentValues, ...newValues])]
+
+        // Update the form field immediately
+        switch (fieldType) {
+          case 'genre':
+            gameForm.value.genre = merged
+            break
+          case 'developer':
+            gameForm.value.developer = merged
+            break
+          case 'publisher':
+            gameForm.value.publisher = merged
+            break
+          case 'tag':
+            gameForm.value.tags = merged
+            break
+        }
+
+        // Clear the search input by blurring and refocusing the input
+        nextTick(() => {
+          if (selectRef) {
+            // Use blurInput and focusInput to operate on the internal input element
+            selectRef.blurInput()
+            setTimeout(() => {
+              selectRef.focusInput()
+            }, 320) // Slight delay to ensure blur has taken effect
+          }
+        })
+
+        // Return false to prevent the original comma-separated text from being added
+        return false
+      }
+    }
+
+    // No comma found, return the label as-is to add it normally
+    return label
+  }
 
   // deal with description input
   const descriptionInput = computed({

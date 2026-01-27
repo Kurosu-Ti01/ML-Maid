@@ -81,15 +81,15 @@
               </div>
               <div class="info-row">
                 <div class="info-label">Genre</div>
-                <div class="info-content">{{ gameData.genre }}</div>
+                <div class="info-content">{{ Array.isArray(gameData.genre) ? gameData.genre.join(', ') : gameData.genre }}</div>
               </div>
               <div class="info-row">
                 <div class="info-label">Developer</div>
-                <div class="info-content">{{ gameData.developer }}</div>
+                <div class="info-content">{{ Array.isArray(gameData.developer) ? gameData.developer.join(', ') : gameData.developer }}</div>
               </div>
               <div class="info-row">
                 <div class="info-label">Publisher</div>
-                <div class="info-content">{{ gameData.publisher }}</div>
+                <div class="info-content">{{ Array.isArray(gameData.publisher) ? gameData.publisher.join(', ') : gameData.publisher }}</div>
               </div>
               <div class="info-row">
                 <div class="info-label">Release Date</div>
