@@ -135,6 +135,7 @@
 
   .settings-card {
     border-radius: 8px;
+    background-color: var(--bg-info-content);
   }
 
   .card-header {

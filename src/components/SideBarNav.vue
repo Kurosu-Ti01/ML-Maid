@@ -62,6 +62,7 @@
   }
 
   .icon-btn {
+    color: var(--color-info-content);
     width: 40px;
     height: 40px;
     background: transparent;
