@@ -17,9 +17,9 @@ interface GameData {
   timePlayed?: number
   workingDir?: string
   folderSize?: number
-  genre?: string
-  developer?: string
-  publisher?: string
+  genre?: string[]
+  developer?: string[]
+  publisher?: string[]
   releaseDate?: string
   communityScore?: number
   personalScore?: number
@@ -44,15 +44,60 @@ interface GameModuleConfig {
 export function setupGameHandlers(config: GameModuleConfig) {
   const { metaDb, win, appDataPath, tempPath, imgPath_game, isDev } = config
 
+  // Helper function to get or create metadata ID
+  function getOrCreateMetadataId(table: string, name: string): number {
+    const existing = metaDb.prepare(`SELECT id FROM ${table} WHERE name = ?`).get(name)
+    if (existing) {
+      return existing.id
+    }
+    const result = metaDb.prepare(`INSERT INTO ${table} (name) VALUES (?)`).run(name)
+    return result.lastInsertRowid as number
+  }
+
+  // Helper function to sync junction table
+  function syncJunctionTable(gameUuid: string, junctionTable: string, metadataTable: string, idColumn: string, values: string[]) {
+    // Delete existing associations
+    metaDb.prepare(`DELETE FROM ${junctionTable} WHERE game_uuid = ?`).run(gameUuid)
+    
+    // Insert new associations
+    if (values && values.length > 0) {
+      const insertStmt = metaDb.prepare(`INSERT INTO ${junctionTable} (game_uuid, ${idColumn}) VALUES (?, ?)`)
+      for (const value of values) {
+        const trimmedValue = value.trim()
+        if (trimmedValue) {
+          const metadataId = getOrCreateMetadataId(metadataTable, trimmedValue)
+          insertStmt.run(gameUuid, metadataId)
+        }
+      }
+    }
+  }
+
+  // Helper function to get metadata from junction table
+  function getMetadataFromJunction(gameUuid: string, junctionTable: string, metadataTable: string, idColumn: string): string[] {
+    const rows = metaDb.prepare(`
+      SELECT m.name 
+      FROM ${metadataTable} m
+      INNER JOIN ${junctionTable} j ON m.id = j.${idColumn}
+      WHERE j.game_uuid = ?
+      ORDER BY m.name
+    `).all(gameUuid)
+    return rows.map((row: any) => row.name)
+  }
+
   // Get game by ID
   ipcMain.handle('get-game-by-id', (_, gameid: string) => {
     const result = metaDb.prepare('SELECT * FROM games WHERE uuid = ?').get(gameid)
 
     if (result) {
-      // Formate result
+      // Format result
       try {
-        // Parse JSON fields back to objects/arrays
-        result.tags = result.tags ? JSON.parse(result.tags) : []
+        // Get metadata from junction tables
+        result.genre = getMetadataFromJunction(gameid, 'game_genres', 'genres', 'genre_id')
+        result.developer = getMetadataFromJunction(gameid, 'game_developers', 'developers', 'developer_id')
+        result.publisher = getMetadataFromJunction(gameid, 'game_publishers', 'publishers', 'publisher_id')
+        result.tags = getMetadataFromJunction(gameid, 'game_tags', 'tags', 'tag_id')
+        
+        // Parse other JSON fields
         result.links = result.links ? JSON.parse(result.links) : {}
         result.description = result.description ? JSON.parse(result.description) : []
         result.actions = result.actions ? JSON.parse(result.actions) : []
@@ -66,8 +111,11 @@ export function setupGameHandlers(config: GameModuleConfig) {
         result.coverImageDisplay = convertToLocalFileUrl(result.coverImage, appDataPath, isDev)
         result.backgroundImageDisplay = convertToLocalFileUrl(result.backgroundImage, appDataPath, isDev)
       } catch (error) {
-        console.error('Error parsing JSON fields for game:', gameid, error)
-        // Fallback to default values if parsing fails
+        console.error('Error loading metadata for game:', gameid, error)
+        // Fallback to default values if loading fails
+        result.genre = []
+        result.developer = []
+        result.publisher = []
         result.tags = []
         result.links = {}
         result.description = []
@@ -117,9 +165,9 @@ export function setupGameHandlers(config: GameModuleConfig) {
       const stmt = metaDb.prepare(
         `INSERT INTO games (
         uuid, title, coverImage, backgroundImage, iconImage, lastPlayed, timePlayed,
-        workingDir, folderSize, genre, developer, publisher, releaseDate,
-        communityScore, personalScore, tags, links, description, actions, procMonMode, procNames, dateAdded
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        workingDir, folderSize, releaseDate,
+        communityScore, personalScore, links, description, actions, procMonMode, procNames, dateAdded
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
 
       stmt.run(
@@ -132,13 +180,9 @@ export function setupGameHandlers(config: GameModuleConfig) {
         updatedGame.timePlayed || 0,
         updatedGame.workingDir || '',
         updatedGame.folderSize || 0,
-        updatedGame.genre || '',
-        updatedGame.developer || '',
-        updatedGame.publisher || '',
         updatedGame.releaseDate || '',
         updatedGame.communityScore || 0,
         updatedGame.personalScore || 0,
-        JSON.stringify(updatedGame.tags || []),
         JSON.stringify(updatedGame.links || {}),
         JSON.stringify(updatedGame.description || []),
         JSON.stringify(updatedGame.actions || []),
@@ -148,6 +192,12 @@ export function setupGameHandlers(config: GameModuleConfig) {
         JSON.stringify(updatedGame.procNames || []),  // Store process names as JSON
         updatedGame.dateAdded
       )
+
+      // Sync metadata to junction tables
+      syncJunctionTable(updatedGame.uuid, 'game_genres', 'genres', 'genre_id', updatedGame.genre || [])
+      syncJunctionTable(updatedGame.uuid, 'game_developers', 'developers', 'developer_id', updatedGame.developer || [])
+      syncJunctionTable(updatedGame.uuid, 'game_publishers', 'publishers', 'publisher_id', updatedGame.publisher || [])
+      syncJunctionTable(updatedGame.uuid, 'game_tags', 'tags', 'tag_id', updatedGame.tags || [])
 
       // For Display
       if (updatedGame.iconImage) {
@@ -187,9 +237,8 @@ export function setupGameHandlers(config: GameModuleConfig) {
       const stmt = metaDb.prepare(
         `UPDATE games SET 
         title = ?, coverImage = ?, backgroundImage = ?, iconImage = ?, lastPlayed = ?,
-        timePlayed = ?, workingDir = ?, folderSize = ?, genre = ?, developer = ?,
-        publisher = ?, releaseDate = ?, communityScore = ?, personalScore = ?, tags = ?,
-        links = ?, description = ?, actions = ?, procMonMode = ?, procNames = ?
+        timePlayed = ?, workingDir = ?, folderSize = ?, releaseDate = ?, communityScore = ?, 
+        personalScore = ?, links = ?, description = ?, actions = ?, procMonMode = ?, procNames = ?
       WHERE uuid = ?`
       )
 
@@ -202,13 +251,9 @@ export function setupGameHandlers(config: GameModuleConfig) {
         updatedGame.timePlayed || 0,
         updatedGame.workingDir || '',
         updatedGame.folderSize || 0,
-        updatedGame.genre || '',
-        updatedGame.developer || '',
-        updatedGame.publisher || '',
         updatedGame.releaseDate || '',
         updatedGame.communityScore || 0,
         updatedGame.personalScore || 0,
-        JSON.stringify(updatedGame.tags || []),
         JSON.stringify(updatedGame.links || {}),
         JSON.stringify(updatedGame.description || []),
         JSON.stringify(updatedGame.actions || []),
@@ -218,6 +263,12 @@ export function setupGameHandlers(config: GameModuleConfig) {
         JSON.stringify(updatedGame.procNames || []),  // Store process names as JSON
         updatedGame.uuid
       )
+
+      // Sync metadata to junction tables
+      syncJunctionTable(updatedGame.uuid, 'game_genres', 'genres', 'genre_id', updatedGame.genre || [])
+      syncJunctionTable(updatedGame.uuid, 'game_developers', 'developers', 'developer_id', updatedGame.developer || [])
+      syncJunctionTable(updatedGame.uuid, 'game_publishers', 'publishers', 'publisher_id', updatedGame.publisher || [])
+      syncJunctionTable(updatedGame.uuid, 'game_tags', 'tags', 'tag_id', updatedGame.tags || [])
 
       // For Display
       if (updatedGame.iconImage) {
