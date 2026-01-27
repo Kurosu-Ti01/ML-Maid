@@ -1,5 +1,5 @@
 <template>
-  <n-config-provider :theme-overrides="themeOverrides">
+  <n-config-provider :theme="isDark ? darkTheme : undefined" :theme-overrides="themeOverrides">
     <n-message-provider>
       <n-dialog-provider>
         <RouterView />
@@ -14,10 +14,11 @@
   import { useGameStore } from './stores/game'
   import { useTheme } from '@/composables/useTheme'
   import FilterDialog from '@/components/FilterDialog.vue'
+  import { darkTheme } from 'naive-ui'
   import type { GlobalThemeOverrides } from 'naive-ui'
 
   const gameStore = useGameStore()
-  const { } = useTheme() // Initialize theme system
+  const { isDark } = useTheme() // Custom composable to manage theme
 
   const themeOverrides: GlobalThemeOverrides = {
     common: {
