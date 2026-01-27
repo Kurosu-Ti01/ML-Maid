@@ -81,19 +81,24 @@
               </div>
             </div>
 
-            <div class="stats-recent-sessions-el">
+            <div class="stats-recent-sessions">
               <h4>Recent Game Sessions</h4>
               <n-scrollbar class="recent-sessions-scroll">
-                <div v-if="recentSessions.length > 0" class="recent-session-list-el">
-                  <n-card v-for="(session, idx) in recentSessions" :key="idx" class="recent-session-card" hoverable>
+                <div v-if="recentSessions.length > 0" class="recent-session-list">
+                  <n-card v-for="(session, idx) in recentSessions" :key="idx" class="recent-session-card" hoverable
+                    size="small" content-style="padding: 10px;" :bordered="false">
                     <div class="recent-session-row">
-                      <span class="recent-session-title-el">{{ session.title }}</span>
-                      <span class="recent-session-time-el">{{ formatSessionTime(session.startTime) }}</span>
-                      <span class="recent-session-duration-el">{{ formatTime(session.durationSeconds) }}</span>
+                      <div class="session-info-left">
+                        <span class="recent-session-title" :title="session.title">{{ session.title }}</span>
+                        <span class="recent-session-time">{{ formatSessionTime(session.startTime) }}</span>
+                      </div>
+                      <div class="session-duration-tag">
+                        {{ formatTime(session.durationSeconds) }}
+                      </div>
                     </div>
                   </n-card>
                 </div>
-                <div v-else class="recent-session-empty-el">No recent sessions found.</div>
+                <div v-else class="recent-session-empty">No recent sessions found.</div>
               </n-scrollbar>
             </div>
           </div>
@@ -1094,34 +1099,6 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    --n-tab-text-color-active: #4080ff !important;
-    --n-tab-text-color-hover: #4080ff !important;
-    --n-bar-color: #4080ff !important;
-
-    :deep(.n-tabs-pane-wrapper) {
-      flex: 1;
-      overflow: hidden;
-    }
-
-    :deep(.n-tab-pane) {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    :deep(.n-tabs-bar) {
-      background-color: #4080ff !important;
-    }
-
-    :deep(.n-tabs-tab--active) {
-      color: #4080ff !important;
-      --n-tab-text-color-active: #4080ff !important;
-    }
-
-    :deep(.n-tabs-tab:hover) {
-      color: #4080ff !important;
-      --n-tab-text-color-hover: #4080ff !important;
-    }
   }
 
   .tab-content {
@@ -1135,7 +1112,7 @@
     color: #409eff;
     margin-top: 0;
     margin-bottom: 15px;
-    border-bottom: 2px solid #f0f0f0;
+    border-bottom: 2px solid var(--border-info-row);
     padding-bottom: 10px;
   }
 
@@ -1271,14 +1248,9 @@
   .stat-value {
     font-size: 1.8em;
     font-weight: 700;
-    color: #2c3e50;
+    color: var(--stat-value-color);
     line-height: 1.2;
     margin-bottom: 4px;
-  }
-
-  /* Dark mode adaptation if needed, assuming generic variables */
-  :global(html.dark) .stat-value {
-    color: #eee;
   }
 
   .stat-label {
@@ -1315,74 +1287,31 @@
     opacity: 0.9;
   }
 
-  /* Recent sessions styles */
-  .stats-recent-sessions {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-    padding: 20px;
-    margin-top: 20px;
-  }
-
-  .recent-session-list {
-    max-height: 200px;
-    overflow-y: auto;
-    margin-top: 10px;
-  }
-
-  .recent-session-item {
-    padding: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  }
-
-  .recent-session-item:last-child {
-    border-bottom: none;
-  }
-
-  .recent-session-title {
-    font-size: 1.1em;
-    color: #fff;
-    margin: 0;
-  }
-
-  .recent-session-meta {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.9em;
-    color: #ccc;
-    margin-top: 4px;
-  }
-
-  .recent-session-time,
-  .recent-session-duration {
-    display: inline-block;
-  }
-
-  .recent-session-empty {
-    color: #999;
-    text-align: center;
-    padding: 10px 0;
-  }
-
   /* Recent Sessions scrollbar and card */
-  .stats-recent-sessions-el {
-    height: 80%;
+  .stats-recent-sessions {
+    height: 90%;
     width: 55%;
     margin-left: 10px;
-    background: #fff;
+    background: var(--bg-info-content);
     border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(64, 158, 255, 0.08);
-    padding: 18px 12px 12px 12px;
+    box-shadow: var(--shadow-info-table);
+    padding: 6px 0 12px 12px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
+    border: 1px solid var(--border-info-row);
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
   }
 
-  .stats-recent-sessions-el h4 {
+  .stats-recent-sessions h4 {
+    font-size: 1.2em;
+    font-weight: 600;
     margin: 0 0 10px 0;
-    color: #409eff;
-    border-bottom: 2px solid #f0f0f0;
-    padding-bottom: 8px;
+    color: var(--color-info-label);
+    border-bottom: 2px solid var(--border-info-row);
+    padding-bottom: 4px;
     flex-shrink: 0;
+    transition: color 0.3s ease, border-color 0.3s ease;
   }
 
   .recent-sessions-scroll {
@@ -1390,54 +1319,83 @@
     min-height: 0;
   }
 
-  .recent-session-list-el {
+  .recent-session-list {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 8px;
+    padding-right: 4px;
+    padding-top: 4px;
   }
 
   .recent-session-card {
-    border-radius: 4px;
-    background: #ecf4fd;
-    box-shadow: 0 1px 4px rgba(64, 158, 255, 0.07);
+    border-radius: 6px;
+    transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+    background-color: var(--siderbar-list-bg);
+    border: 1px solid var(--game-item-border);
   }
 
-  :deep(.recent-session-card .n-card__content) {
-    padding: 12px 12px;
+  .recent-session-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    background-color: var(--game-item-hover-bg);
+    border-color: var(--color-link);
   }
 
   .recent-session-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
   }
 
-  .recent-session-title-el {
-    font-weight: 500;
-    color: #409eff;
+  .session-info-left {
+    display: flex;
+    flex-direction: column;
     flex: 1;
+    overflow: hidden;
+    gap: 4px;
+  }
+
+  .recent-session-title {
+    font-weight: 600;
+    font-size: 1.05em;
+    color: var(--color-info-content);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    transition: color 0.3s ease;
   }
 
-  .recent-session-time-el {
-    color: #666;
-    font-size: 0.95em;
-    min-width: 110px;
+  .recent-session-card:hover .recent-session-title {
+    color: var(--color-link);
   }
 
-  .recent-session-duration-el {
-    color: #67c23a;
-    font-size: 1em;
-    min-width: 60px;
-    text-align: right;
+  .recent-session-time {
+    color: var(--color-muted);
+    font-size: 0.85em;
   }
 
-  .recent-session-empty-el {
-    color: #999;
+  .session-duration-tag {
+    font-size: 0.9em;
+    font-weight: 700;
+    color: var(--color-playtime);
+    background-color: rgba(161, 116, 233, 0.1);
+    padding: 4px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+  }
+
+  .recent-session-card:hover .session-duration-tag {
+    background-color: var(--color-playtime);
+    color: #fff;
+  }
+
+  .recent-session-empty {
+    color: var(--color-muted);
     text-align: center;
-    padding: 10px 0;
+    padding: 30px 0;
+    font-style: italic;
+    opacity: 0.8;
   }
 </style>

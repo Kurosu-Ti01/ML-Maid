@@ -34,13 +34,14 @@
             <div class="button-group">
               <n-button type="primary" size="large" color="#4080ff"
                 style="font-weight: bold; font-size: 1.2em; margin: 10px 5px; padding: 0 40px;"
-                @click="handlePlayGame">Play</n-button>
+                @click="handlePlayGame"><span style="color: var(--color-info-content)">Play</span></n-button>
               <n-button type="primary" size="large" color="#4080ff"
-                style="font-weight: bold; font-size: 1.2em; margin: 10px 5px;" @click="openEditWindow">Edit</n-button>
+                style="font-weight: bold; font-size: 1.2em; margin: 10px 5px;" @click="openEditWindow"><span
+                  style="color: var(--color-info-content)">Edit</span></n-button>
               <n-dropdown trigger="click" :options="dropdownOptions" @select="handleMenuCommand">
                 <n-button type="primary" size="large" color="#4080ff"
                   style="font-weight: bold; font-size: 1.2em; margin: 10px 5px;">
-                  ...
+                  <span style="color: var(--color-info-content)">...</span>
                 </n-button>
               </n-dropdown>
               <div class="game-playtime-text">
@@ -127,7 +128,7 @@
             </div>
           </div>
           <div class="description-container">
-            <n-card style="margin:10px;">
+            <n-card class="description-card">
               <template #header>
                 <span style="font-size: 1.5em; color: #409eff; font-weight: bold;">Description</span>
               </template>
@@ -559,6 +560,12 @@
     width: 60%;
     height: auto;
     margin: 0 5px;
+  }
+
+  .description-card {
+    margin: 10px;
+    width: 97%;
+    background: var(--bg-info-content);
   }
 
   .description-text {

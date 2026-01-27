@@ -42,4 +42,7 @@ html.dark {
     --image-area-bg: #272727;
     --ation-btn-bg: #383838;
     --link-action-item-bg: #242424;
+
+    /* Statistics */
+    --stat-value-color: #eee;
 }
