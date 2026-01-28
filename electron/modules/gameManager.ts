@@ -58,7 +58,7 @@ export function setupGameHandlers(config: GameModuleConfig) {
   function syncJunctionTable(gameUuid: string, junctionTable: string, metadataTable: string, idColumn: string, values: string[]) {
     // Delete existing associations
     metaDb.prepare(`DELETE FROM ${junctionTable} WHERE game_uuid = ?`).run(gameUuid)
-    
+
     // Insert new associations
     if (values && values.length > 0) {
       const insertStmt = metaDb.prepare(`INSERT INTO ${junctionTable} (game_uuid, ${idColumn}) VALUES (?, ?)`)
@@ -96,7 +96,7 @@ export function setupGameHandlers(config: GameModuleConfig) {
         result.developer = getMetadataFromJunction(gameid, 'game_developers', 'developers', 'developer_id')
         result.publisher = getMetadataFromJunction(gameid, 'game_publishers', 'publishers', 'publisher_id')
         result.tags = getMetadataFromJunction(gameid, 'game_tags', 'tags', 'tag_id')
-        
+
         // Parse other JSON fields
         result.links = result.links ? JSON.parse(result.links) : {}
         result.description = result.description ? JSON.parse(result.description) : []
@@ -129,12 +129,40 @@ export function setupGameHandlers(config: GameModuleConfig) {
 
   // Get games list (lightweight - only fields needed for list display)
   ipcMain.handle('get-games-list', () => {
-    // Only select the fields needed for list display - much faster!
-    const games = metaDb.prepare('SELECT uuid, title, iconImage, genre, developer, publisher, tags, lastPlayed, dateAdded, personalScore FROM games').all()
+    // Use a single query with LEFT JOINs to fetch all metadata efficiently
+    // Using json_group_array to aggregate related metadata into arrays
+    const games = metaDb.prepare(`
+      SELECT 
+        g.uuid,
+        g.title,
+        g.iconImage,
+        g.lastPlayed,
+        g.dateAdded,
+        g.personalScore,
+        COALESCE(json_group_array(DISTINCT genres.name) FILTER (WHERE genres.name IS NOT NULL), '[]') as genre,
+        COALESCE(json_group_array(DISTINCT developers.name) FILTER (WHERE developers.name IS NOT NULL), '[]') as developer,
+        COALESCE(json_group_array(DISTINCT publishers.name) FILTER (WHERE publishers.name IS NOT NULL), '[]') as publisher,
+        COALESCE(json_group_array(DISTINCT tags.name) FILTER (WHERE tags.name IS NOT NULL), '[]') as tags
+      FROM games g
+      LEFT JOIN game_genres gg ON g.uuid = gg.game_uuid
+      LEFT JOIN genres ON gg.genre_id = genres.id
+      LEFT JOIN game_developers gd ON g.uuid = gd.game_uuid
+      LEFT JOIN developers ON gd.developer_id = developers.id
+      LEFT JOIN game_publishers gp ON g.uuid = gp.game_uuid
+      LEFT JOIN publishers ON gp.publisher_id = publishers.id
+      LEFT JOIN game_tags gt ON g.uuid = gt.game_uuid
+      LEFT JOIN tags ON gt.tag_id = tags.id
+      GROUP BY g.uuid
+      ORDER BY g.rowid
+    `).all()
 
-    // Add formatted display date and convert icon paths for each game
+    // Parse JSON arrays and add display fields
     return games.map((game: any) => ({
       ...game,
+      genre: JSON.parse(game.genre),
+      developer: JSON.parse(game.developer),
+      publisher: JSON.parse(game.publisher),
+      tags: JSON.parse(game.tags),
       lastPlayedDisplay: formatISOToLocal(game.lastPlayed || ''),
       iconImageDisplay: convertToLocalFileUrl(game.iconImage, appDataPath, isDev)
     }))
@@ -302,12 +330,44 @@ export function setupGameHandlers(config: GameModuleConfig) {
         throw new Error(`Game with UUID ${uuid} not found`)
       }
 
-      // Delete the game from database
+      // Delete the game from database (junction table records will be auto-deleted via ON DELETE CASCADE)
       const deleteStmt = metaDb.prepare('DELETE FROM games WHERE uuid = ?')
       const result = deleteStmt.run(uuid)
 
       if (result.changes === 0) {
         throw new Error(`Failed to delete game with UUID ${uuid}`)
+      }
+
+      // Clean up orphaned metadata (genres/developers/publishers/tags that are no longer associated with any game)
+      try {
+        // Delete orphaned genres
+        metaDb.prepare(`
+          DELETE FROM genres 
+          WHERE id NOT IN (SELECT DISTINCT genre_id FROM game_genres)
+        `).run()
+
+        // Delete orphaned developers
+        metaDb.prepare(`
+          DELETE FROM developers 
+          WHERE id NOT IN (SELECT DISTINCT developer_id FROM game_developers)
+        `).run()
+
+        // Delete orphaned publishers
+        metaDb.prepare(`
+          DELETE FROM publishers 
+          WHERE id NOT IN (SELECT DISTINCT publisher_id FROM game_publishers)
+        `).run()
+
+        // Delete orphaned tags
+        metaDb.prepare(`
+          DELETE FROM tags 
+          WHERE id NOT IN (SELECT DISTINCT tag_id FROM game_tags)
+        `).run()
+
+        console.log('Cleaned up orphaned metadata entries')
+      } catch (cleanupError) {
+        console.warn('Warning: Failed to clean up orphaned metadata:', cleanupError)
+        // Don't throw error here, as the game deletion was successful
       }
 
       // Delete associated image files

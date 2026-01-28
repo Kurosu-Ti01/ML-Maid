@@ -11,6 +11,7 @@ export const useGameStore = defineStore('game', () => {
   const isLoadingDetail = ref<Set<string>>(new Set()) // IDs of games whose details are being loaded
   const error = ref<string | null>(null)
   const listLastUpdated = ref<Date | null>(null)
+  const searchQuery = ref<string>('') // Search query for filtering games by title
 
   // Getters
   const gamesCount = computed(() => gamesList.value.length)
@@ -20,17 +21,6 @@ export const useGameStore = defineStore('game', () => {
     return gameDetailsCache.value.get(uuid) || null
   })
 
-  const gamesByGenre = computed(() => (genre: string) => {
-    return gamesList.value.filter(game => {
-      try {
-        const genres = game.genre ? JSON.parse(game.genre) : []
-        return genres.includes(genre)
-      } catch (e) {
-        return false
-      }
-    })
-  })
-
   // Lightweight data for list display with filtering and sorting
   const gamesForList = computed(() => {
     const settingsStore = useSettingsStore()
@@ -38,6 +28,14 @@ export const useGameStore = defineStore('game', () => {
     const filtering = settingsStore.settings.filtering
 
     let filteredList = [...gamesList.value]
+
+    // Apply search query filter
+    if (searchQuery.value.trim()) {
+      const query = searchQuery.value.toLowerCase().trim()
+      filteredList = filteredList.filter(game =>
+        game.title.toLowerCase().includes(query)
+      )
+    }
 
     // Apply filtering if any filters are set
     if (filtering) {
@@ -53,55 +51,31 @@ export const useGameStore = defineStore('game', () => {
           let matchesPublisher = true
           let matchesTags = true
 
-          // Genre filter: game.genre is a JSON array stored as string
+          // Genre filter: game.genre is a string array
           if (hasGenreFilter) {
-            let gameGenres: string[] = []
-            try {
-              gameGenres = game.genre ? JSON.parse(game.genre) : []
-            } catch (e) {
-              gameGenres = []
-            }
             matchesGenre = filtering.genres!.some(filterGenre =>
-              gameGenres.some(gameGenre => gameGenre === filterGenre)
+              game.genre.some(gameGenre => gameGenre === filterGenre)
             )
           }
 
-          // Developer filter: game.developer is a JSON array stored as string
+          // Developer filter: game.developer is a string array
           if (hasDeveloperFilter) {
-            let gameDevelopers: string[] = []
-            try {
-              gameDevelopers = game.developer ? JSON.parse(game.developer) : []
-            } catch (e) {
-              gameDevelopers = []
-            }
             matchesDeveloper = filtering.developers!.some(filterDev =>
-              gameDevelopers.some(gameDev => gameDev === filterDev)
+              game.developer.some(gameDev => gameDev === filterDev)
             )
           }
 
-          // Publisher filter: game.publisher is a JSON array stored as string
+          // Publisher filter: game.publisher is a string array
           if (hasPublisherFilter) {
-            let gamePublishers: string[] = []
-            try {
-              gamePublishers = game.publisher ? JSON.parse(game.publisher) : []
-            } catch (e) {
-              gamePublishers = []
-            }
             matchesPublisher = filtering.publishers!.some(filterPub =>
-              gamePublishers.some(gamePub => gamePub === filterPub)
+              game.publisher.some(gamePub => gamePub === filterPub)
             )
           }
 
-          // Tags filter: game.tags is a JSON array stored as string
+          // Tags filter: game.tags is a string array
           if (hasTagsFilter) {
-            let gameTags: string[] = []
-            try {
-              gameTags = game.tags ? JSON.parse(game.tags) : []
-            } catch (e) {
-              gameTags = []
-            }
             matchesTags = filtering.tags!.some(filterTag =>
-              gameTags.some(gameTag => gameTag === filterTag)
+              game.tags.some(gameTag => gameTag === filterTag)
             )
           }
 
@@ -363,10 +337,10 @@ export const useGameStore = defineStore('game', () => {
           uuid: data.game.uuid,
           title: data.game.title,
           iconImageDisplay: data.game.iconImageDisplay!,
-          genre: Array.isArray(data.game.genre) ? JSON.stringify(data.game.genre) : (data.game.genre || '[]'),
-          developer: Array.isArray(data.game.developer) ? JSON.stringify(data.game.developer) : (data.game.developer || '[]'),
-          publisher: Array.isArray(data.game.publisher) ? JSON.stringify(data.game.publisher) : (data.game.publisher || '[]'),
-          tags: Array.isArray(data.game.tags) ? JSON.stringify(data.game.tags) : (data.game.tags || '[]'),
+          genre: data.game.genre || [],
+          developer: data.game.developer || [],
+          publisher: data.game.publisher || [],
+          tags: data.game.tags || [],
           lastPlayed: data.game.lastPlayed || '',
           dateAdded: data.game.dateAdded,
           personalScore: data.game.personalScore
@@ -384,10 +358,10 @@ export const useGameStore = defineStore('game', () => {
           uuid: data.game.uuid,
           title: data.game.title,
           iconImageDisplay: data.game.iconImageDisplay!,
-          genre: Array.isArray(data.game.genre) ? JSON.stringify(data.game.genre) : (data.game.genre || '[]'),
-          developer: Array.isArray(data.game.developer) ? JSON.stringify(data.game.developer) : (data.game.developer || '[]'),
-          publisher: Array.isArray(data.game.publisher) ? JSON.stringify(data.game.publisher) : (data.game.publisher || '[]'),
-          tags: Array.isArray(data.game.tags) ? JSON.stringify(data.game.tags) : (data.game.tags || '[]'),
+          genre: data.game.genre || [],
+          developer: data.game.developer || [],
+          publisher: data.game.publisher || [],
+          tags: data.game.tags || [],
           lastPlayed: data.game.lastPlayed || '',
           dateAdded: data.game.dateAdded,
           personalScore: data.game.personalScore
@@ -459,10 +433,16 @@ export const useGameStore = defineStore('game', () => {
     }
   }
 
+  // Set search query
+  function setSearchQuery(query: string) {
+    searchQuery.value = query
+  }
+
   return {
     // State
     currentGameUuid,
     gamesList,
+    searchQuery,
     gameDetailsCache,
     isLoadingList,
     isLoadingDetail,
@@ -472,7 +452,6 @@ export const useGameStore = defineStore('game', () => {
     // Getters
     gamesCount,
     getGameById,
-    gamesByGenre,
     gamesForList,
 
     // Actions
@@ -484,6 +463,7 @@ export const useGameStore = defineStore('game', () => {
     refreshGamesList,
     clearError,
     clearDetailsCache,
-    initialize
+    initialize,
+    setSearchQuery
   }
 })
