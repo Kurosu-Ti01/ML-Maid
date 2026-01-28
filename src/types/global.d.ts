@@ -209,10 +209,10 @@ interface GameListItem {
   uuid: string
   title: string
   iconImageDisplay: string
-  genre: string // JSON array stored as string
-  developer: string // JSON array stored as string
-  publisher: string // JSON array stored as string
-  tags: string // JSON array stored as string
+  genre: string[]
+  developer: string[]
+  publisher: string[]
+  tags: string[]
   lastPlayed: string
   lastPlayedDisplay?: string // Formatted local time for display
   dateAdded: string

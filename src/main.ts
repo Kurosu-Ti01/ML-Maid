@@ -47,7 +47,7 @@ async function initTitlebar() {
 
         // Create buttons container
         const buttonsContainer = document.createElement('div')
-        buttonsContainer.className = 'titlebar-buttons'
+        buttonsContainer.className = 'titlebar-buttons-container'
 
         // Create vertical divider
         const divider = document.createElement('div')
@@ -103,10 +103,28 @@ async function initTitlebar() {
         }
         buttonsContainer.appendChild(filterButton)
 
-        // Append title and buttons to titlebar
+        // Add Search box
+        const searchContainer = document.createElement('div')
+        searchContainer.className = 'titlebar-search-container'
+
+        const searchInput = document.createElement('input')
+        searchInput.type = 'text'
+        searchInput.className = 'titlebar-search-input'
+        searchInput.placeholder = 'Search games...'
+
+        // Dispatch search event when input changes
+        searchInput.addEventListener('input', (e) => {
+          const query = (e.target as HTMLInputElement).value
+          window.dispatchEvent(new CustomEvent('search-games', { detail: query }))
+        })
+
+        searchContainer.appendChild(searchInput)
+
+        // Append title, buttons, search to titlebar
         titlebar.appendChild(titleElement)
         titlebar.appendChild(divider)
         titlebar.appendChild(buttonsContainer)
+        titlebar.appendChild(searchContainer)
         break
 
       case '#/edit':

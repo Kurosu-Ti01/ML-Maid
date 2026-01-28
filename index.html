@@ -91,7 +91,8 @@
     margin: 0 15px;
   }
 
-  .titlebar-buttons {
+  .titlebar-buttons-container {
+    width: 15%;
     display: flex;
     align-items: center;
     gap: 5px;
@@ -130,6 +131,55 @@
     color: #4080ff;
     font-weight: 600;
     white-space: nowrap;
+  }
+
+  .titlebar-search-container {
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+    -webkit-app-region: no-drag;
+  }
+
+  .titlebar-search-input {
+    width: 250px;
+    height: 28px;
+    padding: 4px 12px;
+    font-size: 0.85rem;
+    border: 1px solid rgba(64, 128, 255, 0.3);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #303133;
+    outline: none;
+    transition: all 0.2s;
+    -webkit-app-region: no-drag;
+  }
+
+  .titlebar-search-input:focus {
+    border-color: #4080ff;
+    background: #ffffff;
+    box-shadow: 0 0 0 2px rgba(64, 128, 255, 0.1);
+  }
+
+  .titlebar-search-input::placeholder {
+    color: #909399;
+    font-size: 0.85rem;
+  }
+
+  /* Dark theme styles for search input */
+  html.dark .titlebar-search-input {
+    background: rgba(42, 42, 42, 0.9);
+    color: #e5eaf3;
+    border-color: rgba(121, 187, 255, 0.3);
+  }
+
+  html.dark .titlebar-search-input:focus {
+    border-color: #79bbff;
+    background: #2a2a2a;
+    box-shadow: 0 0 0 2px rgba(121, 187, 255, 0.15);
+  }
+
+  html.dark .titlebar-search-input::placeholder {
+    color: #6c6e72;
   }
 
   .titlebar-button:hover {

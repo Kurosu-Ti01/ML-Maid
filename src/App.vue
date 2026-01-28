@@ -35,6 +35,12 @@
   onMounted(async () => {
     // Initialize games data when app starts
     await gameStore.initialize()
+
+    // Listen for search events from titlebar
+    window.addEventListener('search-games', (e: Event) => {
+      const customEvent = e as CustomEvent
+      gameStore.setSearchQuery(customEvent.detail || '')
+    })
   })
 </script>
 
