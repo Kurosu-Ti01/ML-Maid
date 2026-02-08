@@ -1,0 +1,350 @@
+{
+  "app": {
+    "name": "ML-Maid"
+  },
+  "titlebar": {
+    "add": "Add",
+    "filter": "Filter",
+    "activeFilters": "{count} active filter(s)",
+    "activeFiltersLabel": "Active filters: {count}",
+    "searchPlaceholder": "Search games...",
+    "editGame": "Edit Game",
+    "addGame": "Add Game"
+  },
+  "sidebar": {
+    "loadingGames": "Loading games...",
+    "error": "Error: {message}",
+    "noGames": "No games here (x_x)"
+  },
+  "gameInfo": {
+    "loading": "Loading game data...",
+    "noGameSelected": "No game selected",
+    "selectGameHint": "Please select a game from the sidebar",
+    "play": "Play",
+    "edit": "Edit",
+    "timePlayed": "Time Played",
+    "lastPlayed": "Last Played",
+    "workingPath": "Working Path",
+    "folderSize": "Folder Size",
+    "genre": "Genre",
+    "developer": "Developer",
+    "publisher": "Publisher",
+    "releaseDate": "Release Date",
+    "communityScore": "Community Score",
+    "userScore": "User Score",
+    "links": "Links",
+    "tags": "Tags",
+    "description": "Description",
+    "dropdown": {
+      "openInstallPath": "Open Install Path",
+      "createShortcut": "Create Shortcut",
+      "gameInfo": "Game Info",
+      "backupSave": "Backup Save",
+      "delete": "Delete"
+    },
+    "messages": {
+      "noGameData": "No game data available",
+      "launching": "Launching game...",
+      "noExecutable": "No executable path configured. Please edit the game and add an action.",
+      "launchSuccess": "Game launched successfully!",
+      "launchFailed": "Failed to launch game",
+      "launchError": "Failed to launch game: {error}",
+      "confirmDeletion": "Confirm Deletion",
+      "deleteConfirm": "Are you sure you want to delete the game \"{title}\"?",
+      "deleteButton": "Delete",
+      "cancelButton": "Cancel",
+      "deleting": "Deleting Game...",
+      "deleteSuccess": "Delete Game Successfully",
+      "deleteError": "Failed to delete game: {error}",
+      "unknownError": "Unknown error",
+      "noUrl": "No URL provided",
+      "externalLinkUnavailable": "External link API not available",
+      "linkError": "Failed to open link: {error}",
+      "noInstallPath": "No install path specified",
+      "openedFolder": "Opened install path in file explorer",
+      "folderApiUnavailable": "Folder opening API not available",
+      "folderError": "Failed to open folder: {error}",
+      "notImplemented": "This function is not implemented yet",
+      "placeholder": "This is just a placeholder.\nMay not be implemented in the future."
+    }
+  },
+  "gameForm": {
+    "tabs": {
+      "general": "General",
+      "advanced": "Advanced",
+      "media": "Media",
+      "links": "Links",
+      "actions": "Actions",
+      "script": "Script"
+    },
+    "fields": {
+      "title": "Title",
+      "genre": "Genre",
+      "developer": "Developer",
+      "publisher": "Publisher",
+      "releaseDate": "Release Date",
+      "communityScore": "Community Score",
+      "userScore": "User Score",
+      "tags": "Tags",
+      "description": "Description",
+      "uuid": "UUID",
+      "installPath": "Install Path",
+      "installSize": "Install Size",
+      "timePlayed": "Time Played",
+      "lastPlayed": "Last Played",
+      "monitorMode": "Monitor Mode",
+      "processNames": "Process Names",
+      "actionName": "Action Name",
+      "type": "Type",
+      "actionType": "Type",
+      "executablePath": "Executable Path",
+      "parameters": "Parameters",
+      "linkName": "Link Name",
+      "linkUrl": "URL",
+      "url": "URL"
+    },
+    "placeholders": {
+      "enterTitle": "Enter game title",
+      "title": "Enter game title",
+      "selectGenres": "Select or create genres (comma-separated)",
+      "genre": "Select or create genres (comma-separated)",
+      "selectDevelopers": "Select or create developers (comma-separated)",
+      "developer": "Select or create developers (comma-separated)",
+      "selectPublishers": "Select or create publishers (comma-separated)",
+      "publisher": "Select or create publishers (comma-separated)",
+      "releaseDate": "Release date (e.g., 2017-07-20)",
+      "communityScore": "Community score (0-100)",
+      "userScore": "User score (0-100)",
+      "selectTags": "Select or create tags (comma-separated)",
+      "tags": "Select or create tags (comma-separated)",
+      "description": "Each line is a new paragraph",
+      "uuid": "Unique identifier for the game",
+      "installPath": "Game installation path",
+      "installSize": "Installation size in bytes",
+      "timePlayed": "Time played in seconds",
+      "lastPlayed": "Select last played date",
+      "monitorMode": "Select process monitoring mode",
+      "processName": "Enter process name (e.g., game.exe)",
+      "actionName": "Enter action name (e.g., Play)",
+      "actionType": "Select action type",
+      "executablePath": "Path to executable file",
+      "parameters": "Optional command line parameters (NOT AVAILABLE YET)",
+      "linkName": "Enter link name (e.g., VNDB, Official Site)",
+      "linkUrl": "Enter URL (e.g., https://vndb.org/...)",
+      "url": "Enter URL (e.g., https://vndb.org/...)"
+    },
+    "buttons": {
+      "browse": "Browse",
+      "save": "Save",
+      "cancel": "Cancel",
+      "addLink": "Add Link",
+      "addAction": "Add Action",
+      "addProcess": "Add Process"
+    },
+    "media": {
+      "icon": "Icon",
+      "background": "Background",
+      "cover": "Cover",
+      "noIcon": "No icon selected",
+      "noBackground": "No background selected",
+      "noCover": "No cover selected",
+      "selectFromPath": "Select from path",
+      "addFromUrl": "Add from URL",
+      "remove": "Remove"
+    },
+    "sections": {
+      "gameLinks": "Game Links",
+      "gameActions": "Game Actions",
+      "processNamesHint": "Enter process names to monitor (e.g., game.exe, launcher.exe)"
+    },
+    "empty": {
+      "noLinks": "No links added yet",
+      "linksHint": "Add links to external sites like VNDB, official websites, etc.",
+      "addLinksHint": "Add links to external sites like VNDB, official websites, etc.",
+      "noActions": "No actions configured",
+      "actionsHint": "Add actions to define how to launch or interact with this game.",
+      "addActionsHint": "Add actions to define how to launch or interact with this game.",
+      "noProcessNames": "No process names added yet. Click \"Add Process\" to add process names to monitor.",
+      "processNames": "No process names added yet. Click \"Add Process\" to add process names to monitor.",
+      "processNamesHint": "Enter process names to monitor (e.g., game.exe, launcher.exe)",
+      "scriptComingSoon": "Script configuration coming soon..."
+    },
+    "tooltip": {
+      "monitorModeInfo": "This option affects how game statistics are recorded:",
+      "monitorMode": "This option affects how game statistics are recorded:<br>\u2022 <strong>File mode:</strong> monitors only the process launched by actions<br>\u2022 <strong>Folder mode:</strong> monitors all executable processes created in the game's working directory<br>\u2022 <strong>Process mode:</strong> for handling extreme cases - enter process names to monitor specific process activities<hr><strong>Attention: Only Folder mode is well maintained and reliable Now.</strong>",
+      "fileMode": "File mode:",
+      "fileModeDesc": "monitors only the process launched by actions",
+      "folderMode": "Folder mode:",
+      "folderModeDesc": "monitors all executable processes created in the game's working directory",
+      "processMode": "Process mode:",
+      "processModeDesc": "for handling extreme cases - enter process names to monitor specific process activities",
+      "attention": "Attention: Only Folder mode is well maintained and reliable Now."
+    },
+    "options": {
+      "fileMode": "File Mode",
+      "folderMode": "Folder Mode",
+      "processMode": "Process Mode",
+      "file": "File",
+      "link": "Link",
+      "script": "Script"
+    },
+    "messages": {
+      "fileSelectionUnavailable": "File selection API not available",
+      "failedSelectImage": "Failed to select image",
+      "imageUpdated": "{imageType} image updated successfully!",
+      "failedProcessImage": "Failed to process image",
+      "imageApiUnavailable": "Image processing API not available",
+      "imageRemoved": "{imageType} image removed",
+      "actionAdded": "Action added",
+      "actionRemoved": "Action removed",
+      "executableUpdated": "Executable path updated",
+      "failedSelectExe": "Failed to select executable",
+      "installPathUpdated": "Install path updated",
+      "folderSelectionUnavailable": "Folder selection API not available",
+      "failedSelectFolder": "Failed to select folder",
+      "linkAdded": "Link added",
+      "linkRemoved": "Link removed",
+      "processNameAdded": "Process name added",
+      "processNameRemoved": "Process name removed",
+      "saveSuccess": "Game information saved successfully!",
+      "addFailed": "Failed to add game",
+      "saveFailed": "Failed to save game information"
+    }
+  },
+  "filter": {
+    "title": "Filter and Sort Games",
+    "filterOptions": "Filter Options",
+    "sortOptions": "Sort Options",
+    "genre": "Genre",
+    "developer": "Developer",
+    "publisher": "Publisher",
+    "tags": "Tags",
+    "sortBy": "Sort By",
+    "order": "Order",
+    "placeholders": {
+      "searchGenres": "Type to search genres...",
+      "searchDevelopers": "Type to search developers...",
+      "searchPublishers": "Type to search publishers...",
+      "searchTags": "Type to search tags...",
+      "genre": "Type to search genres...",
+      "developer": "Type to search developers...",
+      "publisher": "Type to search publishers...",
+      "tags": "Type to search tags...",
+      "select": "Select"
+    },
+    "buttons": {
+      "addGenre": "Add Genre",
+      "addDeveloper": "Add Developer",
+      "addPublisher": "Add Publisher",
+      "addTag": "Add Tag",
+      "resetFilters": "Reset Filters",
+      "cancel": "Cancel",
+      "confirm": "Confirm"
+    },
+    "sortByOptions": {
+      "name": "Name",
+      "dateAdded": "Date Added",
+      "lastPlayed": "Last Played",
+      "score": "Score"
+    },
+    "sortOrder": {
+      "ascending": "Ascending",
+      "descending": "Descending"
+    },
+    "messages": {
+      "notInDatabase": "\"{value}\" does not exist in the database",
+      "alreadyAdded": "\"{value}\" is already added",
+      "filtersCleared": "Filters cleared",
+      "loadFailed": "Failed to load filter options",
+      "failedLoadOptions": "Failed to load filter options",
+      "filtersSaved": "Filters and sorting saved ({count} filters active)",
+      "sortingSaved": "Sorting preferences saved"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "generalSettings": "General Settings",
+    "theme": "Theme",
+    "language": "Language",
+    "minimizeToTray": "Minimize to Tray",
+    "selectTheme": "Select theme",
+    "selectLanguage": "Select language",
+    "themeOptions": {
+      "light": "Light",
+      "dark": "Dark",
+      "followSystem": "Follow System"
+    },
+    "switchTrue": "True",
+    "switchFalse": "False",
+    "true": "True",
+    "false": "False"
+  },
+  "statistics": {
+    "tabs": {
+      "main": "Main",
+      "day": "Day",
+      "week": "Week",
+      "month": "Month",
+      "year": "Year"
+    },
+    "overall": "Overall Statistics",
+    "overallStatistics": "Overall Statistics",
+    "totalPlayTime": "Total Play Time",
+    "today": "Today",
+    "gamesPlayed": "Games Played",
+    "thisWeek": "This Week",
+    "totalSessions": "Total Sessions",
+    "thisMonth": "This Month",
+    "recentSessions": "Recent Game Sessions",
+    "noRecentSessions": "No recent sessions found.",
+    "daily": "Daily Statistics",
+    "dailyStatistics": "Daily Statistics",
+    "weekly": "Weekly Statistics",
+    "weeklyStatistics": "Weekly Statistics",
+    "monthly": "Monthly Statistics",
+    "monthlyStatistics": "Monthly Statistics",
+    "yearly": "Yearly Statistics",
+    "yearlyStatistics": "Yearly Statistics",
+    "loadingChart": "Loading chart...",
+    "datePicker": {
+      "today": "Today",
+      "thisWeek": "This Week",
+      "thisMonth": "This Month",
+      "thisYear": "This Year"
+    },
+    "charts": {
+      "dailyTimeline": "Daily Gaming Timeline",
+      "weeklyHours": "Weekly Gaming Hours by Game",
+      "dailyPlayTime": "Daily Total Play Time",
+      "yearlyPlayTime": "Yearly Daily Play Time",
+      "hours": "Hours",
+      "gamingSessions": "Gaming Sessions",
+      "totalHours": "Total Hours",
+      "duration": "Duration:",
+      "time": "Time",
+      "minutes": "minutes",
+      "launch": "Launch:",
+      "unknown": "Unknown"
+    },
+    "weekDays": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    }
+  },
+  "electron": {
+    "tray": {
+      "show": "Show ML-Maid",
+      "exit": "Exit"
+    },
+    "dialog": {
+      "imagesOrExecutables": "Images or Executable Files",
+      "allFiles": "All Files",
+      "executableFiles": "Executable Files"
+    }
+  }
+}

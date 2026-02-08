@@ -1,0 +1,350 @@
+{
+  "app": {
+    "name": "ML-Maid"
+  },
+  "titlebar": {
+    "add": "添加",
+    "filter": "筛选",
+    "activeFilters": "{count} 个筛选条件已激活",
+    "activeFiltersLabel": "已激活筛选: {count}",
+    "searchPlaceholder": "搜索游戏...",
+    "editGame": "编辑游戏",
+    "addGame": "添加游戏"
+  },
+  "sidebar": {
+    "loadingGames": "正在加载游戏列表...",
+    "error": "错误: {message}",
+    "noGames": "这里没有游戏 (x_x)"
+  },
+  "gameInfo": {
+    "loading": "正在加载游戏数据...",
+    "noGameSelected": "未选择游戏",
+    "selectGameHint": "请从侧边栏选择一个游戏",
+    "play": "启动",
+    "edit": "编辑",
+    "timePlayed": "游戏时长",
+    "lastPlayed": "上次游玩",
+    "workingPath": "工作路径",
+    "folderSize": "文件夹大小",
+    "genre": "类型",
+    "developer": "开发商",
+    "publisher": "发行商",
+    "releaseDate": "发行日期",
+    "communityScore": "社区评分",
+    "userScore": "用户评分",
+    "links": "链接",
+    "tags": "标签",
+    "description": "简介",
+    "dropdown": {
+      "openInstallPath": "打开安装路径",
+      "createShortcut": "创建快捷方式",
+      "gameInfo": "游戏信息",
+      "backupSave": "备份存档",
+      "delete": "删除"
+    },
+    "messages": {
+      "noGameData": "没有可用的游戏数据",
+      "launching": "正在启动游戏...",
+      "noExecutable": "未配置可执行路径，请编辑游戏并添加动作。",
+      "launchSuccess": "游戏启动成功！",
+      "launchFailed": "启动游戏失败",
+      "launchError": "启动游戏失败: {error}",
+      "confirmDeletion": "确认删除",
+      "deleteConfirm": "确定要删除游戏「{title}」吗？",
+      "deleteButton": "删除",
+      "cancelButton": "取消",
+      "deleting": "正在删除游戏...",
+      "deleteSuccess": "游戏删除成功",
+      "deleteError": "删除游戏失败: {error}",
+      "unknownError": "未知错误",
+      "noUrl": "未提供 URL",
+      "externalLinkUnavailable": "外部链接 API 不可用",
+      "linkError": "打开链接失败: {error}",
+      "noInstallPath": "未指定安装路径",
+      "openedFolder": "已在文件资源管理器中打开安装路径",
+      "folderApiUnavailable": "文件夹打开 API 不可用",
+      "folderError": "打开文件夹失败: {error}",
+      "notImplemented": "此功能尚未实现",
+      "placeholder": "这只是一个占位符。\n将来可能不会实现。"
+    }
+  },
+  "gameForm": {
+    "tabs": {
+      "general": "常规",
+      "advanced": "高级",
+      "media": "媒体",
+      "links": "链接",
+      "actions": "动作",
+      "script": "脚本"
+    },
+    "fields": {
+      "title": "标题",
+      "genre": "类型",
+      "developer": "开发商",
+      "publisher": "发行商",
+      "releaseDate": "发行日期",
+      "communityScore": "社区评分",
+      "userScore": "用户评分",
+      "tags": "标签",
+      "description": "简介",
+      "uuid": "UUID",
+      "installPath": "安装路径",
+      "installSize": "安装大小",
+      "timePlayed": "游戏时长",
+      "lastPlayed": "上次游玩",
+      "monitorMode": "监控模式",
+      "processNames": "进程名称",
+      "actionName": "动作名称",
+      "type": "类型",
+      "actionType": "类型",
+      "executablePath": "可执行路径",
+      "parameters": "参数",
+      "linkName": "链接名称",
+      "linkUrl": "URL",
+      "url": "URL"
+    },
+    "placeholders": {
+      "enterTitle": "输入游戏标题",
+      "title": "输入游戏标题",
+      "selectGenres": "选择或创建类型（逗号分隔）",
+      "genre": "选择或创建类型（逗号分隔）",
+      "selectDevelopers": "选择或创建开发商（逗号分隔）",
+      "developer": "选择或创建开发商（逗号分隔）",
+      "selectPublishers": "选择或创建发行商（逗号分隔）",
+      "publisher": "选择或创建发行商（逗号分隔）",
+      "releaseDate": "发行日期（例如 2017-07-20）",
+      "communityScore": "社区评分（0-100）",
+      "userScore": "用户评分（0-100）",
+      "selectTags": "选择或创建标签（逗号分隔）",
+      "tags": "选择或创建标签（逗号分隔）",
+      "description": "每行为一个段落",
+      "uuid": "游戏的唯一标识符",
+      "installPath": "游戏安装路径",
+      "installSize": "安装大小（字节）",
+      "timePlayed": "游戏时长（秒）",
+      "lastPlayed": "选择上次游玩日期",
+      "monitorMode": "选择进程监控模式",
+      "processName": "输入进程名称（例如 game.exe）",
+      "actionName": "输入动作名称（例如 启动）",
+      "actionType": "选择动作类型",
+      "executablePath": "可执行文件路径",
+      "parameters": "可选的命令行参数（尚不可用）",
+      "linkName": "输入链接名称（例如 VNDB, 官方网站）",
+      "linkUrl": "输入 URL（例如 https://vndb.org/...）",
+      "url": "输入 URL（例如 https://vndb.org/...）"
+    },
+    "buttons": {
+      "browse": "浏览",
+      "save": "保存",
+      "cancel": "取消",
+      "addLink": "添加链接",
+      "addAction": "添加动作",
+      "addProcess": "添加进程"
+    },
+    "media": {
+      "icon": "图标",
+      "background": "背景",
+      "cover": "封面",
+      "noIcon": "未选择图标",
+      "noBackground": "未选择背景",
+      "noCover": "未选择封面",
+      "selectFromPath": "从路径选择",
+      "addFromUrl": "从 URL 添加",
+      "remove": "移除"
+    },
+    "sections": {
+      "gameLinks": "游戏链接",
+      "gameActions": "游戏动作",
+      "processNamesHint": "输入要监控的进程名称（例如 game.exe, launcher.exe）"
+    },
+    "empty": {
+      "noLinks": "暂无链接",
+      "linksHint": "添加外部网站链接，如 VNDB、官方网站等。",
+      "addLinksHint": "添加外部网站链接，如 VNDB、官方网站等。",
+      "noActions": "未配置动作",
+      "actionsHint": "添加动作以定义如何启动或与此游戏交互。",
+      "addActionsHint": "添加动作以定义如何启动或与此游戏交互。",
+      "noProcessNames": "尚未添加进程名称。点击「添加进程」来添加要监控的进程名称。",
+      "processNames": "尚未添加进程名称。点击「添加进程」来添加要监控的进程名称。",
+      "processNamesHint": "输入要监控的进程名称（例如 game.exe, launcher.exe）",
+      "scriptComingSoon": "脚本配置即将推出..."
+    },
+    "tooltip": {
+      "monitorModeInfo": "此选项影响游戏统计数据的记录方式：",
+      "monitorMode": "此选项影响游戏统计数据的记录方式：<br>• <strong>文件模式：</strong>仅监控由动作启动的进程<br>• <strong>文件夹模式：</strong>监控在游戏工作目录中创建的所有可执行进程<br>• <strong>进程模式：</strong>用于处理极端情况 - 输入进程名称以监控特定的进程活动<hr><strong>注意：目前只有文件夹模式经过充分维护和可靠。</strong>",
+      "fileMode": "文件模式：",
+      "fileModeDesc": "仅监控由动作启动的进程",
+      "folderMode": "文件夹模式：",
+      "folderModeDesc": "监控在游戏工作目录中创建的所有可执行进程",
+      "processMode": "进程模式：",
+      "processModeDesc": "用于处理极端情况 - 输入进程名称以监控特定的进程活动",
+      "attention": "注意：目前只有文件夹模式经过充分维护和可靠。"
+    },
+    "options": {
+      "fileMode": "文件模式",
+      "folderMode": "文件夹模式",
+      "processMode": "进程模式",
+      "file": "文件",
+      "link": "链接",
+      "script": "脚本"
+    },
+    "messages": {
+      "fileSelectionUnavailable": "文件选择 API 不可用",
+      "failedSelectImage": "选择图片失败",
+      "imageUpdated": "{imageType} 图片更新成功！",
+      "failedProcessImage": "处理图片失败",
+      "imageApiUnavailable": "图片处理 API 不可用",
+      "imageRemoved": "{imageType} 图片已移除",
+      "actionAdded": "动作已添加",
+      "actionRemoved": "动作已移除",
+      "executableUpdated": "可执行路径已更新",
+      "failedSelectExe": "选择可执行文件失败",
+      "installPathUpdated": "安装路径已更新",
+      "folderSelectionUnavailable": "文件夹选择 API 不可用",
+      "failedSelectFolder": "选择文件夹失败",
+      "linkAdded": "链接已添加",
+      "linkRemoved": "链接已移除",
+      "processNameAdded": "进程名称已添加",
+      "processNameRemoved": "进程名称已移除",
+      "saveSuccess": "游戏信息保存成功！",
+      "addFailed": "添加游戏失败",
+      "saveFailed": "保存游戏信息失败"
+    }
+  },
+  "filter": {
+    "title": "筛选和排序游戏",
+    "filterOptions": "筛选选项",
+    "sortOptions": "排序选项",
+    "genre": "类型",
+    "developer": "开发商",
+    "publisher": "发行商",
+    "tags": "标签",
+    "sortBy": "排序方式",
+    "order": "排列顺序",
+    "placeholders": {
+      "searchGenres": "输入以搜索类型...",
+      "searchDevelopers": "输入以搜索开发商...",
+      "searchPublishers": "输入以搜索发行商...",
+      "searchTags": "输入以搜索标签...",
+      "genre": "输入以搜索类型...",
+      "developer": "输入以搜索开发商...",
+      "publisher": "输入以搜索发行商...",
+      "tags": "输入以搜索标签...",
+      "select": "选择"
+    },
+    "buttons": {
+      "addGenre": "添加类型",
+      "addDeveloper": "添加开发商",
+      "addPublisher": "添加发行商",
+      "addTag": "添加标签",
+      "resetFilters": "重置筛选",
+      "cancel": "取消",
+      "confirm": "确认"
+    },
+    "sortByOptions": {
+      "name": "名称",
+      "dateAdded": "添加日期",
+      "lastPlayed": "上次游玩",
+      "score": "评分"
+    },
+    "sortOrder": {
+      "ascending": "升序",
+      "descending": "降序"
+    },
+    "messages": {
+      "notInDatabase": "「{value}」不存在于数据库中",
+      "alreadyAdded": "「{value}」已经添加",
+      "filtersCleared": "筛选条件已清除",
+      "loadFailed": "加载筛选选项失败",
+      "failedLoadOptions": "加载筛选选项失败",
+      "filtersSaved": "筛选和排序已保存（{count} 个筛选条件已激活）",
+      "sortingSaved": "排序偏好已保存"
+    }
+  },
+  "settings": {
+    "title": "设置",
+    "generalSettings": "常规设置",
+    "theme": "主题",
+    "language": "语言",
+    "minimizeToTray": "最小化到托盘",
+    "selectTheme": "选择主题",
+    "selectLanguage": "选择语言",
+    "themeOptions": {
+      "light": "浅色",
+      "dark": "深色",
+      "followSystem": "跟随系统"
+    },
+    "switchTrue": "开",
+    "switchFalse": "关",
+    "true": "开",
+    "false": "关"
+  },
+  "statistics": {
+    "tabs": {
+      "main": "总览",
+      "day": "日",
+      "week": "周",
+      "month": "月",
+      "year": "年"
+    },
+    "overall": "总览统计",
+    "overallStatistics": "总览统计",
+    "totalPlayTime": "总游戏时长",
+    "today": "今天",
+    "gamesPlayed": "游戏数量",
+    "thisWeek": "本周",
+    "totalSessions": "总游玩次数",
+    "thisMonth": "本月",
+    "recentSessions": "最近游玩记录",
+    "noRecentSessions": "未找到最近的会话记录。",
+    "daily": "每日统计",
+    "dailyStatistics": "每日统计",
+    "weekly": "每周统计",
+    "weeklyStatistics": "每周统计",
+    "monthly": "每月统计",
+    "monthlyStatistics": "每月统计",
+    "yearly": "每年统计",
+    "yearlyStatistics": "每年统计",
+    "loadingChart": "正在加载图表...",
+    "datePicker": {
+      "today": "今天",
+      "thisWeek": "本周",
+      "thisMonth": "本月",
+      "thisYear": "今年"
+    },
+    "charts": {
+      "dailyTimeline": "每日游戏时间线",
+      "weeklyHours": "每周各游戏时长",
+      "dailyPlayTime": "每日总游戏时长",
+      "yearlyPlayTime": "年度每日游戏时长",
+      "hours": "小时",
+      "gamingSessions": "游戏会话",
+      "totalHours": "总时长",
+      "duration": "时长：",
+      "time": "时间",
+      "minutes": "分钟",
+      "launch": "启动方式：",
+      "unknown": "未知"
+    },
+    "weekDays": {
+      "mon": "周一",
+      "tue": "周二",
+      "wed": "周三",
+      "thu": "周四",
+      "fri": "周五",
+      "sat": "周六",
+      "sun": "周日"
+    }
+  },
+  "electron": {
+    "tray": {
+      "show": "显示 ML-Maid",
+      "exit": "退出"
+    },
+    "dialog": {
+      "imagesOrExecutables": "图片或可执行文件",
+      "allFiles": "所有文件",
+      "executableFiles": "可执行文件"
+    }
+  }
+}

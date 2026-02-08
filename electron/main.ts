@@ -12,6 +12,7 @@ import { setupFileHandlers } from './modules/fileManager.js'
 import { setupWindowHandlers } from './modules/windowManager.js'
 import { setupProtocol } from './modules/protocolHandler.js'
 import { setupSettingsHandlers, sendSettingsToRenderer, settings } from './modules/settingsManager.js'
+import { loadLocales, t as et } from './utils/i18n.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -24,6 +25,9 @@ export const MAIN_DIST = path.join(process.env.APP_ROOT, 'dist-electron')
 export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist')
 
 process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 'public') : RENDERER_DIST
+
+// Load i18n for electron process
+loadLocales(process.env.APP_ROOT)
 
 let win: BrowserWindow | null
 let tray: Tray | null = null
@@ -134,7 +138,7 @@ function createTray() {
   // Create context menu
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: 'Show ML-Maid',
+      label: et('electron.tray.show'),
       click: () => {
         if (win) {
           win.show()
@@ -143,7 +147,7 @@ function createTray() {
       }
     },
     {
-      label: 'Exit',
+      label: et('electron.tray.exit'),
       click: () => {
         // Use app.quit() to trigger before-quit
         app.quit()

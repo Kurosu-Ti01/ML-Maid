@@ -1,9 +1,9 @@
 <template>
   <div class="statistics">
     <n-tabs v-model:value="activeTab" default-value="main" class="statistics-tabs" type="line">
-      <n-tab-pane name="main" tab="Main">
+      <n-tab-pane name="main" :tab="$t('statistics.tabs.main')">
         <div class="tab-content">
-          <h3>Overall Statistics</h3>
+          <h3>{{ $t('statistics.overallStatistics') }}</h3>
           <div class="main-stats-container">
             <div class="stats-cards">
               <div class="stat-card">
@@ -14,7 +14,7 @@
                 </div>
                 <div class="stat-content">
                   <div class="stat-value">{{ formatTime(overallStats.totalPlayTime) }}</div>
-                  <div class="stat-label">Total Play Time</div>
+                  <div class="stat-label">{{ $t('statistics.totalPlayTime') }}</div>
                 </div>
               </div>
 
@@ -26,7 +26,7 @@
                 </div>
                 <div class="stat-content">
                   <div class="stat-value">{{ formatTime(overallStats.todayPlayTime) }}</div>
-                  <div class="stat-label">Today</div>
+                  <div class="stat-label">{{ $t('statistics.today') }}</div>
                 </div>
               </div>
 
@@ -39,7 +39,7 @@
                 </div>
                 <div class="stat-content">
                   <div class="stat-value">{{ overallStats.gamesPlayed }}</div>
-                  <div class="stat-label">Games Played</div>
+                  <div class="stat-label">{{ $t('statistics.gamesPlayed') }}</div>
                 </div>
               </div>
 
@@ -52,7 +52,7 @@
                 </div>
                 <div class="stat-content">
                   <div class="stat-value">{{ formatTime(overallStats.thisWeekPlayTime) }}</div>
-                  <div class="stat-label">This Week</div>
+                  <div class="stat-label">{{ $t('statistics.thisWeek') }}</div>
                 </div>
               </div>
 
@@ -64,7 +64,7 @@
                 </div>
                 <div class="stat-content">
                   <div class="stat-value">{{ overallStats.totalSessions }}</div>
-                  <div class="stat-label">Total Sessions</div>
+                  <div class="stat-label">{{ $t('statistics.totalSessions') }}</div>
                 </div>
               </div>
 
@@ -76,13 +76,13 @@
                 </div>
                 <div class="stat-content">
                   <div class="stat-value">{{ formatTime(overallStats.thisMonthPlayTime) }}</div>
-                  <div class="stat-label">This Month</div>
+                  <div class="stat-label">{{ $t('statistics.thisMonth') }}</div>
                 </div>
               </div>
             </div>
 
             <div class="stats-recent-sessions">
-              <h4>Recent Game Sessions</h4>
+              <h4>{{ $t('statistics.recentSessions') }}</h4>
               <n-scrollbar class="recent-sessions-scroll">
                 <div v-if="recentSessions.length > 0" class="recent-session-list">
                   <n-card v-for="(session, idx) in recentSessions" :key="idx" class="recent-session-card" hoverable
@@ -98,82 +98,83 @@
                     </div>
                   </n-card>
                 </div>
-                <div v-else class="recent-session-empty">No recent sessions found.</div>
+                <div v-else class="recent-session-empty">{{ $t('statistics.noRecentSessions') }}</div>
               </n-scrollbar>
             </div>
           </div>
         </div>
       </n-tab-pane>
 
-      <n-tab-pane name="day" tab="Day">
+      <n-tab-pane name="day" :tab="$t('statistics.tabs.day')">
         <div class="tab-content">
           <div class="header-section">
-            <h3>Daily Statistics</h3>
+            <h3>{{ $t('statistics.dailyStatistics') }}</h3>
             <div class="day-selector">
               <el-date-picker v-model="selectedDay" type="date" format="YYYY-MM-DD" value-format="YYYY-MM-DD"
-                placeholder="Today" @change="onDayChange" />
+                :placeholder="$t('statistics.datePicker.today')" @change="onDayChange" />
             </div>
           </div>
           <div class="chart-container">
             <v-chart v-if="isDayChartReady && activeTab === 'day'" class="chart" :option="dayChartOption" autoresize />
             <div v-else class="loading-placeholder">
-              Loading chart...
+              {{ $t('statistics.loadingChart') }}
             </div>
           </div>
         </div>
       </n-tab-pane>
 
-      <n-tab-pane name="week" tab="Week">
+      <n-tab-pane name="week" :tab="$t('statistics.tabs.week')">
         <div class="tab-content">
           <div class="header-section">
-            <h3>Weekly Statistics</h3>
+            <h3>{{ $t('statistics.weeklyStatistics') }}</h3>
             <div class="week-selector">
               <n-date-picker v-model:value="selectedWeek" type="week" format="yyyy 'Week' w" value-format="yyyy-MM-dd"
-                placeholder="This Week" :first-day-of-week="1" @update:value="onWeekChange" />
+                :placeholder="$t('statistics.datePicker.thisWeek')" :first-day-of-week="1"
+                @update:value="onWeekChange" />
             </div>
           </div>
           <div class="chart-container">
             <v-chart v-if="isChartReady && activeTab === 'week'" class="chart" :option="weekChartOption" autoresize />
             <div v-else class="loading-placeholder">
-              Loading chart...
+              {{ $t('statistics.loadingChart') }}
             </div>
           </div>
         </div>
       </n-tab-pane>
 
-      <n-tab-pane name="month" tab="Month">
+      <n-tab-pane name="month" :tab="$t('statistics.tabs.month')">
         <div class="tab-content">
           <div class="header-section">
-            <h3>Monthly Statistics</h3>
+            <h3>{{ $t('statistics.monthlyStatistics') }}</h3>
             <div class="month-selector">
               <el-date-picker v-model="selectedMonth" type="month" format="YYYY-MM" value-format="YYYY-MM"
-                placeholder="This Month" @change="onMonthChange" />
+                :placeholder="$t('statistics.datePicker.thisMonth')" @change="onMonthChange" />
             </div>
           </div>
           <div class="chart-container">
             <v-chart v-if="isMonthChartReady && activeTab === 'month'" class="chart" :option="monthChartOption"
               autoresize />
             <div v-else class="loading-placeholder">
-              Loading chart...
+              {{ $t('statistics.loadingChart') }}
             </div>
           </div>
         </div>
       </n-tab-pane>
 
-      <n-tab-pane name="year" tab="Year">
+      <n-tab-pane name="year" :tab="$t('statistics.tabs.year')">
         <div class="tab-content">
           <div class="header-section">
-            <h3>Yearly Statistics</h3>
+            <h3>{{ $t('statistics.yearlyStatistics') }}</h3>
             <div class="year-selector">
               <n-date-picker v-model:value="selectedYear" type="year" format="yyyy" value-format="yyyy"
-                placeholder="This Year" @update:value="onYearChange" />
+                :placeholder="$t('statistics.datePicker.thisYear')" @update:value="onYearChange" />
             </div>
           </div>
           <div class="chart-container">
             <v-chart v-if="isYearChartReady && activeTab === 'year'" class="chart" :option="yearChartOption"
               autoresize />
             <div v-else class="loading-placeholder">
-              Loading chart...
+              {{ $t('statistics.loadingChart') }}
             </div>
           </div>
         </div>
@@ -211,6 +212,7 @@
   import VChart, { THEME_KEY } from 'vue-echarts'
   import { useTheme } from '@/composables/useTheme'
   import { DarkTheme } from '@/assets/echarts/dark-theme'
+  import { useI18n } from 'vue-i18n'
   import type { ComposeOption } from 'echarts/core'
   import type {
     BarSeriesOption,
@@ -298,6 +300,8 @@
   // Provide theme to all child ECharts components
   provide(THEME_KEY, computed(() => isDark.value ? 'dark' : undefined))
 
+  const { t } = useI18n()
+
   // Get today's date as the default value
   const getTodayDate = () => {
     const today = new Date()
@@ -376,9 +380,9 @@
 
         return `
           <strong>${gameTitle}</strong><br/>
-          Time: ${startHour.toString().padStart(2, '0')}:${startMin.toString().padStart(2, '0')} - ${endHour.toString().padStart(2, '0')}:${endMin.toString().padStart(2, '0')}<br/>
-          Duration: ${duration.toFixed(0)} minutes<br/>
-          Launch: ${launchMethod || 'Unknown'}
+          ${t('statistics.charts.time')}: ${startHour.toString().padStart(2, '0')}:${startMin.toString().padStart(2, '0')} - ${endHour.toString().padStart(2, '0')}:${endMin.toString().padStart(2, '0')}<br/>
+          ${t('statistics.charts.duration')}: ${duration.toFixed(0)} ${t('statistics.charts.minutes')}<br/>
+          ${t('statistics.charts.launch')}: ${launchMethod || t('statistics.charts.unknown')}
         `
       }
     },
@@ -517,7 +521,7 @@
       formatter: (params: any) => {
         if (!params || params.length === 0) return ''
         const p = params[0]
-        return `${p.axisValue}<br/>${p.seriesName}: ${Number(p.data).toFixed(2)} hours`
+        return `${p.axisValue}<br/>${p.seriesName}: ${Number(p.data).toFixed(2)} ${t('statistics.charts.hours')}`
       }
     },
     legend: {
@@ -551,7 +555,7 @@
       formatter: (params: any) => {
         if (!params) return ''
         const d = params.data
-        return `${d[0]}: ${((d[1] || 0) / 3600).toFixed(2)} hours`
+        return `${d[0]}: ${((d[1] || 0) / 3600).toFixed(2)} ${t('statistics.charts.hours')}`
       }
     },
     visualMap: {
@@ -877,7 +881,15 @@
   // Process weekly data and update chart (stacked by games)
   const updateWeeklyChart = (weeklyData: any[]) => {
     // Create day names mapping starting from Monday (1=Monday, 2=Tuesday, ..., 0=Sunday)
-    const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    const dayNames = [
+      t('statistics.weekDays.mon'),
+      t('statistics.weekDays.tue'),
+      t('statistics.weekDays.wed'),
+      t('statistics.weekDays.thu'),
+      t('statistics.weekDays.fri'),
+      t('statistics.weekDays.sat'),
+      t('statistics.weekDays.sun')
+    ]
 
     // Get all unique games from the data
     const uniqueGames = [...new Set(weeklyData.map(d => d.title))].sort()
@@ -995,7 +1007,7 @@
 
     monthChartOption.value.xAxis = { type: 'category', data: labels }
     monthChartOption.value.series = [{
-      name: 'Total Hours',
+      name: t('statistics.charts.totalHours'),
       type: 'line',
       smooth: true,
       areaStyle: {},

@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { NaiveUiResolver } from 'unplugin-vue-components/resolvers'
+import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
 import path from 'node:path'
 import electron from 'vite-plugin-electron/simple'
 import vue from '@vitejs/plugin-vue'
@@ -33,6 +34,10 @@ export default defineConfig({
     }),
     Components({
       resolvers: [NaiveUiResolver()],
+    }),
+    VueI18nPlugin({
+      include: [path.resolve(__dirname, 'src/locales/**')],
+      strictMessage: false, // Allow HTML in translation strings for tooltips
     }),
     electron({
       main: {

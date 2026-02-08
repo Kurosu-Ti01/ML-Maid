@@ -2,6 +2,7 @@ import { ipcMain, dialog, shell, app } from 'electron'
 import fs from 'node:fs'
 import path from 'node:path'
 import { getMimeType } from '../utils/helpers.js'
+import { t as et } from '../utils/i18n.js'
 
 interface FileModuleConfig {
   tempPath: string
@@ -18,11 +19,11 @@ export function setupFileHandlers(config: FileModuleConfig) {
       properties: ['openFile'],
       filters: [
         {
-          name: 'Images or Executable Files',
+          name: et('electron.dialog.imagesOrExecutables'),
           extensions: ['jpg', 'jpeg', 'png', 'ico', 'gif', 'bmp', 'webp', 'exe', 'dll', 'lnk']
         },
         {
-          name: 'All Files',
+          name: et('electron.dialog.allFiles'),
           extensions: ['*']
         }
       ]
@@ -36,11 +37,11 @@ export function setupFileHandlers(config: FileModuleConfig) {
       properties: ['openFile'],
       filters: [
         {
-          name: 'Executable Files',
+          name: et('electron.dialog.executableFiles'),
           extensions: ['exe', 'bat', 'cmd', 'msi']
         },
         {
-          name: 'All Files',
+          name: et('electron.dialog.allFiles'),
           extensions: ['*']
         }
       ]

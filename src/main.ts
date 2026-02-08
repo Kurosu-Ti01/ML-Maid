@@ -2,6 +2,8 @@ import { createApp } from "vue"
 import App from './App.vue'
 import router from './router'
 import pinia from './stores'
+import i18n from './i18n'
+const t = i18n.global.t
 import { useSettingsStore } from './stores/settings'
 import './styles/base.css'
 import './styles/dark-theme.css'
@@ -56,7 +58,7 @@ async function initTitlebar() {
         // Add "Add Game" button
         const addGameButton = document.createElement('button')
         addGameButton.className = 'titlebar-button'
-        addGameButton.title = 'Add' // tooltip
+        addGameButton.title = t('titlebar.add') // tooltip
         // icons/AddOutlined.svg
         addGameButton.innerHTML = `
           <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"></path></svg>
@@ -86,13 +88,13 @@ async function initTitlebar() {
         // Add Filter button with dynamic state
         const filterButton = document.createElement('button')
         filterButton.className = activeFilterCount > 0 ? 'titlebar-button titlebar-button-active' : 'titlebar-button'
-        filterButton.title = activeFilterCount > 0 ? `${activeFilterCount} active filter(s)` : 'Filter'
+        filterButton.title = activeFilterCount > 0 ? t('titlebar.activeFilters', { count: activeFilterCount }) : t('titlebar.filter')
 
         if (activeFilterCount > 0) {
           // icons/FilterAltOffOutlined.svg
           filterButton.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"><path d="M16.95 6l-3.57 4.55l1.43 1.43c1.03-1.31 4.98-6.37 4.98-6.37A.998.998 0 0 0 19 4H6.83l2 2h8.12zM2.81 2.81L1.39 4.22L10 13v6c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-2.17l5.78 5.78l1.41-1.41L2.81 2.81z" fill="currentColor"></path></svg>
-            <span class="filter-badge">Active filters: ${activeFilterCount}</span>
+            <span class="filter-badge">${t('titlebar.activeFiltersLabel', { count: activeFilterCount })}</span>
           `
         } else {
           // icons/FilterAltOutlined.svg
@@ -113,7 +115,7 @@ async function initTitlebar() {
         const searchInput = document.createElement('input')
         searchInput.type = 'text'
         searchInput.className = 'titlebar-search-input'
-        searchInput.placeholder = 'Search games...'
+        searchInput.placeholder = t('titlebar.searchPlaceholder')
 
         // Dispatch search event when input changes
         searchInput.addEventListener('input', (e) => {
@@ -132,13 +134,13 @@ async function initTitlebar() {
 
       case '#/edit':
         // edit-window titlebar
-        titlebar.textContent = 'Edit Game'
+        titlebar.textContent = t('titlebar.editGame')
         titlebar.className = 'titlebar edit-titlebar'
         break
 
       case '#/add':
         // add-game-window titlebar
-        titlebar.textContent = 'Add Game'
+        titlebar.textContent = t('titlebar.addGame')
         titlebar.className = 'titlebar add-titlebar'
         break
 
@@ -160,7 +162,7 @@ window.addEventListener('hashchange', initTitlebar)
 // Listen for filter changes to update titlebar
 window.addEventListener('filters-updated', initTitlebar)
 
-const app = createApp(App).use(router).use(pinia)
+const app = createApp(App).use(router).use(pinia).use(i18n)
 
 // Initialize settings store and listen for initial settings from main process
 const settingsStore = useSettingsStore()

@@ -1,18 +1,18 @@
 <template>
-  <n-modal v-model:show="visible" preset="dialog" title="Filter and Sort Games" style="width: 600px;"
+  <n-modal v-model:show="visible" preset="dialog" :title="$t('filter.title')" style="width: 600px;"
     class="filter-dialog">
     <n-form :model="form" label-width="100" label-placement="left">
       <!-- Filter Section -->
-      <n-divider title-placement="left">Filter Options</n-divider>
+      <n-divider title-placement="left">{{ $t('filter.filterOptions') }}</n-divider>
 
       <!-- Genre Filter -->
-      <n-form-item label="Genre">
+      <n-form-item :label="$t('gameForm.fields.genre')">
         <n-dynamic-tags v-model:value="form.filtering.genres"
           :render-tag="(tag: string, index: number) => renderTag(tag, index, 'genres')"
           @create="(label: string) => handleCreate(label, 'genres')">
           <template #input="{ submit, deactivate }">
             <n-auto-complete ref="genreInputRef" v-model:value="genreInput" :options="genreOptions"
-              :loading="loadingGenres" placeholder="Type to search genres..."
+              :loading="loadingGenres" :placeholder="$t('filter.placeholders.genre')"
               @select="(value: string) => handleSelect(value, 'genres', submit)" @blur="deactivate"
               @keyup.enter="handleEnterKey($event, 'genres', submit)" />
           </template>
@@ -24,20 +24,20 @@
                   <AddIcon />
                 </n-icon>
               </template>
-              Add Genre
+              {{ $t('filter.buttons.addGenre') }}
             </n-button>
           </template>
         </n-dynamic-tags>
       </n-form-item>
 
       <!-- Developer Filter -->
-      <n-form-item label="Developer">
+      <n-form-item :label="$t('gameForm.fields.developer')">
         <n-dynamic-tags v-model:value="form.filtering.developers"
           :render-tag="(tag: string, index: number) => renderTag(tag, index, 'developers')"
           @create="(label: string) => handleCreate(label, 'developers')">
           <template #input="{ submit, deactivate }">
             <n-auto-complete ref="developerInputRef" v-model:value="developerInput" :options="developerOptions"
-              :loading="loadingDevelopers" placeholder="Type to search developers..."
+              :loading="loadingDevelopers" :placeholder="$t('filter.placeholders.developer')"
               @select="(value: string) => handleSelect(value, 'developers', submit)" @blur="deactivate"
               @keyup.enter="handleEnterKey($event, 'developers', submit)" />
           </template>
@@ -49,20 +49,20 @@
                   <AddIcon />
                 </n-icon>
               </template>
-              Add Developer
+              {{ $t('filter.buttons.addDeveloper') }}
             </n-button>
           </template>
         </n-dynamic-tags>
       </n-form-item>
 
       <!-- Publisher Filter -->
-      <n-form-item label="Publisher">
+      <n-form-item :label="$t('gameForm.fields.publisher')">
         <n-dynamic-tags v-model:value="form.filtering.publishers"
           :render-tag="(tag: string, index: number) => renderTag(tag, index, 'publishers')"
           @create="(label: string) => handleCreate(label, 'publishers')">
           <template #input="{ submit, deactivate }">
             <n-auto-complete ref="publisherInputRef" v-model:value="publisherInput" :options="publisherOptions"
-              :loading="loadingPublishers" placeholder="Type to search publishers..."
+              :loading="loadingPublishers" :placeholder="$t('filter.placeholders.publisher')"
               @select="(value: string) => handleSelect(value, 'publishers', submit)" @blur="deactivate"
               @keyup.enter="handleEnterKey($event, 'publishers', submit)" />
           </template>
@@ -74,21 +74,22 @@
                   <AddIcon />
                 </n-icon>
               </template>
-              Add Publisher
+              {{ $t('filter.buttons.addPublisher') }}
             </n-button>
           </template>
         </n-dynamic-tags>
       </n-form-item>
 
       <!-- Tags Filter -->
-      <n-form-item label="Tags">
+      <n-form-item :label="$t('gameForm.fields.tags')">
         <n-dynamic-tags v-model:value="form.filtering.tags"
           :render-tag="(tag: string, index: number) => renderTag(tag, index, 'tags')"
           @create="(label: string) => handleCreate(label, 'tags')">
           <template #input="{ submit, deactivate }">
             <n-auto-complete ref="tagInputRef" v-model:value="tagInput" :options="tagOptions" :loading="loadingTags"
-              placeholder="Type to search tags..." @select="(value: string) => handleSelect(value, 'tags', submit)"
-              @blur="deactivate" @keyup.enter="handleEnterKey($event, 'tags', submit)" />
+              :placeholder="$t('filter.placeholders.tags')"
+              @select="(value: string) => handleSelect(value, 'tags', submit)" @blur="deactivate"
+              @keyup.enter="handleEnterKey($event, 'tags', submit)" />
           </template>
           <template #trigger="{ activate, disabled }">
             <n-button size="small" type="primary" dashed :disabled="disabled"
@@ -98,19 +99,20 @@
                   <AddIcon />
                 </n-icon>
               </template>
-              Add Tag
+              {{ $t('filter.buttons.addTag') }}
             </n-button>
           </template>
         </n-dynamic-tags>
       </n-form-item>
 
       <!-- Sort Section -->
-      <n-divider title-placement="left">Sort Options</n-divider>
+      <n-divider title-placement="left">{{ $t('filter.sortOptions') }}</n-divider>
 
-      <n-form-item label="Sort By">
-        <n-select v-model:value="form.sorting.sortBy" placeholder="Select" :options="sortByOptions" />
+      <n-form-item :label="$t('filter.sortBy')">
+        <n-select v-model:value="form.sorting.sortBy" :placeholder="$t('filter.placeholders.select')"
+          :options="sortByOptions" />
       </n-form-item>
-      <n-form-item label="Order">
+      <n-form-item :label="$t('filter.order')">
         <n-radio-group v-model:value="form.sorting.sortOrder">
           <n-radio-button v-for="item in sortOrderOptions" :key="item.value" :value="item.value">
             {{ item.label }}
@@ -120,11 +122,11 @@
     </n-form>
     <template #action>
       <div class="dialog-footer">
-        <n-button @click="resetFilters">Reset Filters</n-button>
+        <n-button @click="resetFilters">{{ $t('filter.buttons.resetFilters') }}</n-button>
         <div style="display: flex; gap: 8px;">
-          <n-button @click="visible = false">Cancel</n-button>
+          <n-button @click="visible = false">{{ $t('filter.buttons.cancel') }}</n-button>
           <n-button type="primary" @click="save">
-            Confirm
+            {{ $t('filter.buttons.confirm') }}
           </n-button>
         </div>
       </div>
@@ -138,8 +140,10 @@
   import { useMessage, NTag, NIcon } from 'naive-ui'
   import { AddFilled as AddIcon } from '@vicons/material'
   import { storeToRefs } from 'pinia'
+  import { useI18n } from 'vue-i18n'
 
   const message = useMessage()
+  const { t } = useI18n()
   const visible = ref(false)
   const settingsStore = useSettingsStore()
   const { settings } = storeToRefs(settingsStore)
@@ -168,17 +172,17 @@
   const allPublishers = ref<string[]>([])
   const allTags = ref<string[]>([])
 
-  const sortByOptions = [
-    { label: 'Name', value: 'name' },
-    { label: 'Date Added', value: 'dateAdded' },
-    { label: 'Last Played', value: 'lastPlayed' },
-    { label: 'Score', value: 'score' },
-  ]
+  const sortByOptions = computed(() => [
+    { label: t('filter.sortByOptions.name'), value: 'name' },
+    { label: t('filter.sortByOptions.dateAdded'), value: 'dateAdded' },
+    { label: t('filter.sortByOptions.lastPlayed'), value: 'lastPlayed' },
+    { label: t('filter.sortByOptions.score'), value: 'score' },
+  ])
 
-  const sortOrderOptions = [
-    { label: 'Ascending', value: 'ascending' },
-    { label: 'Descending', value: 'descending' },
-  ]
+  const sortOrderOptions = computed(() => [
+    { label: t('filter.sortOrder.ascending'), value: 'ascending' },
+    { label: t('filter.sortOrder.descending'), value: 'descending' },
+  ])
 
   const form = ref<{
     filtering: {
@@ -288,7 +292,7 @@
       }
     } catch (error) {
       console.error('Failed to fetch metadata:', error)
-      message.error('Failed to load filter options')
+      message.error(t('filter.messages.failedLoadOptions'))
       // Use fallback data on error
       allGenres.value = []
       allDevelopers.value = []
@@ -319,13 +323,13 @@
 
     // Check if the value exists in database
     if (!allValues.includes(value)) {
-      message.warning(`"${value}" does not exist in the database`)
+      message.warning(t('filter.messages.notInDatabase', { value }))
       return
     }
 
     // Check if already added
     if (form.value.filtering[type].includes(value)) {
-      message.warning(`"${value}" is already added`)
+      message.warning(t('filter.messages.alreadyAdded', { value }))
       return
     }
 
@@ -345,13 +349,13 @@
 
     // Check if exists in database
     if (!allValues.includes(trimmed)) {
-      message.warning(`"${trimmed}" does not exist in the database`)
+      message.warning(t('filter.messages.notInDatabase', { value: trimmed }))
       return false
     }
 
     // Check if already added
     if (form.value.filtering[type].includes(trimmed)) {
-      message.warning(`"${trimmed}" is already added`)
+      message.warning(t('filter.messages.alreadyAdded', { value: trimmed }))
       return false
     }
 
@@ -385,7 +389,7 @@
       publishers: [],
       tags: []
     }
-    message.success('Filters cleared')
+    message.success(t('filter.messages.filtersCleared'))
   }
 
   async function open() {
@@ -437,9 +441,9 @@
       form.value.filtering.tags.length
 
     if (filterCount > 0) {
-      message.success(`Filters and sorting saved (${filterCount} filters active)`)
+      message.success(t('filter.messages.filtersSaved', { count: filterCount }))
     } else {
-      message.success('Sorting preferences saved')
+      message.success(t('filter.messages.sortingSaved'))
     }
 
     // Trigger event to update titlebar filter button

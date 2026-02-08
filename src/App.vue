@@ -1,5 +1,6 @@
 <template>
-  <n-config-provider :theme="isDark ? darkTheme : undefined" :theme-overrides="themeOverrides">
+  <n-config-provider :theme="isDark ? darkTheme : undefined" :theme-overrides="themeOverrides" :locale="naiveLocale"
+    :date-locale="naiveDateLocale">
     <n-message-provider>
       <n-dialog-provider>
         <RouterView />
@@ -10,15 +11,54 @@
 </template>
 
 <script setup lang="ts">
-  import { onMounted } from 'vue'
+  import { onMounted, computed, watch } from 'vue'
   import { useGameStore } from './stores/game'
+  import { useSettingsStore } from './stores/settings'
   import { useTheme } from '@/composables/useTheme'
   import FilterDialog from '@/components/FilterDialog.vue'
   import { darkTheme } from 'naive-ui'
   import type { GlobalThemeOverrides } from 'naive-ui'
+  import { zhCN as naiveZhCN, dateZhCN, jaJP as naiveJaJP, dateJaJP, enUS as naiveEnUS, dateEnUS } from 'naive-ui'
+  import { useI18n } from 'vue-i18n'
 
   const gameStore = useGameStore()
+  const settingsStore = useSettingsStore()
   const { isDark } = useTheme() // Custom composable to manage theme
+  const { locale } = useI18n()
+
+  // Sync vue-i18n locale with settings store
+  watch(
+    () => settingsStore.settings.general.language,
+    (newLang) => {
+      locale.value = newLang || 'en-US'
+    },
+    { immediate: true }
+  )
+
+  // Naive UI locale mapping
+  const naiveLocaleMap = {
+    'zh-CN': naiveZhCN,
+    'ja-JP': naiveJaJP,
+    'en-US': naiveEnUS
+  } as const
+
+  const naiveDateLocaleMap = {
+    'zh-CN': dateZhCN,
+    'ja-JP': dateJaJP,
+    'en-US': dateEnUS
+  } as const
+
+  type SupportedLocale = keyof typeof naiveLocaleMap
+
+  const naiveLocale = computed(() => {
+    const lang = settingsStore.settings.general.language as SupportedLocale
+    return naiveLocaleMap[lang] || naiveEnUS
+  })
+
+  const naiveDateLocale = computed(() => {
+    const lang = settingsStore.settings.general.language as SupportedLocale
+    return naiveDateLocaleMap[lang] || dateEnUS
+  })
 
   const themeOverrides: GlobalThemeOverrides = {
     common: {

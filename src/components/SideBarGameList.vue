@@ -2,13 +2,13 @@
   <n-scrollbar class="sidebar-container">
     <div class="sidebar-content">
       <div v-if="gameStore.isLoadingList" class="loading-container">
-        <span>Loading games...</span>
+        <span>{{ $t('sidebar.loadingGames') }}</span>
       </div>
       <div v-else-if="gameStore.error" class="error-container">
-        <span>Error: {{ gameStore.error }}</span>
+        <span>{{ $t('sidebar.error', { message: gameStore.error }) }}</span>
       </div>
       <div v-else-if="!gameStore.gamesForList || gameStore.gamesForList.length === 0" class="no-games-container">
-        <span>No games here (x_x)</span>
+        <span>{{ $t('sidebar.noGames') }}</span>
       </div>
       <div v-else>
         <div v-for="game in gameStore.gamesForList" :key="game.uuid" class="game-item" @click="selectGame(game.uuid)">

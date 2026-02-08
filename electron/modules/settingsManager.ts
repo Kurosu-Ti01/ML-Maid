@@ -3,6 +3,7 @@ import path from 'node:path'
 import ini from 'ini'
 import { ipcMain, BrowserWindow } from 'electron'
 import { updateTitleBarColor } from '../main.js'
+import { setLocale } from '../utils/i18n.js'
 
 const defaultSettings: Settings = {
   general: {
@@ -43,6 +44,11 @@ export function initializeSettings(configDir: string): void {
     // Merge loaded settings with defaults
     settings = { ...defaultSettings, ...loadedSettings }
   }
+
+  // Set electron i18n locale from settings
+  if (settings.general?.language) {
+    setLocale(settings.general.language)
+  }
 }
 
 // Save settings to file
@@ -76,6 +82,11 @@ export function setupSettingsHandlers(configDir: string) {
     // Update title bar color if theme changed
     if (oldTheme !== newSettings.general?.theme) {
       updateTitleBarColor()
+    }
+
+    // Update electron i18n locale if language changed
+    if (newSettings.general?.language) {
+      setLocale(newSettings.general.language)
     }
 
     return true

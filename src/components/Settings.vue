@@ -4,7 +4,7 @@
       <n-icon size="24" style="margin-right: 8px;">
         <component :is="SettingsOutlined" />
       </n-icon>
-      <h1 class="header-title">Settings</h1>
+      <h1 class="header-title">{{ $t('settings.title') }}</h1>
     </div>
 
     <n-card class="settings-card" hoverable>
@@ -13,28 +13,29 @@
           <n-icon size="20">
             <component :is="Wrench16Regular" />
           </n-icon>
-          <span>General Settings</span>
+          <span>{{ $t('settings.generalSettings') }}</span>
         </div>
       </template>
 
       <n-form :model="settingsStore.settings" label-width="140" class="settings-form">
-        <n-form-item label="Theme">
+        <n-form-item :label="$t('settings.theme')">
           <n-select v-model:value="settingsStore.settings.general.theme" @update:value="saveSettings"
-            placeholder="Select theme" style="width: 200px" :options="themeOptions" :render-label="renderLabel" />
+            :placeholder="$t('settings.selectTheme')" style="width: 200px" :options="themeOptions"
+            :render-label="renderLabel" />
         </n-form-item>
 
-        <n-form-item label="Language">
+        <n-form-item :label="$t('settings.language')">
           <n-select v-model:value="settingsStore.settings.general.language" @update:value="saveSettings"
-            placeholder="Select language" style="width: 200px" :options="languageOptions" />
+            :placeholder="$t('settings.selectLanguage')" style="width: 200px" :options="languageOptions" />
         </n-form-item>
 
-        <n-form-item label="Minimize to Tray">
+        <n-form-item :label="$t('settings.minimizeToTray')">
           <n-switch v-model:value="settingsStore.settings.general.minimizeToTray" @update:value="saveSettings">
             <template #checked>
-              True
+              {{ $t('settings.true') }}
             </template>
             <template #unchecked>
-              False
+              {{ $t('settings.false') }}
             </template>
           </n-switch>
         </n-form-item>
@@ -44,14 +45,16 @@
 </template>
 
 <script setup lang="ts" name="Settings">
-  import { h } from 'vue'
+  import { h, computed } from 'vue'
   import { NIcon } from 'naive-ui'
   import type { SelectOption, SelectRenderLabel } from 'naive-ui'
   import { useSettingsStore } from '../stores/settings'
   import { SettingsOutlined, DesktopWindowsOutlined } from '@vicons/material'
   import { Wrench16Regular, WeatherSunny16Regular, WeatherMoon16Regular } from '@vicons/fluent'
+  import { useI18n } from 'vue-i18n'
 
   const settingsStore = useSettingsStore()
+  const { t } = useI18n()
 
   // Render label with icon
   const renderLabel: SelectRenderLabel = (option) => {
@@ -84,20 +87,20 @@
   }
 
   // Theme options with custom render
-  const themeOptions: SelectOption[] = [
+  const themeOptions = computed(() => [
     {
-      label: 'Light',
+      label: t('settings.themeOptions.light'),
       value: 'light'
     },
     {
-      label: 'Dark',
+      label: t('settings.themeOptions.dark'),
       value: 'dark'
     },
     {
-      label: 'Follow System',
+      label: t('settings.themeOptions.followSystem'),
       value: 'auto'
     }
-  ]
+  ])
 
   // Language options
   const languageOptions: SelectOption[] = [

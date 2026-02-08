@@ -3,82 +3,83 @@
     <!-- Tab Navigation -->
     <n-tabs v-model:value="activeTab" class="tabs-container" type="line">
       <!-- General Tab -->
-      <n-tab-pane name="general" tab="General">
+      <n-tab-pane name="general" :tab="$t('gameForm.tabs.general')">
         <n-scrollbar class="tab-scrollbar">
           <n-form :model="gameForm" label-width="120" class="tab-form">
-            <n-form-item label="Title">
-              <n-input v-model:value="gameForm.title" placeholder="Enter game title" />
+            <n-form-item :label="$t('gameForm.fields.title')">
+              <n-input v-model:value="gameForm.title" :placeholder="$t('gameForm.placeholders.title')" />
             </n-form-item>
 
-            <n-form-item label="Genre">
+            <n-form-item :label="$t('gameForm.fields.genre')">
               <n-select ref="genreSelectRef" v-model:value="gameForm.genre" filterable multiple tag
-                :options="genreOptions" placeholder="Select or create genres (comma-separated)" :loading="loadingGenres"
+                :options="genreOptions" :placeholder="$t('gameForm.placeholders.genre')" :loading="loadingGenres"
                 :render-tag="renderTag" :show-arrow="false"
                 @create="(label: string) => handleCreateTag(label, 'genre')" />
             </n-form-item>
 
-            <n-form-item label="Developer">
+            <n-form-item :label="$t('gameForm.fields.developer')">
               <n-select ref="developerSelectRef" v-model:value="gameForm.developer" filterable multiple tag
-                :options="developerOptions" placeholder="Select or create developers (comma-separated)"
+                :options="developerOptions" :placeholder="$t('gameForm.placeholders.developer')"
                 :loading="loadingDevelopers" :render-tag="renderTag" :show-arrow="false"
                 @create="(label: string) => handleCreateTag(label, 'developer')" />
             </n-form-item>
 
-            <n-form-item label="Publisher">
+            <n-form-item :label="$t('gameForm.fields.publisher')">
               <n-select ref="publisherSelectRef" v-model:value="gameForm.publisher" filterable multiple tag
-                :options="publisherOptions" placeholder="Select or create publishers (comma-separated)"
+                :options="publisherOptions" :placeholder="$t('gameForm.placeholders.publisher')"
                 :loading="loadingPublishers" :render-tag="renderTag" :show-arrow="false"
                 @create="(label: string) => handleCreateTag(label, 'publisher')" />
             </n-form-item>
 
-            <n-form-item label="Release Date">
-              <n-date-picker v-model:value="gameForm.releaseDate" placeholder="Release date (e.g., 2017-07-20)"
+            <n-form-item :label="$t('gameForm.fields.releaseDate')">
+              <n-date-picker v-model:value="gameForm.releaseDate" :placeholder="$t('gameForm.placeholders.releaseDate')"
                 type="date" format="yyyy-MM-dd" value-format="yyyy-MM-dd" style="width: 100%;" />
             </n-form-item>
 
             <!-- Community Score and User Score in one row -->
             <n-grid :cols="2" :x-gap="20">
               <n-gi>
-                <n-form-item label="Community Score">
-                  <n-input-number v-model:value="gameForm.communityScore" placeholder="Community score (0-100)" :min="0"
-                    :max="100" style="width: 100%;" />
+                <n-form-item :label="$t('gameForm.fields.communityScore')">
+                  <n-input-number v-model:value="gameForm.communityScore"
+                    :placeholder="$t('gameForm.placeholders.communityScore')" :min="0" :max="100"
+                    style="width: 100%;" />
                 </n-form-item>
               </n-gi>
               <n-gi>
-                <n-form-item label="User Score">
-                  <n-input-number v-model:value="gameForm.personalScore" placeholder="User score (0-100)" :min="0"
-                    :max="100" style="width: 100%;" />
+                <n-form-item :label="$t('gameForm.fields.userScore')">
+                  <n-input-number v-model:value="gameForm.personalScore"
+                    :placeholder="$t('gameForm.placeholders.userScore')" :min="0" :max="100" style="width: 100%;" />
                 </n-form-item>
               </n-gi>
             </n-grid>
 
-            <n-form-item label="Tags">
+            <n-form-item :label="$t('gameForm.fields.tags')">
               <n-select ref="tagSelectRef" v-model:value="gameForm.tags" filterable multiple tag :options="tagOptions"
-                placeholder="Select or create tags (comma-separated)" :loading="loadingTags" :render-tag="renderTag"
+                :placeholder="$t('gameForm.placeholders.tags')" :loading="loadingTags" :render-tag="renderTag"
                 :show-arrow="false" @create="(label: string) => handleCreateTag(label, 'tag')" />
             </n-form-item>
 
-            <n-form-item label="Description">
+            <n-form-item :label="$t('gameForm.fields.description')">
               <n-input v-model:value="descriptionInput" type="textarea" :rows="8"
-                placeholder="Each line is a new paragraph" :autosize="{ minRows: 6, maxRows: 12 }" />
+                :placeholder="$t('gameForm.placeholders.description')" :autosize="{ minRows: 6, maxRows: 12 }" />
             </n-form-item>
           </n-form>
         </n-scrollbar>
       </n-tab-pane>
 
       <!-- Advanced Tab -->
-      <n-tab-pane name="advanced" tab="Advanced">
+      <n-tab-pane name="advanced" :tab="$t('gameForm.tabs.advanced')">
         <n-scrollbar class="tab-scrollbar">
           <n-form :model="gameForm" label-width="120" class="tab-form">
-            <n-form-item label="UUID">
-              <n-input v-model:value="gameForm.uuid" placeholder="Unique identifier for the game" disabled />
+            <n-form-item :label="$t('gameForm.fields.uuid')">
+              <n-input v-model:value="gameForm.uuid" :placeholder="$t('gameForm.placeholders.uuid')" disabled />
             </n-form-item>
 
-            <n-form-item label="Install Path">
+            <n-form-item :label="$t('gameForm.fields.installPath')">
               <div class="install-path-input">
-                <n-input v-model:value="gameForm.workingDir" placeholder="Game installation path" />
+                <n-input v-model:value="gameForm.workingDir" :placeholder="$t('gameForm.placeholders.installPath')" />
                 <n-button @click="selectworkingDir" style="margin-left: 8px;">
-                  Browse
+                  {{ $t('gameForm.buttons.browse') }}
                 </n-button>
               </div>
             </n-form-item>
@@ -86,27 +87,28 @@
             <!-- Install Size and Time Played in one row -->
             <n-grid :cols="2" :x-gap="20">
               <n-gi>
-                <n-form-item label="Install Size">
-                  <n-input-number v-model:value="gameForm.folderSize" placeholder="Installation size in bytes" :min="0"
-                    style="width: 100%;" />
+                <n-form-item :label="$t('gameForm.fields.installSize')">
+                  <n-input-number v-model:value="gameForm.folderSize"
+                    :placeholder="$t('gameForm.placeholders.installSize')" :min="0" style="width: 100%;" />
                 </n-form-item>
               </n-gi>
               <n-gi>
-                <n-form-item label="Time Played">
-                  <n-input-number v-model:value="gameForm.timePlayed" placeholder="Time played in seconds" :min="0"
-                    style="width: 100%;" />
+                <n-form-item :label="$t('gameForm.fields.timePlayed')">
+                  <n-input-number v-model:value="gameForm.timePlayed"
+                    :placeholder="$t('gameForm.placeholders.timePlayed')" :min="0" style="width: 100%;" />
                 </n-form-item>
               </n-gi>
             </n-grid>
 
-            <n-form-item label="Last Played">
-              <n-date-picker v-model:value="gameForm.lastPlayed" type="date" placeholder="Select last played date"
-                format="yyyy-MM-dd" value-format="yyyy-MM-dd" style="width: 100%;" />
+            <n-form-item :label="$t('gameForm.fields.lastPlayed')">
+              <n-date-picker v-model:value="gameForm.lastPlayed" type="date"
+                :placeholder="$t('gameForm.placeholders.lastPlayed')" format="yyyy-MM-dd" value-format="yyyy-MM-dd"
+                style="width: 100%;" />
             </n-form-item>
 
-            <n-form-item label="Monitor Mode">
+            <n-form-item :label="$t('gameForm.fields.monitorMode')">
               <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-                <n-select v-model:value="gameForm.procMonMode" placeholder="Select process monitoring mode"
+                <n-select v-model:value="gameForm.procMonMode" :placeholder="$t('gameForm.placeholders.monitorMode')"
                   style="width: calc(100% - 32px);" :options="procMonModeOptions" />
                 <n-tooltip trigger="hover" placement="top">
                   <template #trigger>
@@ -114,39 +116,31 @@
                       <InfoOutlined />
                     </n-icon>
                   </template>
-                  <div style="max-width: 280px; line-height: 1.5;">
-                    This option affects how game statistics are recorded:<br>
-                    • <strong>File mode:</strong> monitors only the process launched by actions<br>
-                    • <strong>Folder mode:</strong> monitors all executable processes created in the game's working
-                    directory<br>
-                    • <strong>Process mode:</strong> for handling extreme cases - enter process names to monitor
-                    specific process activities
-                    <hr>
-                    <strong>Attention: Only Folder mode is well maintained and reliable Now.</strong>
-                  </div>
+                  <div style="max-width: 280px; line-height: 1.5;" v-html="$t('gameForm.tooltip.monitorMode')"></div>
                 </n-tooltip>
               </div>
             </n-form-item>
 
             <!-- Process Names - Only show when Process Monitor is selected -->
-            <n-form-item v-if="gameForm.procMonMode === PROC_MON_MODE.PROCESS" label="Process Names">
+            <n-form-item v-if="gameForm.procMonMode === PROC_MON_MODE.PROCESS"
+              :label="$t('gameForm.fields.processNames')">
               <div class="process-names-container">
                 <div class="process-names-header">
-                  <span class="hint-text">Enter process names to monitor (e.g., game.exe, launcher.exe)</span>
+                  <span class="hint-text">{{ $t('gameForm.sections.processNamesHint') }}</span>
                   <n-button type="primary" size="small" @click="addProcessName">
                     <template #icon>
                       <n-icon>
                         <component :is="AddFilled" />
                       </n-icon>
                     </template>
-                    Add Process
+                    {{ $t('gameForm.buttons.addProcess') }}
                   </n-button>
                 </div>
 
                 <div v-if="gameForm.procNames && gameForm.procNames.length > 0" class="process-names-list">
                   <div v-for="(_, index) in gameForm.procNames" :key="index" class="process-name-item">
-                    <n-input v-model:value="gameForm.procNames[index]" placeholder="Enter process name (e.g., game.exe)"
-                      style="flex: 1;" />
+                    <n-input v-model:value="gameForm.procNames[index]"
+                      :placeholder="$t('gameForm.placeholders.processName')" style="flex: 1;" />
                     <n-button type="error" size="small" @click="removeProcessName(index)" style="margin-left: 8px;">
                       <template #icon>
                         <n-icon>
@@ -158,8 +152,7 @@
                 </div>
 
                 <div v-else class="no-process-names">
-                  <p class="hint-text">No process names added yet. Click "Add Process" to add process names to monitor.
-                  </p>
+                  <p class="hint-text">{{ $t('gameForm.empty.processNames') }}</p>
                 </div>
               </div>
             </n-form-item>
@@ -168,7 +161,7 @@
       </n-tab-pane>
 
       <!-- Media Tab -->
-      <n-tab-pane name="media" tab="Media">
+      <n-tab-pane name="media" :tab="$t('gameForm.tabs.media')">
         <n-scrollbar class="tab-scrollbar">
           <div class="media-container">
             <!-- Left Column -->
@@ -176,25 +169,26 @@
               <!-- Icon Section -->
               <div class="media-section">
                 <div class="section-header">
-                  <span class="section-title">Icon</span>
+                  <span class="section-title">{{ $t('gameForm.media.icon') }}</span>
                   <div class="title-underline"></div>
                 </div>
                 <div class="image-display-area icon-area" :class="{ 'has-image': iconPreview }">
                   <img v-if="iconPreview" :src="iconPreview" alt="Icon Preview" class="image-preview icon-preview" />
-                  <span v-else class="placeholder-text">No icon selected</span>
+                  <span v-else class="placeholder-text">{{ $t('gameForm.media.noIcon') }}</span>
                 </div>
                 <div class="action-buttons">
-                  <button class="action-btn" title="Select from path" @click="selectImageFromPath('icon')">
+                  <button class="action-btn" :title="$t('gameForm.media.selectFromPath')"
+                    @click="selectImageFromPath('icon')">
                     <n-icon size="20">
                       <component :is="FolderOpenOutlined" />
                     </n-icon>
                   </button>
-                  <button class="action-btn" title="Add from URL">
+                  <button class="action-btn" :title="$t('gameForm.media.addFromUrl')">
                     <n-icon size="20">
                       <component :is="LinkOutlined" />
                     </n-icon>
                   </button>
-                  <button class="action-btn" title="Remove" @click="removeImage('icon')">
+                  <button class="action-btn" :title="$t('gameForm.media.remove')" @click="removeImage('icon')">
                     <n-icon size="20">
                       <component :is="DeleteOutlined" />
                     </n-icon>
@@ -205,26 +199,27 @@
               <!-- Background Section -->
               <div class="media-section">
                 <div class="section-header">
-                  <span class="section-title">Background</span>
+                  <span class="section-title">{{ $t('gameForm.media.background') }}</span>
                   <div class="title-underline"></div>
                 </div>
                 <div class="image-display-area background-area" :class="{ 'has-image': backgroundPreview }">
                   <img v-if="backgroundPreview" :src="backgroundPreview" alt="Background Preview"
                     class="image-preview background-preview" />
-                  <span v-else class="placeholder-text">No background selected</span>
+                  <span v-else class="placeholder-text">{{ $t('gameForm.media.noBackground') }}</span>
                 </div>
                 <div class="action-buttons">
-                  <button class="action-btn" title="Select from path" @click="selectImageFromPath('background')">
+                  <button class="action-btn" :title="$t('gameForm.media.selectFromPath')"
+                    @click="selectImageFromPath('background')">
                     <n-icon size="20">
                       <component :is="FolderOpenOutlined" />
                     </n-icon>
                   </button>
-                  <button class="action-btn" title="Add from URL">
+                  <button class="action-btn" :title="$t('gameForm.media.addFromUrl')">
                     <n-icon size="20">
                       <component :is="LinkOutlined" />
                     </n-icon>
                   </button>
-                  <button class="action-btn" title="Remove" @click="removeImage('background')">
+                  <button class="action-btn" :title="$t('gameForm.media.remove')" @click="removeImage('background')">
                     <n-icon size="20">
                       <component :is="DeleteOutlined" />
                     </n-icon>
@@ -238,26 +233,27 @@
               <!-- Cover Section -->
               <div class="media-section full-height">
                 <div class="section-header">
-                  <span class="section-title">Cover</span>
+                  <span class="section-title">{{ $t('gameForm.media.cover') }}</span>
                   <div class="title-underline"></div>
                 </div>
                 <div class="image-display-area cover-area" :class="{ 'has-image': coverPreview }">
                   <img v-if="coverPreview" :src="coverPreview" alt="Cover Preview"
                     class="image-preview cover-preview" />
-                  <span v-else class="placeholder-text">No cover selected</span>
+                  <span v-else class="placeholder-text">{{ $t('gameForm.media.noCover') }}</span>
                 </div>
                 <div class="action-buttons">
-                  <button class="action-btn" title="Select from path" @click="selectImageFromPath('cover')">
+                  <button class="action-btn" :title="$t('gameForm.media.selectFromPath')"
+                    @click="selectImageFromPath('cover')">
                     <n-icon size="20">
                       <component :is="FolderOpenOutlined" />
                     </n-icon>
                   </button>
-                  <button class="action-btn" title="Add from URL">
+                  <button class="action-btn" :title="$t('gameForm.media.addFromUrl')">
                     <n-icon size="20">
                       <component :is="LinkOutlined" />
                     </n-icon>
                   </button>
-                  <button class="action-btn" title="Remove" @click="removeImage('cover')">
+                  <button class="action-btn" :title="$t('gameForm.media.remove')" @click="removeImage('cover')">
                     <n-icon size="20">
                       <component :is="DeleteOutlined" />
                     </n-icon>
@@ -270,19 +266,19 @@
       </n-tab-pane>
 
       <!-- Links Tab -->
-      <n-tab-pane name="links" tab="Links">
+      <n-tab-pane name="links" :tab="$t('gameForm.tabs.links')">
         <n-scrollbar class="tab-scrollbar">
           <n-form :model="gameForm" label-width="120" class="tab-form">
             <div class="links-container">
               <div class="links-header">
-                <h3>Game Links</h3>
+                <h3>{{ $t('gameForm.sections.gameLinks') }}</h3>
                 <n-button type="primary" @click="addLink">
                   <template #icon>
                     <n-icon>
                       <component :is="AddFilled" />
                     </n-icon>
                   </template>
-                  Add Link
+                  {{ $t('gameForm.buttons.addLink') }}
                 </n-button>
               </div>
 
@@ -299,19 +295,19 @@
                     </n-button>
                   </div>
 
-                  <n-form-item label="Link Name" :path="`links.${index}.name`">
-                    <n-input v-model:value="link.name" placeholder="Enter link name (e.g., VNDB, Official Site)" />
+                  <n-form-item :label="$t('gameForm.fields.linkName')" :path="`links.${index}.name`">
+                    <n-input v-model:value="link.name" :placeholder="$t('gameForm.placeholders.linkName')" />
                   </n-form-item>
 
-                  <n-form-item label="URL" :path="`links.${index}.url`">
-                    <n-input v-model:value="link.url" placeholder="Enter URL (e.g., https://vndb.org/...)" />
+                  <n-form-item :label="$t('gameForm.fields.linkUrl')" :path="`links.${index}.url`">
+                    <n-input v-model:value="link.url" :placeholder="$t('gameForm.placeholders.linkUrl')" />
                   </n-form-item>
                 </div>
               </div>
 
               <div v-else class="no-links">
-                <p>No links added yet</p>
-                <p class="hint-text">Add links to external sites like VNDB, official websites, etc.</p>
+                <p>{{ $t('gameForm.empty.noLinks') }}</p>
+                <p class="hint-text">{{ $t('gameForm.empty.addLinksHint') }}</p>
               </div>
             </div>
           </n-form>
@@ -319,19 +315,19 @@
       </n-tab-pane>
 
       <!-- Actions Tab -->
-      <n-tab-pane name="actions" tab="Actions">
+      <n-tab-pane name="actions" :tab="$t('gameForm.tabs.actions')">
         <n-scrollbar class="tab-scrollbar">
           <n-form :model="gameForm" label-width="120" class="tab-form">
             <div class="actions-container">
               <div class="actions-header">
-                <h3>Game Actions</h3>
+                <h3>{{ $t('gameForm.sections.gameActions') }}</h3>
                 <n-button type="primary" size="small" @click="addAction">
                   <template #icon>
                     <n-icon>
                       <component :is="AddFilled" />
                     </n-icon>
                   </template>
-                  Add Action
+                  {{ $t('gameForm.buttons.addAction') }}
                 </n-button>
               </div>
 
@@ -348,34 +344,34 @@
                     </n-button>
                   </div>
 
-                  <n-form-item label="Action Name">
-                    <n-input v-model:value="action.name" placeholder="Enter action name (e.g., Play)" />
+                  <n-form-item :label="$t('gameForm.fields.actionName')">
+                    <n-input v-model:value="action.name" :placeholder="$t('gameForm.placeholders.actionName')" />
                   </n-form-item>
 
-                  <n-form-item label="Type">
-                    <n-select v-model:value="action.type" placeholder="Select action type" style="width: 100%"
-                      :options="actionTypeOptions" />
+                  <n-form-item :label="$t('gameForm.fields.actionType')">
+                    <n-select v-model:value="action.type" :placeholder="$t('gameForm.placeholders.actionType')"
+                      style="width: 100%" :options="actionTypeOptions" />
                   </n-form-item>
 
-                  <n-form-item v-if="action.type === 'File'" label="Executable Path">
+                  <n-form-item v-if="action.type === 'File'" :label="$t('gameForm.fields.executablePath')">
                     <div class="executable-path-input">
-                      <n-input v-model:value="action.executablePath" placeholder="Path to executable file" />
+                      <n-input v-model:value="action.executablePath"
+                        :placeholder="$t('gameForm.placeholders.executablePath')" />
                       <n-button @click="selectExecutablePath(index)" style="margin-left: 8px;">
-                        Browse
+                        {{ $t('gameForm.buttons.browse') }}
                       </n-button>
                     </div>
                   </n-form-item>
 
-                  <n-form-item v-if="action.type === 'File'" label="Parameters">
-                    <n-input v-model:value="action.parameters"
-                      placeholder="Optional command line parameters (NOT AVAILAVLE YET)" />
+                  <n-form-item v-if="action.type === 'File'" :label="$t('gameForm.fields.parameters')">
+                    <n-input v-model:value="action.parameters" :placeholder="$t('gameForm.placeholders.parameters')" />
                   </n-form-item>
                 </div>
               </div>
 
               <div v-else class="no-actions">
-                <n-empty description="No actions configured" />
-                <p class="hint-text">Add actions to define how to launch or interact with this game.</p>
+                <n-empty :description="$t('gameForm.empty.noActions')" />
+                <p class="hint-text">{{ $t('gameForm.empty.addActionsHint') }}</p>
               </div>
             </div>
           </n-form>
@@ -383,10 +379,10 @@
       </n-tab-pane>
 
       <!-- Script Tab (TODO) -->
-      <n-tab-pane name="script" tab="Script">
+      <n-tab-pane name="script" :tab="$t('gameForm.tabs.script')">
         <n-scrollbar class="tab-scrollbar">
           <div class="placeholder-content">
-            <n-empty description="Script configuration coming soon..." />
+            <n-empty :description="$t('gameForm.empty.scriptComingSoon')" />
           </div>
         </n-scrollbar>
       </n-tab-pane>
@@ -394,8 +390,8 @@
 
     <!-- Buttons fixed at the bottom -->
     <div class="fixed-buttons">
-      <n-button type="primary" @click="saveGame" :loading="saving">Save</n-button>
-      <n-button type="error" @click="closeWindow">Cancel</n-button>
+      <n-button type="primary" @click="saveGame" :loading="saving">{{ $t('gameForm.buttons.save') }}</n-button>
+      <n-button type="error" @click="closeWindow">{{ $t('gameForm.buttons.cancel') }}</n-button>
     </div>
   </div>
 </template>
@@ -408,24 +404,26 @@
   import { AddFilled, DeleteOutlined, InfoOutlined, FolderOpenOutlined, LinkOutlined } from '@vicons/material'
   import { useGameStore } from '../stores/game'
   import { PROC_MON_MODE } from '../constants/procMonMode'
+  import { useI18n } from 'vue-i18n'
 
   // Use game store
   const gameStore = useGameStore()
   const message = useMessage()
+  const { t } = useI18n()
 
-  // Process monitor mode options
-  const procMonModeOptions: SelectOption[] = [
-    { label: 'File Mode', value: PROC_MON_MODE.FILE },
-    { label: 'Folder Mode', value: PROC_MON_MODE.FOLDER },
-    { label: 'Process Mode', value: PROC_MON_MODE.PROCESS }
-  ]
+  // Process monitor mode options (computed for reactivity)
+  const procMonModeOptions = computed(() => [
+    { label: t('gameForm.options.fileMode'), value: PROC_MON_MODE.FILE },
+    { label: t('gameForm.options.folderMode'), value: PROC_MON_MODE.FOLDER },
+    { label: t('gameForm.options.processMode'), value: PROC_MON_MODE.PROCESS }
+  ])
 
   // Action type options
-  const actionTypeOptions: SelectOption[] = [
-    { label: 'File', value: 'File' },
-    { label: 'Link', value: 'Link', disabled: true },
-    { label: 'Script', value: 'Script', disabled: true }
-  ]
+  const actionTypeOptions = computed(() => [
+    { label: t('gameForm.options.file'), value: 'File' },
+    { label: t('gameForm.options.link'), value: 'Link', disabled: true },
+    { label: t('gameForm.options.script'), value: 'Script', disabled: true }
+  ])
 
   // Options for select components
   const genreOptions = ref<SelectOption[]>([])
@@ -495,11 +493,11 @@
           await processSelectedImage(selectedPath, imageType)
         }
       } else {
-        message.error('File selection API not available')
+        message.error(t('gameForm.messages.fileSelectionUnavailable'))
       }
     } catch (error) {
       console.error('Error selecting image:', error)
-      message.error('Failed to select image')
+      message.error(t('gameForm.messages.failedSelectImage'))
     }
   }
 
@@ -536,16 +534,16 @@
               break
           }
 
-          message.success(`${imageType} image updated successfully!`)
+          message.success(t('gameForm.messages.imageUpdated', { imageType }))
         } else {
-          message.error(result.error || 'Failed to process image')
+          message.error(result.error || t('gameForm.messages.failedProcessImage'))
         }
       } else {
-        message.error('Image processing API not available')
+        message.error(t('gameForm.messages.imageApiUnavailable'))
       }
     } catch (error) {
       console.error('Error processing image:', error)
-      message.error('Failed to process image')
+      message.error(t('gameForm.messages.failedProcessImage'))
     }
   }
 
@@ -565,7 +563,7 @@
         coverPreview.value = ''
         break
     }
-    message.success(`${imageType} image removed`)
+    message.success(t('gameForm.messages.imageRemoved', { imageType }))
   }  // Actions management functions
   function addAction() {
     if (!gameForm.value.actions) {
@@ -577,13 +575,13 @@
       executablePath: '',
       parameters: ''
     })
-    message.success('Action added')
+    message.success(t('gameForm.messages.actionAdded'))
   }
 
   function removeAction(index: number) {
     if (gameForm.value.actions && index >= 0 && index < gameForm.value.actions.length) {
       gameForm.value.actions.splice(index, 1)
-      message.success('Action removed')
+      message.success(t('gameForm.messages.actionRemoved'))
     }
   }
 
@@ -596,15 +594,15 @@
           const selectedPath = result.filePaths[0]
           if (gameForm.value.actions && gameForm.value.actions[index]) {
             gameForm.value.actions[index].executablePath = selectedPath
-            message.success('Executable path updated')
+            message.success(t('gameForm.messages.executableUpdated'))
           }
         }
       } else {
-        message.error('File selection API not available')
+        message.error(t('gameForm.messages.fileSelectionUnavailable'))
       }
     } catch (error) {
       console.error('Error selecting executable:', error)
-      message.error('Failed to select executable')
+      message.error(t('gameForm.messages.failedSelectExe'))
     }
   }
 
@@ -616,14 +614,14 @@
         if (result && !result.canceled && result.filePaths.length > 0) {
           const selectedPath = result.filePaths[0]
           gameForm.value.workingDir = selectedPath
-          message.success('Install path updated')
+          message.success(t('gameForm.messages.installPathUpdated'))
         }
       } else {
-        message.error('Folder selection API not available')
+        message.error(t('gameForm.messages.folderSelectionUnavailable'))
       }
     } catch (error) {
       console.error('Error selecting folder:', error)
-      message.error('Failed to select folder')
+      message.error(t('gameForm.messages.failedSelectFolder'))
     }
   }
 
@@ -636,13 +634,13 @@
       name: '',
       url: ''
     })
-    message.success('Link added')
+    message.success(t('gameForm.messages.linkAdded'))
   }
 
   function removeLink(index: number) {
     if (gameForm.value.links && index >= 0 && index < gameForm.value.links.length) {
       gameForm.value.links.splice(index, 1)
-      message.success('Link removed')
+      message.success(t('gameForm.messages.linkRemoved'))
     }
   }
 
@@ -652,13 +650,13 @@
       gameForm.value.procNames = []
     }
     gameForm.value.procNames.push('')
-    message.success('Process name added')
+    message.success(t('gameForm.messages.processNameAdded'))
   }
 
   function removeProcessName(index: number) {
     if (gameForm.value.procNames && index >= 0 && index < gameForm.value.procNames.length) {
       gameForm.value.procNames.splice(index, 1)
-      message.success('Process name removed')
+      message.success(t('gameForm.messages.processNameRemoved'))
     }
   }
 
@@ -849,7 +847,7 @@
 
       // Use the store to update the game (which will also update the database)
       await gameStore.updateGame(plainGameData)
-      message.success('Game information saved successfully!')
+      message.success(t('gameForm.messages.saveSuccess'))
 
       // delay close window
       setTimeout(() => {
@@ -857,7 +855,7 @@
       }, 1000)
     } catch (error) {
       console.error('Save Error:', error)
-      message.error('Failed to save game information')
+      message.error(t('gameForm.messages.saveFailed'))
     } finally {
       saving.value = false
     }

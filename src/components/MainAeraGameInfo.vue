@@ -1,10 +1,10 @@
 <template>
   <n-scrollbar class="game-info-container">
-    <n-spin :show="isLoading" description="Loading game data...">
+    <n-spin :show="isLoading" :description="$t('gameInfo.loading')">
       <div v-if="!isLoading && ((!gameStore.currentGameUuid) || (!gameData))" class="no-game-container">
         <div class="no-game-text">
-          <p>No game selected</p>
-          <span class="no-game-hint">Please select a game from the sidebar</span>
+          <p>{{ $t('gameInfo.noGameSelected') }}</p>
+          <span class="no-game-hint">{{ $t('gameInfo.selectGameHint') }}</span>
         </div>
       </div>
       <div v-else-if="!isLoading && gameData">
@@ -34,23 +34,24 @@
             <div class="button-group">
               <n-button type="primary" size="large" color="#4080ff"
                 style="font-weight: bold; font-size: 1.2em; margin: 10px 5px; padding: 0 40px;"
-                @click="handlePlayGame"><span style="color: var(--color-info-content)">Play</span></n-button>
+                @click="handlePlayGame"><span style="color: var(--button-info-content)">{{ $t('gameInfo.play')
+                }}</span></n-button>
               <n-button type="primary" size="large" color="#4080ff"
                 style="font-weight: bold; font-size: 1.2em; margin: 10px 5px;" @click="openEditWindow"><span
-                  style="color: var(--color-info-content)">Edit</span></n-button>
+                  style="color: var(--button-info-content)">{{ $t('gameInfo.edit') }}</span></n-button>
               <n-dropdown trigger="click" :options="dropdownOptions" @select="handleMenuCommand">
                 <n-button type="primary" size="large" color="#4080ff"
                   style="font-weight: bold; font-size: 1.2em; margin: 10px 5px;">
-                  <span style="color: var(--color-info-content)">...</span>
+                  <span style="color: var(--button-info-content)">...</span>
                 </n-button>
               </n-dropdown>
               <div class="game-playtime-text">
                 <div class="game-playtime">
-                  <p style="font-size: 1.1em;">Time Played</p>
+                  <p style="font-size: 1.1em;">{{ $t('gameInfo.timePlayed') }}</p>
                   <p style="font-weight: bold;">{{ formatTimePlayed(gameData.timePlayed) }}</p>
                 </div>
                 <div class="game-playtime">
-                  <p style="font-size: 1.1em;">Last Played</p>
+                  <p style="font-size: 1.1em;">{{ $t('gameInfo.lastPlayed') }}</p>
                   <p style="font-weight: bold;">{{ gameData.lastPlayedDisplay }}</p>
                 </div>
               </div>
@@ -69,7 +70,7 @@
           <div class="detail-info-container">
             <div class="custom-info-table">
               <div class="info-row">
-                <div class="info-label">Working Path</div>
+                <div class="info-label">{{ $t('gameInfo.workingPath') }}</div>
                 <div class="info-content">
                   <span class="clickable-path" @click="openworkingDir" :title="gameData.workingDir">
                     {{ gameData.workingDir }}
@@ -77,35 +78,38 @@
                 </div>
               </div>
               <div class="info-row">
-                <div class="info-label">Folder Size</div>
+                <div class="info-label">{{ $t('gameInfo.folderSize') }}</div>
                 <div class="info-content">{{ formatFileSize(gameData.folderSize) }}</div>
               </div>
               <div class="info-row">
-                <div class="info-label">Genre</div>
-                <div class="info-content">{{ Array.isArray(gameData.genre) ? gameData.genre.join(', ') : gameData.genre }}</div>
+                <div class="info-label">{{ $t('gameInfo.genre') }}</div>
+                <div class="info-content">{{ Array.isArray(gameData.genre) ? gameData.genre.join(', ') : gameData.genre
+                }}</div>
               </div>
               <div class="info-row">
-                <div class="info-label">Developer</div>
-                <div class="info-content">{{ Array.isArray(gameData.developer) ? gameData.developer.join(', ') : gameData.developer }}</div>
+                <div class="info-label">{{ $t('gameInfo.developer') }}</div>
+                <div class="info-content">{{ Array.isArray(gameData.developer) ? gameData.developer.join(', ') :
+                  gameData.developer }}</div>
               </div>
               <div class="info-row">
-                <div class="info-label">Publisher</div>
-                <div class="info-content">{{ Array.isArray(gameData.publisher) ? gameData.publisher.join(', ') : gameData.publisher }}</div>
+                <div class="info-label">{{ $t('gameInfo.publisher') }}</div>
+                <div class="info-content">{{ Array.isArray(gameData.publisher) ? gameData.publisher.join(', ') :
+                  gameData.publisher }}</div>
               </div>
               <div class="info-row">
-                <div class="info-label">Release Date</div>
+                <div class="info-label">{{ $t('gameInfo.releaseDate') }}</div>
                 <div class="info-content">{{ gameData.releaseDate }}</div>
               </div>
               <div class="info-row">
-                <div class="info-label">Community Score</div>
+                <div class="info-label">{{ $t('gameInfo.communityScore') }}</div>
                 <div class="info-content">{{ gameData.communityScore }}</div>
               </div>
               <div class="info-row">
-                <div class="info-label">User Score</div>
+                <div class="info-label">{{ $t('gameInfo.userScore') }}</div>
                 <div class="info-content">{{ gameData.personalScore }}</div>
               </div>
               <div class="info-row">
-                <div class="info-label">Links</div>
+                <div class="info-label">{{ $t('gameInfo.links') }}</div>
                 <div class="info-content"
                   style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
                   <div v-for="(link, index) in gameData.links" :key="index">
@@ -114,7 +118,7 @@
                 </div>
               </div>
               <div class="info-row-tags">
-                <div class="info-label-tags">Tags</div>
+                <div class="info-label-tags">{{ $t('gameInfo.tags') }}</div>
                 <div class="info-content-tags">
                   <div class="tags-flex-wrap">
                     <n-tag
@@ -130,7 +134,8 @@
           <div class="description-container">
             <n-card class="description-card">
               <template #header>
-                <span style="font-size: 1.5em; color: #409eff; font-weight: bold;">Description</span>
+                <span style="font-size: 1.5em; color: #409eff; font-weight: bold;">{{ $t('gameInfo.description')
+                }}</span>
               </template>
               <p v-for="(line, index) in gameData.description" :key="index" class="description-text">{{ line }}</p>
             </n-card>
@@ -151,6 +156,9 @@
   import { DeleteOutlined, FolderOutlined, LinkOutlined, InfoOutlined, DownloadOutlined } from '@vicons/material'
   import defaultBackground from '/default/ML-Maid-Background.png'
   import defaultIcon from '/default/ML-Maid-Icon-W.png'
+  import { useI18n } from 'vue-i18n'
+
+  const { t } = useI18n()
 
   const gameStore = useGameStore()
   const { gameDetailsCache, currentGameUuid } = storeToRefs(gameStore)
@@ -170,17 +178,17 @@
 
   const dropdownOptions: DropdownOption[] = [
     {
-      label: 'Open Install Path',
+      label: () => t('gameInfo.dropdown.openInstallPath'),
       key: 'openFolder',
       icon: renderIcon(FolderOutlined)
     },
     {
-      label: 'Create Shortcut',
+      label: () => t('gameInfo.dropdown.createShortcut'),
       key: 'createShortcut',
       icon: renderIcon(LinkOutlined)
     },
     {
-      label: 'Game Info',
+      label: () => t('gameInfo.dropdown.gameInfo'),
       key: 'gameInfo',
       icon: renderIcon(InfoOutlined)
     },
@@ -189,12 +197,12 @@
       key: 'divider1'
     },
     {
-      label: 'Backup Save',
+      label: () => t('gameInfo.dropdown.backupSave'),
       key: 'backup',
       icon: renderIcon(DownloadOutlined)
     },
     {
-      label: 'Delete',
+      label: () => t('gameInfo.dropdown.delete'),
       key: 'delete',
       icon: renderIcon(DeleteOutlined)
     }
@@ -256,13 +264,13 @@
   // handle play game function
   async function handlePlayGame() {
     if (!gameData.value) {
-      message.error('No game data available')
+      message.error(t('gameInfo.messages.noGameData'))
       return
     }
 
     try {
       // Show loading message
-      const loadingMsg = message.loading('Launching game...', { duration: 0 })
+      const loadingMsg = message.loading(t('gameInfo.messages.launching'), { duration: 0 })
 
       // Launch the game using the electronAPI
       // First try to find a File type action
@@ -279,7 +287,7 @@
 
       if (!executablePath) {
         loadingMsg.destroy()
-        message.error('No executable path configured. Please edit the game and add an action.')
+        message.error(t('gameInfo.messages.noExecutable'))
         return
       }
 
@@ -300,13 +308,13 @@
       loadingMsg.destroy()
 
       if (result?.success) {
-        message.success(`Game launched successfully!`)
+        message.success(t('gameInfo.messages.launchSuccess'))
       } else {
-        message.error('Failed to launch game')
+        message.error(t('gameInfo.messages.launchFailed'))
       }
     } catch (error) {
       console.error('Failed to launch game:', error)
-      message.error('Failed to launch game: ' + (error instanceof Error ? error.message : 'Unknown error'))
+      message.error(t('gameInfo.messages.launchError', { error: error instanceof Error ? error.message : t('gameInfo.messages.unknownError') }))
     }
   }
 
@@ -331,16 +339,16 @@
         await handleDeleteGame()
         break
       case 'openFolder':
-        message.info('This function is not implemented yet')
+        message.info(t('gameInfo.messages.notImplemented'))
         break
       case 'createShortcut':
-        message.info('This is just a placeholder.\nMay not be implemented in the future.')
+        message.info(t('gameInfo.messages.placeholder'))
         break
       case 'gameInfo':
-        message.info('This is just a placeholder.\nMay not be implemented in the future.')
+        message.info(t('gameInfo.messages.placeholder'))
         break
       case 'backup':
-        message.info('This function is not implemented yet')
+        message.info(t('gameInfo.messages.notImplemented'))
         break
       default:
         console.log('Unknown command:', key)
@@ -350,30 +358,30 @@
   // handle delete game with confirmation
   async function handleDeleteGame() {
     if (!gameData.value) {
-      message.error('No game data available')
+      message.error(t('gameInfo.messages.noGameData'))
       return
     }
 
     dialog.warning({
-      title: 'Confirm Deletion',
-      content: `Are you sure you want to delete the game "${gameData.value.title}"?`,
-      positiveText: 'Delete',
-      negativeText: 'Cancel',
+      title: t('gameInfo.messages.confirmDeletion'),
+      content: t('gameInfo.messages.deleteConfirm', { title: gameData.value.title }),
+      positiveText: t('gameInfo.messages.deleteButton'),
+      negativeText: t('gameInfo.messages.cancelButton'),
       onPositiveClick: async () => {
         // Show loading message
-        const loadingMsg = message.loading('Deleting Game...', { duration: 0 })
+        const loadingMsg = message.loading(t('gameInfo.messages.deleting'), { duration: 0 })
 
         try {
           await gameStore.deleteGame(gameData.value!.uuid)
           loadingMsg.destroy()
-          message.success('Delete Game Successfully')
+          message.success(t('gameInfo.messages.deleteSuccess'))
 
           // Clear current selection after deletion
           gameStore.currentGameUuid = null
         } catch (error) {
           loadingMsg.destroy()
           console.error('Failed to delete game:', error)
-          message.error('Failed to delete game: ' + (error instanceof Error ? error.message : '未知错误'))
+          message.error(t('gameInfo.messages.deleteError', { error: error instanceof Error ? error.message : t('gameInfo.messages.unknownError') }))
         }
       },
       onNegativeClick: () => {
@@ -385,7 +393,7 @@
   // Open external link in default browser
   async function openExternalLink(url: string) {
     if (!url) {
-      message.warning('No URL provided')
+      message.warning(t('gameInfo.messages.noUrl'))
       return
     }
 
@@ -394,31 +402,31 @@
         await window.electronAPI.openExternalLink(url)
       } else {
         // Fallback: try to open with window.open (might not work in Electron)
-        message.warning('External link API not available')
+        message.warning(t('gameInfo.messages.externalLinkUnavailable'))
       }
     } catch (error) {
       console.error('Failed to open external link:', error)
-      message.error('Failed to open link: ' + (error instanceof Error ? error.message : 'Unknown error'))
+      message.error(t('gameInfo.messages.linkError', { error: error instanceof Error ? error.message : t('gameInfo.messages.unknownError') }))
     }
   }
 
   // Open install path in file explorer
   async function openworkingDir() {
     if (!gameData.value?.workingDir) {
-      message.warning('No install path specified')
+      message.warning(t('gameInfo.messages.noInstallPath'))
       return
     }
 
     try {
       if (window.electronAPI?.openFolder) {
         await window.electronAPI.openFolder(gameData.value.workingDir)
-        message.success('Opened install path in file explorer')
+        message.success(t('gameInfo.messages.openedFolder'))
       } else {
-        message.warning('Folder opening API not available')
+        message.warning(t('gameInfo.messages.folderApiUnavailable'))
       }
     } catch (error) {
       console.error('Failed to open install path:', error)
-      message.error('Failed to open folder: ' + (error instanceof Error ? error.message : 'Unknown error'))
+      message.error(t('gameInfo.messages.folderError', { error: error instanceof Error ? error.message : t('gameInfo.messages.unknownError') }))
     }
   }
 </script>

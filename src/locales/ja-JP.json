@@ -1,0 +1,350 @@
+{
+  "app": {
+    "name": "ML-Maid"
+  },
+  "titlebar": {
+    "add": "追加",
+    "filter": "フィルター",
+    "activeFilters": "{count} 個のフィルターが有効",
+    "activeFiltersLabel": "有効なフィルター: {count}",
+    "searchPlaceholder": "ゲームを検索...",
+    "editGame": "ゲームを編集",
+    "addGame": "ゲームを追加"
+  },
+  "sidebar": {
+    "loadingGames": "ゲームを読み込み中...",
+    "error": "エラー: {message}",
+    "noGames": "ゲームがありません (x_x)"
+  },
+  "gameInfo": {
+    "loading": "ゲームデータを読み込み中...",
+    "noGameSelected": "ゲームが選択されていません",
+    "selectGameHint": "サイドバーからゲームを選択してください",
+    "play": "プレイ",
+    "edit": "編集",
+    "timePlayed": "プレイ時間",
+    "lastPlayed": "最終プレイ",
+    "workingPath": "作業パス",
+    "folderSize": "フォルダサイズ",
+    "genre": "ジャンル",
+    "developer": "開発元",
+    "publisher": "発売元",
+    "releaseDate": "発売日",
+    "communityScore": "コミュニティスコア",
+    "userScore": "ユーザースコア",
+    "links": "リンク",
+    "tags": "タグ",
+    "description": "説明",
+    "dropdown": {
+      "openInstallPath": "インストールパスを開く",
+      "createShortcut": "ショートカットを作成",
+      "gameInfo": "ゲーム情報",
+      "backupSave": "セーブデータのバックアップ",
+      "delete": "削除"
+    },
+    "messages": {
+      "noGameData": "利用可能なゲームデータがありません",
+      "launching": "ゲームを起動中...",
+      "noExecutable": "実行可能パスが設定されていません。ゲームを編集してアクションを追加してください。",
+      "launchSuccess": "ゲームが正常に起動しました！",
+      "launchFailed": "ゲームの起動に失敗しました",
+      "launchError": "ゲームの起動に失敗しました: {error}",
+      "confirmDeletion": "削除の確認",
+      "deleteConfirm": "ゲーム「{title}」を削除してもよろしいですか？",
+      "deleteButton": "削除",
+      "cancelButton": "キャンセル",
+      "deleting": "ゲームを削除中...",
+      "deleteSuccess": "ゲームの削除に成功しました",
+      "deleteError": "ゲームの削除に失敗しました: {error}",
+      "unknownError": "不明なエラー",
+      "noUrl": "URLが指定されていません",
+      "externalLinkUnavailable": "外部リンクAPIが利用できません",
+      "linkError": "リンクを開けませんでした: {error}",
+      "noInstallPath": "インストールパスが指定されていません",
+      "openedFolder": "エクスプローラーでインストールパスを開きました",
+      "folderApiUnavailable": "フォルダ開くAPIが利用できません",
+      "folderError": "フォルダを開けませんでした: {error}",
+      "notImplemented": "この機能はまだ実装されていません",
+      "placeholder": "これはプレースホルダーです。\n将来実装されない可能性があります。"
+    }
+  },
+  "gameForm": {
+    "tabs": {
+      "general": "一般",
+      "advanced": "詳細",
+      "media": "メディア",
+      "links": "リンク",
+      "actions": "アクション",
+      "script": "スクリプト"
+    },
+    "fields": {
+      "title": "タイトル",
+      "genre": "ジャンル",
+      "developer": "開発元",
+      "publisher": "発売元",
+      "releaseDate": "発売日",
+      "communityScore": "コミュニティスコア",
+      "userScore": "ユーザースコア",
+      "tags": "タグ",
+      "description": "説明",
+      "uuid": "UUID",
+      "installPath": "インストールパス",
+      "installSize": "インストールサイズ",
+      "timePlayed": "プレイ時間",
+      "lastPlayed": "最終プレイ",
+      "monitorMode": "監視モード",
+      "processNames": "プロセス名",
+      "actionName": "アクション名",
+      "type": "タイプ",
+      "actionType": "タイプ",
+      "executablePath": "実行可能パス",
+      "parameters": "パラメータ",
+      "linkName": "リンク名",
+      "linkUrl": "URL",
+      "url": "URL"
+    },
+    "placeholders": {
+      "enterTitle": "ゲームタイトルを入力",
+      "title": "ゲームタイトルを入力",
+      "selectGenres": "ジャンルを選択または作成（カンマ区切り）",
+      "genre": "ジャンルを選択または作成（カンマ区切り）",
+      "selectDevelopers": "開発元を選択または作成（カンマ区切り）",
+      "developer": "開発元を選択または作成（カンマ区切り）",
+      "selectPublishers": "発売元を選択または作成（カンマ区切り）",
+      "publisher": "発売元を選択または作成（カンマ区切り）",
+      "releaseDate": "発売日（例: 2017-07-20）",
+      "communityScore": "コミュニティスコア（0-100）",
+      "userScore": "ユーザースコア（0-100）",
+      "selectTags": "タグを選択または作成（カンマ区切り）",
+      "tags": "タグを選択または作成（カンマ区切り）",
+      "description": "各行が新しい段落になります",
+      "uuid": "ゲームの一意識別子",
+      "installPath": "ゲームのインストールパス",
+      "installSize": "インストールサイズ（バイト）",
+      "timePlayed": "プレイ時間（秒）",
+      "lastPlayed": "最終プレイ日を選択",
+      "monitorMode": "プロセス監視モードを選択",
+      "processName": "プロセス名を入力（例: game.exe）",
+      "actionName": "アクション名を入力（例: プレイ）",
+      "actionType": "アクションタイプを選択",
+      "executablePath": "実行可能ファイルのパス",
+      "parameters": "オプションのコマンドラインパラメータ（未対応）",
+      "linkName": "リンク名を入力（例: VNDB, 公式サイト）",
+      "linkUrl": "URLを入力（例: https://vndb.org/...）",
+      "url": "URLを入力（例: https://vndb.org/...）"
+    },
+    "buttons": {
+      "browse": "参照",
+      "save": "保存",
+      "cancel": "キャンセル",
+      "addLink": "リンクを追加",
+      "addAction": "アクションを追加",
+      "addProcess": "プロセスを追加"
+    },
+    "media": {
+      "icon": "アイコン",
+      "background": "背景",
+      "cover": "カバー",
+      "noIcon": "アイコンが選択されていません",
+      "noBackground": "背景が選択されていません",
+      "noCover": "カバーが選択されていません",
+      "selectFromPath": "パスから選択",
+      "addFromUrl": "URLから追加",
+      "remove": "削除"
+    },
+    "sections": {
+      "gameLinks": "ゲームリンク",
+      "gameActions": "ゲームアクション",
+      "processNamesHint": "監視するプロセス名を入力してください（例: game.exe, launcher.exe）"
+    },
+    "empty": {
+      "noLinks": "リンクがまだ追加されていません",
+      "linksHint": "VNDB、公式サイトなどの外部サイトへのリンクを追加できます。",
+      "addLinksHint": "VNDB、公式サイトなどの外部サイトへのリンクを追加できます。",
+      "noActions": "アクションが設定されていません",
+      "actionsHint": "ゲームの起動方法やインタラクション方法を定義するアクションを追加してください。",
+      "addActionsHint": "ゲームの起動方法やインタラクション方法を定義するアクションを追加してください。",
+      "noProcessNames": "プロセス名がまだ追加されていません。「プロセスを追加」をクリックして監視するプロセス名を追加してください。",
+      "processNames": "プロセス名がまだ追加されていません。「プロセスを追加」をクリックして監視するプロセス名を追加してください。",
+      "processNamesHint": "監視するプロセス名を入力してください（例: game.exe, launcher.exe）",
+      "scriptComingSoon": "スクリプト設定は近日公開予定..."
+    },
+    "tooltip": {
+      "monitorModeInfo": "このオプションはゲーム統計の記録方法に影響します：",
+      "monitorMode": "このオプションはゲーム統計の記録方法に影響します：<br>• <strong>ファイルモード：</strong>アクションによって起動されたプロセスのみを監視します<br>• <strong>フォルダモード：</strong>ゲームの作業ディレクトリ内で作成されたすべての実行可能プロセスを監視します<br>• <strong>プロセスモード：</strong>極端なケースに対応 - プロセス名を入力して特定のプロセスアクティビティを監視します<hr><strong>注意：現在、フォルダモードのみが十分にメンテナンスされ、信頼性があります。</strong>",
+      "fileMode": "ファイルモード：",
+      "fileModeDesc": "アクションによって起動されたプロセスのみを監視します",
+      "folderMode": "フォルダモード：",
+      "folderModeDesc": "ゲームの作業ディレクトリ内で作成されたすべての実行可能プロセスを監視します",
+      "processMode": "プロセスモード：",
+      "processModeDesc": "極端なケースに対応 - プロセス名を入力して特定のプロセスアクティビティを監視します",
+      "attention": "注意：現在、フォルダモードのみが十分にメンテナンスされ、信頼性があります。"
+    },
+    "options": {
+      "fileMode": "ファイルモード",
+      "folderMode": "フォルダモード",
+      "processMode": "プロセスモード",
+      "file": "ファイル",
+      "link": "リンク",
+      "script": "スクリプト"
+    },
+    "messages": {
+      "fileSelectionUnavailable": "ファイル選択APIが利用できません",
+      "failedSelectImage": "画像の選択に失敗しました",
+      "imageUpdated": "{imageType}画像が正常に更新されました！",
+      "failedProcessImage": "画像の処理に失敗しました",
+      "imageApiUnavailable": "画像処理APIが利用できません",
+      "imageRemoved": "{imageType}画像が削除されました",
+      "actionAdded": "アクションが追加されました",
+      "actionRemoved": "アクションが削除されました",
+      "executableUpdated": "実行可能パスが更新されました",
+      "failedSelectExe": "実行可能ファイルの選択に失敗しました",
+      "installPathUpdated": "インストールパスが更新されました",
+      "folderSelectionUnavailable": "フォルダ選択APIが利用できません",
+      "failedSelectFolder": "フォルダの選択に失敗しました",
+      "linkAdded": "リンクが追加されました",
+      "linkRemoved": "リンクが削除されました",
+      "processNameAdded": "プロセス名が追加されました",
+      "processNameRemoved": "プロセス名が削除されました",
+      "saveSuccess": "ゲーム情報が正常に保存されました！",
+      "addFailed": "ゲームの追加に失敗しました",
+      "saveFailed": "ゲーム情報の保存に失敗しました"
+    }
+  },
+  "filter": {
+    "title": "ゲームのフィルターとソート",
+    "filterOptions": "フィルターオプション",
+    "sortOptions": "ソートオプション",
+    "genre": "ジャンル",
+    "developer": "開発元",
+    "publisher": "発売元",
+    "tags": "タグ",
+    "sortBy": "ソート基準",
+    "order": "並び順",
+    "placeholders": {
+      "searchGenres": "ジャンルを検索...",
+      "searchDevelopers": "開発元を検索...",
+      "searchPublishers": "発売元を検索...",
+      "searchTags": "タグを検索...",
+      "genre": "ジャンルを検索...",
+      "developer": "開発元を検索...",
+      "publisher": "発売元を検索...",
+      "tags": "タグを検索...",
+      "select": "選択"
+    },
+    "buttons": {
+      "addGenre": "ジャンルを追加",
+      "addDeveloper": "開発元を追加",
+      "addPublisher": "発売元を追加",
+      "addTag": "タグを追加",
+      "resetFilters": "フィルターをリセット",
+      "cancel": "キャンセル",
+      "confirm": "確認"
+    },
+    "sortByOptions": {
+      "name": "名前",
+      "dateAdded": "追加日",
+      "lastPlayed": "最終プレイ",
+      "score": "スコア"
+    },
+    "sortOrder": {
+      "ascending": "昇順",
+      "descending": "降順"
+    },
+    "messages": {
+      "notInDatabase": "「{value}」はデータベースに存在しません",
+      "alreadyAdded": "「{value}」はすでに追加されています",
+      "filtersCleared": "フィルターがクリアされました",
+      "loadFailed": "フィルターオプションの読み込みに失敗しました",
+      "failedLoadOptions": "フィルターオプションの読み込みに失敗しました",
+      "filtersSaved": "フィルターとソートが保存されました（{count} 個のフィルターが有効）",
+      "sortingSaved": "ソート設定が保存されました"
+    }
+  },
+  "settings": {
+    "title": "設定",
+    "generalSettings": "一般設定",
+    "theme": "テーマ",
+    "language": "言語",
+    "minimizeToTray": "トレイに最小化",
+    "selectTheme": "テーマを選択",
+    "selectLanguage": "言語を選択",
+    "themeOptions": {
+      "light": "ライト",
+      "dark": "ダーク",
+      "followSystem": "システムに従う"
+    },
+    "switchTrue": "オン",
+    "switchFalse": "オフ",
+    "true": "オン",
+    "false": "オフ"
+  },
+  "statistics": {
+    "tabs": {
+      "main": "メイン",
+      "day": "日",
+      "week": "週",
+      "month": "月",
+      "year": "年"
+    },
+    "overall": "全体統計",
+    "overallStatistics": "全体統計",
+    "totalPlayTime": "総プレイ時間",
+    "today": "今日",
+    "gamesPlayed": "プレイしたゲーム",
+    "thisWeek": "今週",
+    "totalSessions": "総セッション数",
+    "thisMonth": "今月",
+    "recentSessions": "最近のゲームセッション",
+    "noRecentSessions": "最近のセッションが見つかりません。",
+    "daily": "日別統計",
+    "dailyStatistics": "日別統計",
+    "weekly": "週別統計",
+    "weeklyStatistics": "週別統計",
+    "monthly": "月別統計",
+    "monthlyStatistics": "月別統計",
+    "yearly": "年別統計",
+    "yearlyStatistics": "年別統計",
+    "loadingChart": "チャートを読み込み中...",
+    "datePicker": {
+      "today": "今日",
+      "thisWeek": "今週",
+      "thisMonth": "今月",
+      "thisYear": "今年"
+    },
+    "charts": {
+      "dailyTimeline": "日別ゲームタイムライン",
+      "weeklyHours": "週別ゲーム別プレイ時間",
+      "dailyPlayTime": "日別総プレイ時間",
+      "yearlyPlayTime": "年間日別プレイ時間",
+      "hours": "時間",
+      "gamingSessions": "ゲームセッション",
+      "totalHours": "合計時間",
+      "duration": "時間：",
+      "time": "時刻",
+      "minutes": "分",
+      "launch": "起動方法：",
+      "unknown": "不明"
+    },
+    "weekDays": {
+      "mon": "月",
+      "tue": "火",
+      "wed": "水",
+      "thu": "木",
+      "fri": "金",
+      "sat": "土",
+      "sun": "日"
+    }
+  },
+  "electron": {
+    "tray": {
+      "show": "ML-Maidを表示",
+      "exit": "終了"
+    },
+    "dialog": {
+      "imagesOrExecutables": "画像または実行可能ファイル",
+      "allFiles": "すべてのファイル",
+      "executableFiles": "実行可能ファイル"
+    }
+  }
+}
