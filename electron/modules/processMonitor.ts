@@ -1,5 +1,4 @@
 import { BrowserWindow } from 'electron'
-import { formatDateToISO, formatISOToLocal } from '../utils/helpers.js'
 import {
   getAllProcessesWithPaths,
   checkRunningProcesses as psCheckRunningProcesses,
@@ -229,7 +228,7 @@ async function finalizeGameSession(
   if (!processInfo) return
 
   const { metaDb, statsDb, win } = config
-  const endTimeStr = formatDateToISO(endTime)
+  const endTimeTs = endTime.getTime() // Unix timestamp in milliseconds
   const { gameUuid, sessionId } = processInfo
 
   try {
@@ -240,7 +239,7 @@ async function finalizeGameSession(
         SET endTime = ?, durationSeconds = ?, exitCode = ?, isCompleted = 0
         WHERE id = ?
       `)
-      updateSessionStmt.run(endTimeStr, sessionTimeSeconds, exitCode, sessionId)
+      updateSessionStmt.run(endTimeTs, sessionTimeSeconds, exitCode, sessionId)
 
       console.log(`Session ${sessionId} marked as launcher (${sessionTimeSeconds}s), not adding to play time`)
     } else {
@@ -250,16 +249,16 @@ async function finalizeGameSession(
         SET endTime = ?, durationSeconds = ?, exitCode = ?, isCompleted = 1
         WHERE id = ?
       `)
-      updateSessionStmt.run(endTimeStr, sessionTimeSeconds, exitCode, sessionId)
+      updateSessionStmt.run(endTimeTs, sessionTimeSeconds, exitCode, sessionId)
 
       // Get current timePlayed from database
       const currentData = metaDb.prepare('SELECT timePlayed FROM games WHERE uuid = ?').get(gameUuid)
       const currentTimePlayed = currentData ? (currentData.timePlayed || 0) : 0
       const newTimePlayed = currentTimePlayed + sessionTimeSeconds
 
-      // Update timePlayed and lastPlayed in database
+      // Update timePlayed and lastPlayed in database (lastPlayed as timestamp)
       const updateStmt = metaDb.prepare('UPDATE games SET timePlayed = ?, lastPlayed = ? WHERE uuid = ?')
-      updateStmt.run(newTimePlayed, endTimeStr, gameUuid)
+      updateStmt.run(newTimePlayed, endTimeTs, gameUuid)
 
       // Notify main window that game session ended
       if (win && !win.isDestroyed()) {
@@ -269,8 +268,8 @@ async function finalizeGameSession(
           sessionTimeSeconds,
           totalTimePlayed: newTimePlayed,
           executablePath: processInfo.executablePath,
-          startTime: formatISOToLocal(formatDateToISO(processInfo.startTime)),
-          endTime: formatISOToLocal(endTimeStr)
+          startTime: processInfo.startTime.getTime(),
+          endTime: endTimeTs
         })
       }
 

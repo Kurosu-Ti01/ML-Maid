@@ -99,12 +99,10 @@ export const useGameStore = defineStore('game', () => {
           compareResult = a.title.localeCompare(b.title)
           break
         case 'dateAdded':
-          // Compare dates (ISO format can be compared as strings)
-          compareResult = (a.dateAdded || '').localeCompare(b.dateAdded || '')
+          compareResult = (a.dateAdded || 0) - (b.dateAdded || 0)
           break
         case 'lastPlayed':
-          // Compare dates (ISO format can be compared as strings)
-          compareResult = (a.lastPlayed || '').localeCompare(b.lastPlayed || '')
+          compareResult = (a.lastPlayed || 0) - (b.lastPlayed || 0)
           break
         case 'score':
           compareResult = (a.personalScore || 0) - (b.personalScore || 0)
@@ -341,7 +339,7 @@ export const useGameStore = defineStore('game', () => {
           developer: data.game.developer || [],
           publisher: data.game.publisher || [],
           tags: data.game.tags || [],
-          lastPlayed: data.game.lastPlayed || '',
+          lastPlayed: data.game.lastPlayed ?? null,
           dateAdded: data.game.dateAdded,
           personalScore: data.game.personalScore
         })
@@ -362,7 +360,7 @@ export const useGameStore = defineStore('game', () => {
           developer: data.game.developer || [],
           publisher: data.game.publisher || [],
           tags: data.game.tags || [],
-          lastPlayed: data.game.lastPlayed || '',
+          lastPlayed: data.game.lastPlayed ?? null,
           dateAdded: data.game.dateAdded,
           personalScore: data.game.personalScore
         }
@@ -405,31 +403,31 @@ export const useGameStore = defineStore('game', () => {
     sessionTimeSeconds: number,
     totalTimePlayed: number,
     executablePath: string,
-    startTime: string,
-    endTime: string
+    startTime: number,
+    endTime: number
   }) {
     console.log(`🏁 Processing game session ended for game:`, data.gameUuid)
     console.log(`⏱️ Session duration: ${data.sessionTimeSeconds}s, Total time: ${data.totalTimePlayed}s`)
 
+    // Format endTime timestamp for display
+    const endDate = new Date(data.endTime)
+    const displayTime = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')} ${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}:${String(endDate.getSeconds()).padStart(2, '0')}`
+
     // Update lastPlayed time in games list
     const listIndex = gamesList.value.findIndex(g => g.uuid === data.gameUuid)
     if (listIndex !== -1) {
-      gamesList.value[listIndex].lastPlayedDisplay = data.endTime
-      console.log('✅ Updated lastPlayed in list:', data.endTime)
+      gamesList.value[listIndex].lastPlayed = data.endTime
+      gamesList.value[listIndex].lastPlayedDisplay = displayTime
+      console.log('✅ Updated lastPlayed in list:', displayTime)
     }
-    // Update lastPlayed time in details cache if the game is cached
+    // Update lastPlayed time and timePlayed in details cache if the game is cached
     if (gameDetailsCache.value.has(data.gameUuid)) {
       const cachedGame = gameDetailsCache.value.get(data.gameUuid)!
-      cachedGame.lastPlayedDisplay = data.endTime
-      gameDetailsCache.value.set(data.gameUuid, cachedGame)
-      console.log('✅ Updated lastPlayed in cache:', data.endTime)
-    }
-    // Update timePlayed in details cache if the game is cached
-    if (gameDetailsCache.value.has(data.gameUuid)) {
-      const cachedGame = gameDetailsCache.value.get(data.gameUuid)!
+      cachedGame.lastPlayed = data.endTime
+      cachedGame.lastPlayedDisplay = displayTime
       cachedGame.timePlayed = data.totalTimePlayed
       gameDetailsCache.value.set(data.gameUuid, cachedGame)
-      console.log('✅ Updated timePlayed in cache:', data.totalTimePlayed)
+      console.log('✅ Updated lastPlayed & timePlayed in cache:', displayTime, data.totalTimePlayed)
     }
   }
 

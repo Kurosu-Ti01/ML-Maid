@@ -33,7 +33,7 @@
 
             <n-form-item :label="$t('gameForm.fields.releaseDate')">
               <n-date-picker v-model:value="gameForm.releaseDate" :placeholder="$t('gameForm.placeholders.releaseDate')"
-                type="date" format="yyyy-MM-dd" value-format="yyyy-MM-dd" style="width: 100%;" />
+                type="date" style="width: 100%;" />
             </n-form-item>
 
             <!-- Community Score and User Score in one row -->
@@ -102,7 +102,7 @@
 
             <n-form-item :label="$t('gameForm.fields.lastPlayed')">
               <n-date-picker v-model:value="gameForm.lastPlayed" type="date"
-                :placeholder="$t('gameForm.placeholders.lastPlayed')" format="yyyy-MM-dd" value-format="yyyy-MM-dd"
+                :placeholder="$t('gameForm.placeholders.lastPlayed')"
                 style="width: 100%;" />
             </n-form-item>
 
@@ -465,7 +465,7 @@
     actions: [],
     procMonMode: 1,  // Default to folder mode
     procNames: [],   // Default to empty array
-    dateAdded: ''    // Will be set from received data
+    dateAdded: 0     // Will be set from received data
   })
 
   const saving = ref(false)
@@ -881,14 +881,14 @@
         gameForm.value.coverImage = data.coverImage || ''
         gameForm.value.backgroundImage = data.backgroundImage || ''
         gameForm.value.iconImage = data.iconImage || ''
-        gameForm.value.lastPlayed = data.lastPlayed || ''
+        gameForm.value.lastPlayed = data.lastPlayed ?? null
         gameForm.value.timePlayed = data.timePlayed || 0
         gameForm.value.workingDir = data.workingDir || ''
         gameForm.value.folderSize = data.folderSize || 0
         gameForm.value.genre = Array.isArray(data.genre) ? data.genre : []
         gameForm.value.developer = Array.isArray(data.developer) ? data.developer : []
         gameForm.value.publisher = Array.isArray(data.publisher) ? data.publisher : []
-        gameForm.value.releaseDate = data.releaseDate || ''
+        gameForm.value.releaseDate = data.releaseDate ?? null
         gameForm.value.communityScore = data.communityScore || 0
         gameForm.value.personalScore = data.personalScore || 0
         gameForm.value.tags = Array.isArray(data.tags) ? data.tags : []
@@ -897,7 +897,7 @@
         gameForm.value.actions = Array.isArray(data.actions) ? data.actions : []
         gameForm.value.procMonMode = data.procMonMode ?? PROC_MON_MODE.FOLDER  // Default to folder mode
         gameForm.value.procNames = Array.isArray(data.procNames) ? data.procNames : []  // Default to empty array
-        gameForm.value.dateAdded = data.dateAdded || ''  // Set dateAdded from data
+        gameForm.value.dateAdded = data.dateAdded || Date.now()  // Set dateAdded from data
         // Load existing image previews
         if (data.iconImage) {
           loadExistingImagePreview(data.iconImage, 'icon')

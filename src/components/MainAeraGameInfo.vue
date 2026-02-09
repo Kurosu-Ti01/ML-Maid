@@ -98,7 +98,7 @@
               </div>
               <div class="info-row">
                 <div class="info-label">{{ $t('gameInfo.releaseDate') }}</div>
-                <div class="info-content">{{ gameData.releaseDate }}</div>
+                <div class="info-content">{{ gameData.releaseDateDisplay }}</div>
               </div>
               <div class="info-row">
                 <div class="info-label">{{ $t('gameInfo.communityScore') }}</div>

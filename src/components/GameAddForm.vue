@@ -102,7 +102,7 @@
 
             <n-form-item :label="$t('gameForm.fields.lastPlayed')">
               <n-date-picker v-model:value="gameForm.lastPlayed" type="date"
-                :placeholder="$t('gameForm.placeholders.lastPlayed')" format="yyyy-MM-dd" value-format="yyyy-MM-dd"
+                :placeholder="$t('gameForm.placeholders.lastPlayed')"
                 style="width: 100%;" />
             </n-form-item>
 
@@ -470,7 +470,7 @@
     actions: [],
     procMonMode: 1,  // Default to folder mode
     procNames: [],   // Default to empty array
-    dateAdded: new Date().toISOString().replace('T', ' ').substring(0, 19)  // Set current timestamp
+    dateAdded: Date.now()  // Set current timestamp in milliseconds
   })
 
   const saving = ref(false)
@@ -811,14 +811,6 @@
 
       // Convert reactive object to plain object to avoid cloning issues
       const plainGameData = toRaw(gameForm.value)
-
-      // Convert null dates to empty strings for database compatibility
-      if (plainGameData.lastPlayed === null) {
-        plainGameData.lastPlayed = ''
-      }
-      if (plainGameData.releaseDate === null) {
-        plainGameData.releaseDate = ''
-      }
 
       console.log('Plain game data:', plainGameData)
 

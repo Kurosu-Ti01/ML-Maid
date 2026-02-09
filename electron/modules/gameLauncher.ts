@@ -2,7 +2,7 @@ import { ipcMain, BrowserWindow } from 'electron'
 import { spawn } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
-import { formatDateToISO, getWeekNumber } from '../utils/helpers.js'
+import { getWeekNumber } from '../utils/helpers.js'
 import { PROC_MON_MODE, type ProcMonMode } from '../constants/procMonMode.js'
 import { handleProcessExit, activeGameProcesses } from './processMonitor.js'
 
@@ -66,7 +66,7 @@ export function setupLauncherHandlers(config: LauncherModuleConfig) {
 
       const startTime = new Date()
       const processKey = `${gameUuid}_${Date.now()}`
-      const startTimeStr = formatDateToISO(startTime)
+      const startTimeTs = startTime.getTime() // Unix timestamp in milliseconds
 
       // For statistics, use local date for date/time components
       const year = startTime.getFullYear()
@@ -88,7 +88,7 @@ export function setupLauncherHandlers(config: LauncherModuleConfig) {
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `)
       const sessionResult = sessionStmt.run(
-        gameUuid, gameName, startTimeStr, launchMethodName, executablePath, sessionDate,
+        gameUuid, gameName, startTimeTs, launchMethodName, executablePath, sessionDate,
         sessionYear, sessionMonth, sessionWeek, sessionDayOfWeek
       )
       const sessionId = sessionResult.lastInsertRowid as number

@@ -72,8 +72,8 @@ interface Window {
     getDailyGameSessions: (dateString: string) => Promise<{
       uuid: string;
       title: string;
-      startTime: string;
-      endTime: string;
+      startTime: number;
+      endTime: number;
       durationSeconds: number;
       launchMethod: string;
     }[]>
@@ -110,8 +110,8 @@ interface Window {
       id: number;
       uuid: string;
       title: string;
-      startTime: string;
-      endTime: string;
+      startTime: number;
+      endTime: number;
       durationSeconds: number;
       sessionDate: string;
       launchMethod: string;
@@ -134,8 +134,8 @@ interface Window {
       sessionTimeSeconds: number,
       totalTimePlayed: number,
       executablePath: string,
-      startTime: string,
-      endTime: string
+      startTime: number,
+      endTime: number
     }) => void) => void
     // settings operations
     getSettings: () => Promise<any>
@@ -176,7 +176,7 @@ interface gameData {
   coverImageDisplay?: string;
   backgroundImageDisplay?: string;
   iconImageDisplay?: string;
-  lastPlayed: string | null;     // ISO date format "YYYY-MM-DD HH:MM:SS" (UTC)
+  lastPlayed: number | null;     // Unix timestamp in milliseconds, NULL if never played
   lastPlayedDisplay?: string; // Formatted local time for display
   timePlayed: number;
   workingDir: string;
@@ -184,7 +184,8 @@ interface gameData {
   genre: string[];
   developer: string[];
   publisher: string[];
-  releaseDate: string | null;    // ISO date format "YYYY-MM-DD"
+  releaseDate: number | null;    // Unix timestamp in milliseconds, NULL if unknown
+  releaseDateDisplay?: string; // Formatted date for display (YYYY-MM-DD)
   communityScore: number;
   personalScore: number;
   tags: string[];
@@ -201,7 +202,7 @@ interface gameData {
   }[];
   procMonMode: number;    // 0: file, 1: folder, 2: process
   procNames?: string[];   // Process names to monitor when procMonMode=2
-  dateAdded: string;      // ISO date format "YYYY-MM-DD HH:MM:SS" (UTC)
+  dateAdded: number;      // Unix timestamp in milliseconds (when game was added to library)
 }
 
 // For lightweight game list items
@@ -213,9 +214,9 @@ interface GameListItem {
   developer: string[]
   publisher: string[]
   tags: string[]
-  lastPlayed: string
+  lastPlayed: number | null
   lastPlayedDisplay?: string // Formatted local time for display
-  dateAdded: string
+  dateAdded: number
   personalScore: number
 }
 

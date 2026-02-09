@@ -63,6 +63,7 @@ export function getMimeTypeFromPath(filePath: string): string {
 }
 
 // Helper function to format ISO datetime to local display format
+// @deprecated Use formatTimestamp instead
 export function formatISOToLocal(isoDateTime: string): string {
   if (!isoDateTime) return '';
   try {
@@ -81,7 +82,43 @@ export function formatISOToLocal(isoDateTime: string): string {
   }
 }
 
+// Helper function to format Unix timestamp (milliseconds) to local display string
+export function formatTimestamp(timestamp: number | null | undefined): string {
+  if (!timestamp) return '';
+  try {
+    const date = new Date(timestamp);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  } catch (error) {
+    console.error('Error formatting timestamp:', error);
+    return '';
+  }
+}
+
+// Helper function to format Unix timestamp (milliseconds) to date-only string (YYYY-MM-DD)
+export function formatDateOnly(timestamp: number | null | undefined): string {
+  if (!timestamp) return '';
+  try {
+    const date = new Date(timestamp);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return '';
+  }
+}
+
 // Helper function to format a Date object to ISO datetime string (UTC)
+// @deprecated No longer needed - use Date.getTime() for timestamps
 export function formatDateToISO(date: Date): string {
   return date.toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, ''); // Replace T with space, remove milliseconds and Z
 }

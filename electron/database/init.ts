@@ -36,9 +36,13 @@ function updateVersion(db: any, version: number) {
   console.log(`Database updated to version ${version}`)
 }
 
-// Migration V1: Add dateAdded column
-function migrateToV1(metaDb: any) {
-  console.log('Starting migration to V1: Adding dateAdded column...')
+// ==========================================
+//  Metadata Database Migrations
+// ==========================================
+
+// Metadata.db Migration V1: Add dateAdded column
+function migrateMetaToV1(metaDb: any) {
+  console.log('Starting metadata.db migration to V1: Adding dateAdded column...')
 
   try {
     metaDb.prepare(`ALTER TABLE games ADD COLUMN dateAdded TEXT`).run()
@@ -57,12 +61,12 @@ function migrateToV1(metaDb: any) {
     WHERE dateAdded IS NULL OR dateAdded = ''
   `).run()
 
-  console.log('Migration to V1 completed successfully!')
+  console.log('metadata.db migration to V1 completed successfully!')
 }
 
-// Migration V2: Create metadata tables and migrate data
-function migrateToV2(metaDb: any, libPath: string) {
-  console.log('Starting migration to V2: Creating metadata tables...')
+// Metadata.db Migration V2: Create metadata tables and migrate data
+function migrateMetaToV2(metaDb: any, libPath: string) {
+  console.log('Starting metadata.db migration to V2: Creating metadata tables...')
 
   const dbPath_metadata = path.join(libPath, 'metadata.db')
 
@@ -243,12 +247,280 @@ function migrateToV2(metaDb: any, libPath: string) {
 
   try {
     migrate()
-    console.log('Migration to V2 completed successfully!')
+    console.log('metadata.db migration to V2 completed successfully!')
   } catch (error) {
-    console.error('Migration to V2 failed:', error)
+    console.error('metadata.db migration to V2 failed:', error)
     throw error
   }
 }
+
+// Metadata.db Migration V3: Convert date fields to Unix timestamps and remove deprecated columns
+function migrateMetaToV3(metaDb: any, libPath: string) {
+  console.log('Starting metadata.db migration to V3: Converting dates to timestamps and removing deprecated columns...')
+
+  const dbPath_metadata = path.join(libPath, 'metadata.db')
+
+  // Backup database before migration
+  const backupPath = path.join(libPath, `metadata.db.backup.v2.${Date.now()}`)
+  try {
+    fs.copyFileSync(dbPath_metadata, backupPath)
+    console.log(`Backup created: ${backupPath}`)
+  } catch (error) {
+    console.error('Failed to create backup:', error)
+  }
+
+  // Use transaction for atomic migration
+  const migrate = metaDb.transaction(() => {
+    console.log('Creating new games table with timestamp fields...')
+
+    // Create new table with updated schema
+    metaDb.prepare(`
+      CREATE TABLE IF NOT EXISTS games_new (
+        uuid TEXT PRIMARY KEY,
+        title TEXT,
+        coverImage TEXT,
+        backgroundImage TEXT,
+        iconImage TEXT,
+        lastPlayed NUMERIC,          -- Unix timestamp in milliseconds, NULL if never played
+        timePlayed NUMERIC DEFAULT 0,
+        workingDir TEXT,
+        folderSize NUMERIC DEFAULT 0,
+        releaseDate NUMERIC,         -- Unix timestamp in milliseconds, NULL if unknown
+        communityScore NUMERIC DEFAULT 0,
+        personalScore NUMERIC DEFAULT 0,
+        links TEXT,                  -- JSON string
+        description TEXT,            -- JSON string
+        actions TEXT,                -- JSON string
+        procMonMode NUMERIC DEFAULT 1,  -- file:0 / folder:1 / process:2
+        procNames TEXT,              -- JSON string for process names array
+        dateAdded NUMERIC            -- Unix timestamp in milliseconds (when game was added to library)
+      )
+    `).run()
+
+    console.log('Migrating data from old table to new table...')
+
+    // Copy data from old table to new table, converting date strings to timestamps
+    const games = metaDb.prepare(`
+      SELECT uuid, title, coverImage, backgroundImage, iconImage, 
+             lastPlayed, timePlayed, workingDir, folderSize,
+             releaseDate, communityScore, personalScore,
+             links, description, actions, procMonMode, procNames, dateAdded
+      FROM games
+    `).all()
+
+    const insertStmt = metaDb.prepare(`
+      INSERT INTO games_new (
+        uuid, title, coverImage, backgroundImage, iconImage,
+        lastPlayed, timePlayed, workingDir, folderSize,
+        releaseDate, communityScore, personalScore,
+        links, description, actions, procMonMode, procNames, dateAdded
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `)
+
+    let migratedCount = 0
+    for (const game of games) {
+      try {
+        // Convert date strings to timestamps
+        const lastPlayed = game.lastPlayed && game.lastPlayed !== ''
+          ? (typeof game.lastPlayed === 'number' ? game.lastPlayed : new Date(game.lastPlayed).getTime())
+          : null
+        const releaseDate = game.releaseDate && game.releaseDate !== ''
+          ? (typeof game.releaseDate === 'number' ? game.releaseDate : new Date(game.releaseDate).getTime())
+          : null
+        const dateAdded = game.dateAdded && game.dateAdded !== ''
+          ? (typeof game.dateAdded === 'number' ? game.dateAdded : new Date(game.dateAdded).getTime())
+          : Date.now()
+
+        insertStmt.run(
+          game.uuid,
+          game.title,
+          game.coverImage,
+          game.backgroundImage,
+          game.iconImage,
+          lastPlayed,
+          game.timePlayed || 0,
+          game.workingDir,
+          game.folderSize || 0,
+          releaseDate,
+          game.communityScore || 0,
+          game.personalScore || 0,
+          game.links,
+          game.description,
+          game.actions,
+          game.procMonMode ?? 1,
+          game.procNames,
+          dateAdded
+        )
+        migratedCount++
+      } catch (error) {
+        console.error(`Failed to migrate game ${game.uuid}:`, error)
+      }
+    }
+
+    console.log(`Successfully migrated ${migratedCount} games with new timestamp format`)
+
+    // Drop old table and rename new table
+    metaDb.prepare('DROP TABLE games').run()
+    metaDb.prepare('ALTER TABLE games_new RENAME TO games').run()
+
+    console.log('Old table dropped and new table renamed')
+  })
+
+  try {
+    migrate()
+    console.log(' metadata.db migration to V3 completed successfully!')
+  } catch (error) {
+    console.error('metadata.db migration to V3 failed:', error)
+    throw error
+  }
+}
+
+// ==========================================
+//  Statistics Database Migrations
+// ==========================================
+
+// statistics.db Migration V1: Convert startTime/endTime from TEXT to NUMERIC timestamps
+function migrateStatsToV1(statsDb: any, libPath: string) {
+  console.log('Starting statistics.db migration to V1: Converting date fields to timestamps...')
+
+  const dbPath_statistics = path.join(libPath, 'statistics.db')
+
+  // Backup database before migration
+  const backupPath = path.join(libPath, `statistics.db.backup.v0.${Date.now()}`)
+  try {
+    fs.copyFileSync(dbPath_statistics, backupPath)
+    console.log(`Statistics backup created: ${backupPath}`)
+  } catch (error) {
+    console.error('Failed to create statistics backup:', error)
+  }
+
+  const migrate = statsDb.transaction(() => {
+    console.log('Creating new game table with timestamp fields...')
+
+    statsDb.prepare(`
+      CREATE TABLE IF NOT EXISTS game_new (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        uuid TEXT NOT NULL,
+        title TEXT,
+        startTime NUMERIC NOT NULL,            -- Unix timestamp in milliseconds (UTC)
+        endTime NUMERIC,                       -- Unix timestamp in milliseconds (UTC), NULL if ongoing
+        durationSeconds INTEGER,
+        launchMethod TEXT,
+        executablePath TEXT,
+        exitCode INTEGER,
+        sessionDate TEXT NOT NULL,             -- YYYY-MM-DD (local date), kept for easy date grouping
+        sessionYear INTEGER NOT NULL,
+        sessionMonth INTEGER NOT NULL,
+        sessionWeek INTEGER NOT NULL,
+        sessionDayOfWeek INTEGER NOT NULL,
+        isCompleted BOOLEAN DEFAULT 0,
+        createdAt NUMERIC
+      )
+    `).run()
+
+    console.log('Migrating statistics data...')
+
+    const sessions = statsDb.prepare(`
+      SELECT id, uuid, title, startTime, endTime, durationSeconds,
+             launchMethod, executablePath, exitCode, sessionDate,
+             sessionYear, sessionMonth, sessionWeek, sessionDayOfWeek,
+             isCompleted, createdAt
+      FROM game
+    `).all()
+
+    const insertStmt = statsDb.prepare(`
+      INSERT INTO game_new (
+        id, uuid, title, startTime, endTime, durationSeconds,
+        launchMethod, executablePath, exitCode, sessionDate,
+        sessionYear, sessionMonth, sessionWeek, sessionDayOfWeek,
+        isCompleted, createdAt
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `)
+
+    let migratedCount = 0
+    for (const session of sessions) {
+      try {
+        // Convert startTime string (UTC) to timestamp
+        let startTimeTs: number
+        if (typeof session.startTime === 'number') {
+          startTimeTs = session.startTime
+        } else {
+          startTimeTs = new Date(session.startTime + 'Z').getTime()
+        }
+
+        // Convert endTime string (UTC) to timestamp
+        let endTimeTs: number | null = null
+        if (session.endTime) {
+          if (typeof session.endTime === 'number') {
+            endTimeTs = session.endTime
+          } else {
+            endTimeTs = new Date(session.endTime + 'Z').getTime()
+          }
+        }
+
+        // Convert createdAt to timestamp
+        let createdAtTs: number | null = null
+        if (session.createdAt) {
+          if (typeof session.createdAt === 'number') {
+            createdAtTs = session.createdAt
+          } else {
+            createdAtTs = new Date(session.createdAt).getTime()
+          }
+        }
+
+        insertStmt.run(
+          session.id,
+          session.uuid,
+          session.title,
+          startTimeTs,
+          endTimeTs,
+          session.durationSeconds,
+          session.launchMethod,
+          session.executablePath,
+          session.exitCode,
+          session.sessionDate,  // Keep as-is (YYYY-MM-DD string for grouping)
+          session.sessionYear,
+          session.sessionMonth,
+          session.sessionWeek,
+          session.sessionDayOfWeek,
+          session.isCompleted,
+          createdAtTs
+        )
+        migratedCount++
+      } catch (error) {
+        console.error(`Failed to migrate session ${session.id}:`, error)
+      }
+    }
+
+    console.log(`Successfully migrated ${migratedCount} sessions`)
+
+    // Drop old table and rename
+    statsDb.prepare('DROP TABLE game').run()
+    statsDb.prepare('ALTER TABLE game_new RENAME TO game').run()
+
+    // Recreate indexes
+    statsDb.prepare('CREATE INDEX IF NOT EXISTS idx_game_uuid ON game (uuid)').run()
+    statsDb.prepare('CREATE INDEX IF NOT EXISTS idx_game_date ON game (sessionDate)').run()
+    statsDb.prepare('CREATE INDEX IF NOT EXISTS idx_game_year_month ON game (sessionYear, sessionMonth)').run()
+    statsDb.prepare('CREATE INDEX IF NOT EXISTS idx_game_start_time ON game (startTime)').run()
+    statsDb.prepare('CREATE INDEX IF NOT EXISTS idx_game_completed ON game (isCompleted)').run()
+    statsDb.prepare('CREATE INDEX IF NOT EXISTS idx_game_launch_method ON game (launchMethod)').run()
+
+    console.log('Statistics table rebuilt and indexes recreated')
+  })
+
+  try {
+    migrate()
+    console.log('statistics.db migration to V1 completed successfully!')
+  } catch (error) {
+    console.error('statistics.db migration to V1 failed:', error)
+    throw error
+  }
+}
+
+// ==========================================
+//  Database Initialization
+// ==========================================
 
 export function initializeDatabases(config: DatabaseConfig) {
   const { libPath, tempPath, imgPath_game } = config
@@ -275,6 +547,7 @@ export function initializeDatabases(config: DatabaseConfig) {
   metaDb.pragma('foreign_keys = ON')
 
   // Initialize game database schema (base structure)
+  // Note: This schema is for V3+. Older versions will be migrated automatically.
   metaDb.prepare(`
     CREATE TABLE IF NOT EXISTS games (
       uuid TEXT PRIMARY KEY,
@@ -282,23 +555,23 @@ export function initializeDatabases(config: DatabaseConfig) {
       coverImage TEXT,
       backgroundImage TEXT,
       iconImage TEXT,
-      lastPlayed TEXT,   -- ISO 8601 format: YYYY-MM-DD HH:MM:SS (UTC)
-      timePlayed  NUMERIC DEFAULT 0,
+      lastPlayed NUMERIC,          -- Unix timestamp in milliseconds, NULL if never played
+      timePlayed NUMERIC DEFAULT 0,
       workingDir TEXT,
       folderSize NUMERIC DEFAULT 0,
-      genre TEXT,        -- Kept for backward compatibility, new code uses game_genres table
-      developer TEXT,    -- Kept for backward compatibility, new code uses game_developers table
-      publisher TEXT,    -- Kept for backward compatibility, new code uses game_publishers table
-      releaseDate TEXT,
+      genre TEXT,                  -- Temporary for migration V1->V2, removed in V3
+      developer TEXT,              -- Temporary for migration V1->V2, removed in V3
+      publisher TEXT,              -- Temporary for migration V1->V2, removed in V3
+      releaseDate NUMERIC,         -- Unix timestamp in milliseconds, NULL if unknown
       communityScore NUMERIC DEFAULT 0,
       personalScore NUMERIC DEFAULT 0,
-      tags TEXT,         -- Kept for backward compatibility, new code uses game_tags table
-      links TEXT,        -- use JSON.stringify to store, use JSON.parse to retrieve
-      description TEXT,  -- use JSON.stringify to store, use JSON.parse to retrieve
-      actions TEXT,      -- use JSON.stringify to store, use JSON.parse to retrieve
-      procMonMode NUMERIC DEFAULT 1,      -- file:0 / folder:1 / process:2
-      procNames TEXT,                     -- use JSON.stringify to store process names array when procMonMode=2
-      dateAdded TEXT                      -- ISO 8601 format: YYYY-MM-DD HH:MM:SS (UTC)
+      tags TEXT,                   -- Temporary for migration V1->V2, removed in V3
+      links TEXT,                  -- JSON string
+      description TEXT,            -- JSON string
+      actions TEXT,                -- JSON string
+      procMonMode NUMERIC DEFAULT 1,  -- file:0 / folder:1 / process:2
+      procNames TEXT,              -- JSON string for process names array
+      dateAdded NUMERIC            -- Unix timestamp in milliseconds (when game was added to library)
     )
   `).run()
 
@@ -310,13 +583,18 @@ export function initializeDatabases(config: DatabaseConfig) {
 
   // Execute migrations sequentially
   if (currentVersion < 1) {
-    migrateToV1(metaDb)
+    migrateMetaToV1(metaDb)
     updateVersion(metaDb, 1)
   }
 
   if (currentVersion < 2) {
-    migrateToV2(metaDb, libPath)
+    migrateMetaToV2(metaDb, libPath)
     updateVersion(metaDb, 2)
+  }
+
+  if (currentVersion < 3) {
+    migrateMetaToV3(metaDb, libPath)
+    updateVersion(metaDb, 3)
   }
 
   console.log('Metadata database initialization completed')
@@ -327,8 +605,8 @@ export function initializeDatabases(config: DatabaseConfig) {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       uuid TEXT NOT NULL,
       title TEXT,                            -- Game title for easier querying
-      startTime TEXT NOT NULL,               -- YYYY-MM-DD HH:MM:SS format (UTC)
-      endTime TEXT,                          -- YYYY-MM-DD HH:MM:SS format (UTC), NULL if session is ongoing
+      startTime NUMERIC NOT NULL,            -- Unix timestamp in milliseconds (UTC)
+      endTime NUMERIC,                       -- Unix timestamp in milliseconds (UTC), NULL if session is ongoing
       durationSeconds INTEGER,               -- Duration in seconds, calculated when session ends
       launchMethod TEXT,                     -- Launch method name (e.g., "Direct Launch", "Steam", "Launcher")
       executablePath TEXT,                   -- Path of the executable that was launched
@@ -339,7 +617,7 @@ export function initializeDatabases(config: DatabaseConfig) {
       sessionWeek INTEGER NOT NULL,          -- Week number (1-53) for weekly statistics (local time)
       sessionDayOfWeek INTEGER NOT NULL,     -- Day of week (0=Sunday, 6=Saturday) (local time)
       isCompleted BOOLEAN DEFAULT 0,         -- Whether the session ended normally
-      createdAt TEXT DEFAULT (datetime('now', 'localtime'))
+      createdAt NUMERIC DEFAULT (strftime('%s', 'now') * 1000) -- Unix timestamp in milliseconds
     )
   `).run()
 
@@ -350,6 +628,16 @@ export function initializeDatabases(config: DatabaseConfig) {
   statsDb.prepare(`CREATE INDEX IF NOT EXISTS idx_game_start_time ON game (startTime)`).run()
   statsDb.prepare(`CREATE INDEX IF NOT EXISTS idx_game_completed ON game (isCompleted)`).run()
   statsDb.prepare(`CREATE INDEX IF NOT EXISTS idx_game_launch_method ON game (launchMethod)`).run()
+
+  // Statistics database version management and migrations
+  createVersionTable(statsDb)
+  const statsVersion = getCurrentVersion(statsDb)
+  console.log(`Current statistics database version: ${statsVersion}`)
+
+  if (statsVersion < 1) {
+    migrateStatsToV1(statsDb, libPath)
+    updateVersion(statsDb, 1)
+  }
 
   return { metaDb, statsDb }
 }

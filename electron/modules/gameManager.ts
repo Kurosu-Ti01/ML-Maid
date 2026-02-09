@@ -1,5 +1,5 @@
 import { ipcMain, BrowserWindow } from 'electron'
-import { convertToLocalFileUrl, formatISOToLocal } from '../utils/helpers.js'
+import { convertToLocalFileUrl, formatTimestamp, formatDateOnly } from '../utils/helpers.js'
 import { PROC_MON_MODE } from '../constants/procMonMode.js'
 import path from 'node:path'
 import fs from 'node:fs'
@@ -13,14 +13,16 @@ interface GameData {
   coverImageDisplay?: string
   backgroundImageDisplay?: string
   iconImageDisplay?: string
-  lastPlayed?: string
+  lastPlayed?: number | null
+  lastPlayedDisplay?: string;
   timePlayed?: number
   workingDir?: string
   folderSize?: number
   genre?: string[]
   developer?: string[]
   publisher?: string[]
-  releaseDate?: string
+  releaseDate?: number | null
+  releaseDateDisplay?: string;
   communityScore?: number
   personalScore?: number
   tags?: string[]
@@ -29,7 +31,7 @@ interface GameData {
   actions?: string[]
   procMonMode?: number  // 0: file, 1: folder, 2: process
   procNames?: string[]  // Process names to monitor when procMonMode=2
-  dateAdded?: string
+  dateAdded?: number
 }
 
 interface GameModuleConfig {
@@ -103,8 +105,9 @@ export function setupGameHandlers(config: GameModuleConfig) {
         result.actions = result.actions ? JSON.parse(result.actions) : []
         result.procNames = result.procNames ? JSON.parse(result.procNames) : []
 
-        // Convert ISO datetime to formatted date string for display
-        result.lastPlayedDisplay = formatISOToLocal(result.lastPlayed || '')
+        // Convert timestamp to formatted date string for display
+        result.lastPlayedDisplay = formatTimestamp(result.lastPlayed)
+        result.releaseDateDisplay = formatDateOnly(result.releaseDate)
 
         // Convert image paths to custom protocol URLs for production
         result.iconImageDisplay = convertToLocalFileUrl(result.iconImage, appDataPath, isDev)
@@ -163,14 +166,9 @@ export function setupGameHandlers(config: GameModuleConfig) {
       developer: JSON.parse(game.developer),
       publisher: JSON.parse(game.publisher),
       tags: JSON.parse(game.tags),
-      lastPlayedDisplay: formatISOToLocal(game.lastPlayed || ''),
+      lastPlayedDisplay: formatTimestamp(game.lastPlayed),
       iconImageDisplay: convertToLocalFileUrl(game.iconImage, appDataPath, isDev)
     }))
-  })
-
-  // Format ISO datetime for display (utility function for frontend)
-  ipcMain.handle('format-datetime', (_, isoDateTime: string) => {
-    return formatISOToLocal(isoDateTime)
   })
 
   // Add a new game
@@ -187,7 +185,7 @@ export function setupGameHandlers(config: GameModuleConfig) {
 
       // Set dateAdded to current timestamp if not provided
       if (!updatedGame.dateAdded) {
-        updatedGame.dateAdded = new Date().toISOString().replace('T', ' ').substring(0, 19)
+        updatedGame.dateAdded = Date.now()
       }
 
       const stmt = metaDb.prepare(
@@ -204,11 +202,11 @@ export function setupGameHandlers(config: GameModuleConfig) {
         updatedGame.coverImage || '',
         updatedGame.backgroundImage || '',
         updatedGame.iconImage || '',
-        updatedGame.lastPlayed || '',
+        updatedGame.lastPlayed ?? null,
         updatedGame.timePlayed || 0,
         updatedGame.workingDir || '',
         updatedGame.folderSize || 0,
-        updatedGame.releaseDate || '',
+        updatedGame.releaseDate ?? null,
         updatedGame.communityScore || 0,
         updatedGame.personalScore || 0,
         JSON.stringify(updatedGame.links || {}),
@@ -228,6 +226,8 @@ export function setupGameHandlers(config: GameModuleConfig) {
       syncJunctionTable(updatedGame.uuid, 'game_tags', 'tags', 'tag_id', updatedGame.tags || [])
 
       // For Display
+      updatedGame.lastPlayedDisplay = formatTimestamp(updatedGame.lastPlayed)
+      updatedGame.releaseDateDisplay = formatDateOnly(updatedGame.releaseDate)
       if (updatedGame.iconImage) {
         updatedGame.iconImageDisplay = convertToLocalFileUrl(updatedGame.iconImage, appDataPath, isDev)
       }
@@ -275,11 +275,11 @@ export function setupGameHandlers(config: GameModuleConfig) {
         updatedGame.coverImage || '',
         updatedGame.backgroundImage || '',
         updatedGame.iconImage || '',
-        updatedGame.lastPlayed || '',
+        updatedGame.lastPlayed ?? null,
         updatedGame.timePlayed || 0,
         updatedGame.workingDir || '',
         updatedGame.folderSize || 0,
-        updatedGame.releaseDate || '',
+        updatedGame.releaseDate ?? null,
         updatedGame.communityScore || 0,
         updatedGame.personalScore || 0,
         JSON.stringify(updatedGame.links || {}),
@@ -299,6 +299,8 @@ export function setupGameHandlers(config: GameModuleConfig) {
       syncJunctionTable(updatedGame.uuid, 'game_tags', 'tags', 'tag_id', updatedGame.tags || [])
 
       // For Display
+      updatedGame.lastPlayedDisplay = formatTimestamp(updatedGame.lastPlayed)
+      updatedGame.releaseDateDisplay = formatDateOnly(updatedGame.releaseDate)
       if (updatedGame.iconImage) {
         updatedGame.iconImageDisplay = convertToLocalFileUrl(updatedGame.iconImage, appDataPath, isDev)
       }

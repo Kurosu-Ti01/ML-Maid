@@ -1,6 +1,30 @@
 import { ipcMain } from 'electron'
 import { getWeekNumber } from '../utils/helpers.js'
 
+// Helper to get local YYYY-MM-DD string for "today"
+function getLocalDateString(date: Date = new Date()): string {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+// Helper to get local date N days ago as YYYY-MM-DD
+function getLocalDateNDaysAgo(days: number): string {
+  const d = new Date()
+  d.setDate(d.getDate() - days)
+  return getLocalDateString(d)
+}
+
+// Helper to get start of current week (Monday) as YYYY-MM-DD
+function getStartOfWeek(): string {
+  const d = new Date()
+  const day = d.getDay()
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1) // Adjust when day is Sunday
+  d.setDate(diff)
+  return getLocalDateString(d)
+}
+
 interface StatsModuleConfig {
   statsDb: any
 }
@@ -145,20 +169,40 @@ function getDailyGameSessions(dateString: string, statsDb: any) {
 
 // Internal function to get overall statistics
 function getOverallStats(statsDb: any) {
+  const today = getLocalDateString()
+  const weekStart = getStartOfWeek()
+  const now = new Date()
+  const currentYear = now.getFullYear()
+  const currentMonth = now.getMonth() + 1
+
   const queries = {
     totalPlayTime: `SELECT SUM(durationSeconds) as total FROM game WHERE isCompleted = 1`,
     totalSessions: `SELECT COUNT(*) as total FROM game WHERE isCompleted = 1`,
     gamesPlayed: `SELECT COUNT(DISTINCT uuid) as total FROM game WHERE isCompleted = 1`,
-    todayPlayTime: `SELECT SUM(durationSeconds) as total FROM game WHERE isCompleted = 1 AND sessionDate = date('now', 'localtime')`,
-    thisWeekPlayTime: `SELECT SUM(durationSeconds) as total FROM game WHERE isCompleted = 1 AND sessionDate >= date('now', 'weekday 0', '-6 days')`,
-    thisMonthPlayTime: `SELECT SUM(durationSeconds) as total FROM game WHERE isCompleted = 1 AND sessionYear = strftime('%Y', 'now') AND sessionMonth = strftime('%m', 'now')`
+    todayPlayTime: `SELECT SUM(durationSeconds) as total FROM game WHERE isCompleted = 1 AND sessionDate = ?`,
+    thisWeekPlayTime: `SELECT SUM(durationSeconds) as total FROM game WHERE isCompleted = 1 AND sessionDate >= ?`,
+    thisMonthPlayTime: `SELECT SUM(durationSeconds) as total FROM game WHERE isCompleted = 1 AND sessionYear = ? AND sessionMonth = ?`
   }
 
   const stats: any = {}
-  for (const [key, query] of Object.entries(queries)) {
-    const result = statsDb.prepare(query).get()
+
+  // Queries without parameters
+  for (const key of ['totalPlayTime', 'totalSessions', 'gamesPlayed'] as const) {
+    const result = statsDb.prepare(queries[key]).get()
     stats[key] = result ? (result.total || 0) : 0
   }
+
+  // Today
+  const todayResult = statsDb.prepare(queries.todayPlayTime).get(today)
+  stats.todayPlayTime = todayResult ? (todayResult.total || 0) : 0
+
+  // This week
+  const weekResult = statsDb.prepare(queries.thisWeekPlayTime).get(weekStart)
+  stats.thisWeekPlayTime = weekResult ? (weekResult.total || 0) : 0
+
+  // This month
+  const monthResult = statsDb.prepare(queries.thisMonthPlayTime).get(currentYear, currentMonth)
+  stats.thisMonthPlayTime = monthResult ? (monthResult.total || 0) : 0
 
   return stats
 }
@@ -294,6 +338,7 @@ function getLaunchMethodStats(gameUuid: string | undefined, statsDb: any) {
 
 // Internal function to get game statistics - daily play time for a specific game (recent days)
 function getGameRecentDailyStats(gameUuid: string, days: number, statsDb: any) {
+  const startDate = getLocalDateNDaysAgo(days)
   const query = `
     SELECT 
       sessionDate,
@@ -301,9 +346,9 @@ function getGameRecentDailyStats(gameUuid: string, days: number, statsDb: any) {
       COUNT(*) as sessionCount
     FROM game 
     WHERE uuid = ? AND isCompleted = 1
-    AND sessionDate >= date('now', '-' || ? || ' days')
+    AND sessionDate >= ?
     GROUP BY sessionDate
     ORDER BY sessionDate DESC
   `
-  return statsDb.prepare(query).all(gameUuid, days)
+  return statsDb.prepare(query).all(gameUuid, startDate)
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="statistics">
     <n-tabs v-model:value="activeTab" default-value="main" class="statistics-tabs" type="line">
-      <n-tab-pane name="main" :tab="$t('statistics.tabs.main')">
+      <n-tab-pane name="main" :tab="$t('statistics.tabs.main')" style="height: 100%;">
         <div class="tab-content">
           <h3>{{ $t('statistics.overallStatistics') }}</h3>
           <div class="main-stats-container">
@@ -335,7 +335,7 @@
   })
 
   // Recent game sessions data
-  const recentSessions = ref<Array<{ title: string; startTime: string; durationSeconds: number }>>([])
+  const recentSessions = ref<Array<{ title: string; startTime: number; durationSeconds: number }>>([])
 
   // Format time from seconds to readable format
   const formatTime = (seconds: number) => {
@@ -347,8 +347,8 @@
   }
 
   // Format session time
-  function formatSessionTime(timeStr: string) {
-    const d = new Date(timeStr + 'Z')
+  function formatSessionTime(timestamp: number) {
+    const d = new Date(timestamp)
     const yyyy = d.getFullYear()
     const mm = (d.getMonth() + 1).toString().padStart(2, '0')
     const dd = d.getDate().toString().padStart(2, '0')
@@ -674,8 +674,8 @@
 
     // Convert time strings to decimal hours for easier processing
     const sessions = dailyData.map(session => {
-      const startTime = new Date(session.startTime + 'Z') // Add Z to indicate UTC
-      const endTime = new Date(session.endTime + 'Z')
+      const startTime = new Date(session.startTime)
+      const endTime = new Date(session.endTime)
 
       // Convert to local time decimal hours
       let startHour = startTime.getHours() + startTime.getMinutes() / 60
