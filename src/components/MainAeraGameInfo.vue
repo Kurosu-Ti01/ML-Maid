@@ -72,6 +72,9 @@
               <div class="info-row">
                 <div class="info-label">{{ $t('gameInfo.workingPath') }}</div>
                 <div class="info-content">
+                  <n-icon size="18" style="margin-right: 8px; color: #666">
+                    <FolderOutlined />
+                  </n-icon>
                   <span class="clickable-path" @click="openworkingDir" :title="gameData.workingDir">
                     {{ gameData.workingDir }}
                   </span>
@@ -79,42 +82,119 @@
               </div>
               <div class="info-row">
                 <div class="info-label">{{ $t('gameInfo.folderSize') }}</div>
-                <div class="info-content">{{ formatFileSize(gameData.folderSize) }}</div>
+                <div class="info-content">
+                  <n-icon size="18" style="margin-right: 8px; color: #666">
+                    <SdStorageOutlined />
+                  </n-icon>
+                  <span style="font-weight: bold;">{{ formatFileSize(gameData.folderSize).value }}</span>
+                  <span style="font-size: 0.8em; color: #888; margin-left: 4px;">{{
+                    formatFileSize(gameData.folderSize).unit }}</span>
+                </div>
               </div>
               <div class="info-row">
                 <div class="info-label">{{ $t('gameInfo.genre') }}</div>
-                <div class="info-content">{{ Array.isArray(gameData.genre) ? gameData.genre.join(', ') : gameData.genre
-                }}</div>
+                <div class="info-content">
+                  <div class="tags-flex-wrap">
+                    <template v-if="Array.isArray(gameData.genre)">
+                      <n-tag v-for="(item, index) in gameData.genre" :key="index"
+                        :color="{ color: 'rgba(64, 128, 255, 0.1)', textColor: '#4080ff', borderColor: 'rgba(64, 128, 255, 0.2)' }"
+                        style="margin: 2px 6px 2px 0;">
+                        {{ item }}
+                      </n-tag>
+                    </template>
+                    <template v-else-if="gameData.genre">
+                      <n-tag
+                        :color="{ color: 'rgba(64, 128, 255, 0.1)', textColor: '#4080ff', borderColor: 'rgba(64, 128, 255, 0.2)' }"
+                        style="margin: 2px 6px 2px 0;">
+                        {{ gameData.genre }}
+                      </n-tag>
+                    </template>
+                  </div>
+                </div>
               </div>
               <div class="info-row">
                 <div class="info-label">{{ $t('gameInfo.developer') }}</div>
-                <div class="info-content">{{ Array.isArray(gameData.developer) ? gameData.developer.join(', ') :
-                  gameData.developer }}</div>
+                <div class="info-content">
+                  <div class="tags-flex-wrap">
+                    <template v-if="Array.isArray(gameData.developer)">
+                      <n-tag v-for="(item, index) in gameData.developer" :key="index"
+                        :color="{ color: 'rgba(64, 128, 255, 0.1)', textColor: '#4080ff', borderColor: 'rgba(64, 128, 255, 0.2)' }"
+                        style="margin: 2px 6px 2px 0;">
+                        {{ item }}
+                      </n-tag>
+                    </template>
+                    <template v-else-if="gameData.developer">
+                      <n-tag
+                        :color="{ color: 'rgba(64, 128, 255, 0.1)', textColor: '#4080ff', borderColor: 'rgba(64, 128, 255, 0.2)' }"
+                        style="margin: 2px 6px 2px 0;">
+                        {{ gameData.developer }}
+                      </n-tag>
+                    </template>
+                  </div>
+                </div>
               </div>
               <div class="info-row">
                 <div class="info-label">{{ $t('gameInfo.publisher') }}</div>
-                <div class="info-content">{{ Array.isArray(gameData.publisher) ? gameData.publisher.join(', ') :
-                  gameData.publisher }}</div>
+                <div class="info-content">
+                  <div class="tags-flex-wrap">
+                    <template v-if="Array.isArray(gameData.publisher)">
+                      <n-tag v-for="(item, index) in gameData.publisher" :key="index"
+                        :color="{ color: 'rgba(64, 128, 255, 0.1)', textColor: '#4080ff', borderColor: 'rgba(64, 128, 255, 0.2)' }"
+                        style="margin: 2px 6px 2px 0;">
+                        {{ item }}
+                      </n-tag>
+                    </template>
+                    <template v-else-if="gameData.publisher">
+                      <n-tag
+                        :color="{ color: 'rgba(64, 128, 255, 0.1)', textColor: '#4080ff', borderColor: 'rgba(64, 128, 255, 0.2)' }"
+                        style="margin: 2px 6px 2px 0;">
+                        {{ gameData.publisher }}
+                      </n-tag>
+                    </template>
+                  </div>
+                </div>
               </div>
               <div class="info-row">
                 <div class="info-label">{{ $t('gameInfo.releaseDate') }}</div>
-                <div class="info-content">{{ gameData.releaseDateDisplay }}</div>
+                <div class="info-content">
+                  <n-icon size="18" style="margin-right: 8px; color: #666">
+                    <CalendarTodayOutlined />
+                  </n-icon>
+                  {{ gameData.releaseDateDisplay }}
+                </div>
               </div>
               <div class="info-row">
                 <div class="info-label">{{ $t('gameInfo.communityScore') }}</div>
-                <div class="info-content">{{ gameData.communityScore }}</div>
+                <div class="info-content">
+                  <span :style="{ color: getScoreColor(gameData.communityScore), fontWeight: 'bold' }">
+                    {{ gameData.communityScore }}
+                  </span>
+                </div>
               </div>
               <div class="info-row">
                 <div class="info-label">{{ $t('gameInfo.userScore') }}</div>
-                <div class="info-content">{{ gameData.personalScore }}</div>
+                <div class="info-content">
+                  <span :style="{ color: getScoreColor(gameData.personalScore), fontWeight: 'bold' }">
+                    {{ gameData.personalScore }}
+                  </span>
+                </div>
               </div>
               <div class="info-row">
                 <div class="info-label">{{ $t('gameInfo.links') }}</div>
-                <div class="info-content"
-                  style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
-                  <div v-for="(link, index) in gameData.links" :key="index">
-                    <a @click.prevent="openExternalLink(link.url)" class="game-link">{{ link.name }}</a>
-                  </div>
+                <div class="info-content" style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+                  <n-tooltip trigger="hover" v-for="(link, index) in gameData.links" :key="index">
+                    <template #trigger>
+                      <n-button size="tiny" secondary type="primary" @click="openExternalLink(link.url)">
+                        <template #icon>
+                          <n-icon>
+                            <OpenInNewOutlined />
+                          </n-icon>
+                        </template>
+                        {{ link.name }}
+                      </n-button>
+                    </template>
+                    {{ link.url }}
+                  </n-tooltip>
                 </div>
               </div>
               <div class="info-row-tags">
@@ -153,7 +233,7 @@
   import { useMessage, useDialog } from 'naive-ui'
   import type { DropdownOption } from 'naive-ui'
   import { NIcon } from 'naive-ui'
-  import { DeleteOutlined, FolderOutlined, LinkOutlined, InfoOutlined, DownloadOutlined } from '@vicons/material'
+  import { DeleteOutlined, FolderOutlined, LinkOutlined, InfoOutlined, DownloadOutlined, SdStorageOutlined, CalendarTodayOutlined, OpenInNewOutlined } from '@vicons/material'
   import defaultBackground from '/default/ML-Maid-Background.png'
   import defaultIcon from '/default/ML-Maid-Icon-W.png'
   import { useI18n } from 'vue-i18n'
@@ -228,24 +308,49 @@
   }
 
   // Format file size from bytes to human readable format
-  function formatFileSize(bytes: number): string {
+  function formatFileSize(bytes: number): { value: string, unit: string } {
     if (!bytes || bytes === 0) {
-      return '0 B'
+      return { value: '0', unit: 'B' }
     }
 
     const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
     const i = Math.floor(Math.log(bytes) / Math.log(1024))
     const size = bytes / Math.pow(1024, i)
+    let valueStr = ''
 
     // For sizes >= 1GB, show 2 decimal places
     // For sizes >= 1MB, show 1 decimal place
     // For smaller sizes, show no decimal places
     if (i >= 3) {
-      return `${size.toFixed(2)} ${sizes[i]}`
+      valueStr = size.toFixed(2)
     } else if (i >= 2) {
-      return `${size.toFixed(1)} ${sizes[i]}`
+      valueStr = size.toFixed(1)
     } else {
-      return `${Math.round(size)} ${sizes[i]}`
+      valueStr = Math.round(size).toString()
+    }
+
+    return { value: valueStr, unit: sizes[i] || 'B' }
+  }
+
+  // Get color for score
+  function getScoreColor(score: string | number | undefined): string {
+    if (score === undefined || score === null) return 'inherit'
+    const num = parseFloat(String(score))
+    if (isNaN(num)) return 'inherit'
+
+    // Check if it's likely 100-scale or 10-scale
+    // If score > 10, assume 100 scale
+    // If score <= 10, assume 10 scale
+    const is100Scale = num > 10
+
+    if (is100Scale) {
+      if (num >= 80) return '#18a058' // Green
+      if (num >= 60) return '#f0a020' // Orange
+      return '#d11515' // Red
+    } else {
+      if (num >= 8) return '#18a058'
+      if (num >= 6) return '#f0a020'
+      return '#d11515'
     }
   }
 
@@ -648,7 +753,7 @@
 
   .info-content {
     flex: 1;
-    padding: 12px;
+    padding: 6px 10px;
     background-color: var(--bg-info-content);
     color: var(--color-info-content);
     word-break: break-word;

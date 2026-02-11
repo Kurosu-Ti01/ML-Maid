@@ -95,9 +95,8 @@
     width: 15%;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 10px;
     margin-left: -3px;
-    -webkit-app-region: no-drag;
   }
 
   .titlebar-button {
@@ -140,12 +139,27 @@
     align-items: center;
     margin-left: 10px;
     -webkit-app-region: no-drag;
+    position: relative;
+  }
+
+  .titlebar-search-icon {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    color: #909399;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .titlebar-search-input {
-    width: 250px;
+    width: 300px;
     height: 28px;
-    padding: 4px 12px;
+    padding: 4px 12px 4px 36px;
     font-size: 0.85rem;
     border: 1px solid rgba(64, 128, 255, 0.3);
     border-radius: 6px;
