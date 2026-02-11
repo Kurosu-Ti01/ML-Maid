@@ -110,8 +110,8 @@
           <div class="header-section">
             <h3>{{ $t('statistics.dailyStatistics') }}</h3>
             <div class="day-selector">
-              <el-date-picker v-model="selectedDay" type="date" format="YYYY-MM-DD" value-format="YYYY-MM-DD"
-                :placeholder="$t('statistics.datePicker.today')" @change="onDayChange" />
+              <n-date-picker v-model:formatted-value="selectedDay" type="date" value-format="yyyy-MM-dd"
+                :placeholder="$t('statistics.datePicker.today')" @update:formatted-value="onDayChange" />
             </div>
           </div>
           <div class="chart-container">
@@ -128,9 +128,9 @@
           <div class="header-section">
             <h3>{{ $t('statistics.weeklyStatistics') }}</h3>
             <div class="week-selector">
-              <n-date-picker v-model:value="selectedWeek" type="week" format="yyyy 'Week' w" value-format="yyyy-MM-dd"
+              <n-date-picker v-model:formatted-value="selectedWeek" type="week" value-format="yyyy-MM-dd"
                 :placeholder="$t('statistics.datePicker.thisWeek')" :first-day-of-week="1"
-                @update:value="onWeekChange" />
+                @update:formatted-value="onWeekChange" />
             </div>
           </div>
           <div class="chart-container">
@@ -147,8 +147,8 @@
           <div class="header-section">
             <h3>{{ $t('statistics.monthlyStatistics') }}</h3>
             <div class="month-selector">
-              <el-date-picker v-model="selectedMonth" type="month" format="YYYY-MM" value-format="YYYY-MM"
-                :placeholder="$t('statistics.datePicker.thisMonth')" @change="onMonthChange" />
+              <n-date-picker v-model:formatted-value="selectedMonth" type="month" value-format="yyyy-MM"
+                :placeholder="$t('statistics.datePicker.thisMonth')" @update:formatted-value="onMonthChange" />
             </div>
           </div>
           <div class="chart-container">
@@ -166,8 +166,8 @@
           <div class="header-section">
             <h3>{{ $t('statistics.yearlyStatistics') }}</h3>
             <div class="year-selector">
-              <n-date-picker v-model:value="selectedYear" type="year" format="yyyy" value-format="yyyy"
-                :placeholder="$t('statistics.datePicker.thisYear')" @update:value="onYearChange" />
+              <n-date-picker v-model:formatted-value="selectedYear" type="year" value-format="yyyy"
+                :placeholder="$t('statistics.datePicker.thisYear')" @update:formatted-value="onYearChange" />
             </div>
           </div>
           <div class="chart-container">
@@ -302,10 +302,13 @@
 
   const { t } = useI18n()
 
-  // Get today's date as the default value
+  // Get today's date as the default value (local YYYY-MM-DD)
   const getTodayDate = () => {
     const today = new Date()
-    return today.toISOString().split('T')[0] // YYYY-MM-DD format
+    const y = today.getFullYear()
+    const m = (today.getMonth() + 1).toString().padStart(2, '0')
+    const d = today.getDate().toString().padStart(2, '0')
+    return `${y}-${m}-${d}`
   }
 
   // Get current month string YYYY-MM
@@ -449,19 +452,22 @@
     series: []
   })
 
-  // Get the current week's Monday as the default value (ISO 8601 standard)
-  const getCurrentWeekMonday = () => {
+  // Get the current week's Monday as YYYY-MM-DD string (ISO 8601 standard)
+  const getCurrentWeekMondayString = () => {
     const today = new Date()
     const dayOfWeek = today.getDay() // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
     const monday = new Date(today)
     // Convert Sunday (0) to 7 for easier calculation
     const adjustedDay = dayOfWeek === 0 ? 7 : dayOfWeek
     monday.setDate(today.getDate() - adjustedDay + 1) // Go back to this week's Monday
-    return monday
+    const y = monday.getFullYear()
+    const m = (monday.getMonth() + 1).toString().padStart(2, '0')
+    const d = monday.getDate().toString().padStart(2, '0')
+    return `${y}-${m}-${d}`
   }
 
-  // Selected week (default is current week's Monday)
-  const selectedWeek = ref(getCurrentWeekMonday())
+  // Selected week (default is current week's Monday, as YYYY-MM-DD string)
+  const selectedWeek = ref(getCurrentWeekMondayString())
 
   // Chart configuration for the Week tab
   const weekChartOption = ref<WeekChartOption>({
@@ -853,15 +859,7 @@
     try {
       console.log('Loading weekly statistics...')
 
-      // Convert selected week to YYYY-MM-DD format
-      let dateString: string
-      if (typeof selectedWeek.value === 'string') {
-        // If it's already a string from the date picker
-        dateString = selectedWeek.value
-      } else {
-        // If it's a Date object from initial setup
-        dateString = selectedWeek.value.toISOString().split('T')[0]
-      }
+      const dateString = selectedWeek.value
       console.log(`Loading statistics for week starting: ${dateString}`)
 
       // Call the API
@@ -955,18 +953,9 @@
     try {
       console.log('Loading monthly daily statistics...')
 
-      // Determine year and month
-      let year: number
-      let month: number
-      if (typeof selectedMonth.value === 'string') {
-        const parts = selectedMonth.value.split('-')
-        year = parseInt(parts[0], 10)
-        month = parseInt(parts[1], 10)
-      } else {
-        const d = selectedMonth.value as Date
-        year = d.getFullYear()
-        month = d.getMonth() + 1
-      }
+      const parts = selectedMonth.value.split('-')
+      const year = parseInt(parts[0], 10)
+      const month = parseInt(parts[1], 10)
 
       console.log(`Loading statistics for month: ${year}-${month.toString().padStart(2, '0')}`)
 
@@ -1030,7 +1019,7 @@
   // Load yearly daily totals
   const loadYearlyDailyStats = async () => {
     try {
-      const year = typeof selectedYear.value === 'string' ? parseInt(selectedYear.value, 10) : (selectedYear.value as Date).getFullYear()
+      const year = parseInt(selectedYear.value, 10)
       console.log('Loading yearly daily stats for', year)
       const data = await window.electronAPI?.getYearlyDailyStats(year)
       if (data) updateYearChart(year, data)
@@ -1084,9 +1073,12 @@
 
   // Initial data load
   onMounted(async () => {
-    await loadOverallStats()
-    await loadRecentSessions()
-    // Other initial loads...
+    loadOverallStats()
+    loadDailyStatistics()
+    loadWeeklyStatistics()
+    loadMonthlyDailyStats()
+    loadYearlyDailyStats()
+    loadRecentSessions()
   })
 </script>
 

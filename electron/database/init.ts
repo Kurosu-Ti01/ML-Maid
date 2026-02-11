@@ -269,6 +269,9 @@ function migrateMetaToV3(metaDb: any, libPath: string) {
     console.error('Failed to create backup:', error)
   }
 
+  // Temporarily disable foreign keys during table swap to avoid cascading deletes on junction tables.
+  metaDb.pragma('foreign_keys = OFF')
+
   // Use transaction for atomic migration
   const migrate = metaDb.transaction(() => {
     console.log('Creating new games table with timestamp fields...')
@@ -372,6 +375,8 @@ function migrateMetaToV3(metaDb: any, libPath: string) {
   } catch (error) {
     console.error('metadata.db migration to V3 failed:', error)
     throw error
+  } finally {
+    metaDb.pragma('foreign_keys = ON')
   }
 }
 
