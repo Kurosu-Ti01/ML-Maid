@@ -1,28 +1,14 @@
-import fs from 'node:fs'
-import path from 'node:path'
+import enUS from '../../src/locales/en-US.json'
+import zhCN from '../../src/locales/zh-CN.json'
+import jaJP from '../../src/locales/ja-JP.json'
 
 type LocaleMessages = Record<string, any>
 
 let currentLocale = 'en-US'
-const locales: Record<string, LocaleMessages> = {}
-
-/**
- * Load locale files from src/locales directory.
- * In production, these are bundled into the dist folder.
- */
-export function loadLocales(appRoot: string) {
-  const localeDir = path.join(appRoot, 'src', 'locales')
-  const fallbackDir = path.join(appRoot, 'dist', 'locales')
-
-  const dir = fs.existsSync(localeDir) ? localeDir : fallbackDir
-
-  for (const file of ['en-US.json', 'zh-CN.json', 'ja-JP.json']) {
-    const filePath = path.join(dir, file)
-    if (fs.existsSync(filePath)) {
-      const localeName = file.replace('.json', '')
-      locales[localeName] = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
-    }
-  }
+const locales: Record<string, LocaleMessages> = {
+  'en-US': enUS,
+  'zh-CN': zhCN,
+  'ja-JP': jaJP,
 }
 
 /**
