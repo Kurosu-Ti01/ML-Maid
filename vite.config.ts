@@ -16,6 +16,7 @@ export default defineConfig({
   },
   build: {
     target: 'esnext', // Support latest ES features, including top-level await
+    chunkSizeWarningLimit: 2000, // Increase chunk size warning limit to 2000 KB
   },
   plugins: [
     vue(),
