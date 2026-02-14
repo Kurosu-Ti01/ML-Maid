@@ -184,7 +184,8 @@ function initializeApp() {
   })
 
   setupStatsHandlers({
-    statsDb: databases.statsDb
+    statsDb: databases.statsDb,
+    metaDb: databases.metaDb
   })
 
   setupLauncherHandlers({

@@ -523,6 +523,118 @@ function migrateStatsToV1(statsDb: any, libPath: string) {
   }
 }
 
+// statistics.db Migration V2: Remove title & executablePath columns, refactor sessionDayOfWeek to 0=Monday..6=Sunday
+function migrateStatsToV2(statsDb: any, libPath: string) {
+  console.log('Starting statistics.db migration to V2: Removing title/executablePath, refactoring sessionDayOfWeek...')
+
+  const dbPath_statistics = path.join(libPath, 'statistics.db')
+
+  // Backup database before migration
+  const backupPath = path.join(libPath, `statistics.db.backup.v1.${Date.now()}`)
+  try {
+    fs.copyFileSync(dbPath_statistics, backupPath)
+    console.log(`Statistics backup created: ${backupPath}`)
+  } catch (error) {
+    console.error('Failed to create statistics backup:', error)
+  }
+
+  const migrate = statsDb.transaction(() => {
+    console.log('Creating new game table without title/executablePath and with new sessionDayOfWeek...')
+
+    statsDb.prepare(`
+      CREATE TABLE IF NOT EXISTS game_new (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        uuid TEXT NOT NULL,
+        startTime NUMERIC NOT NULL,            -- Unix timestamp in milliseconds (UTC)
+        endTime NUMERIC,                       -- Unix timestamp in milliseconds (UTC), NULL if ongoing
+        durationSeconds INTEGER,
+        launchMethod TEXT,
+        exitCode INTEGER,
+        sessionDate TEXT NOT NULL,             -- YYYY-MM-DD (local date), kept for easy date grouping
+        sessionYear INTEGER NOT NULL,
+        sessionMonth INTEGER NOT NULL,
+        sessionWeek INTEGER NOT NULL,
+        sessionDayOfWeek INTEGER NOT NULL,     -- 0=Monday, 6=Sunday
+        isCompleted BOOLEAN DEFAULT 0,
+        createdAt NUMERIC
+      )
+    `).run()
+
+    console.log('Migrating statistics data with sessionDayOfWeek conversion...')
+
+    const sessions = statsDb.prepare(`
+      SELECT id, uuid, startTime, endTime, durationSeconds,
+             launchMethod, exitCode, sessionDate,
+             sessionYear, sessionMonth, sessionWeek, sessionDayOfWeek,
+             isCompleted, createdAt
+      FROM game
+    `).all()
+
+    const insertStmt = statsDb.prepare(`
+      INSERT INTO game_new (
+        id, uuid, startTime, endTime, durationSeconds,
+        launchMethod, exitCode, sessionDate,
+        sessionYear, sessionMonth, sessionWeek, sessionDayOfWeek,
+        isCompleted, createdAt
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `)
+
+    let migratedCount = 0
+    for (const session of sessions) {
+      try {
+        // Convert sessionDayOfWeek from old format (0=Sunday, 6=Saturday)
+        // to new format (0=Monday, 6=Sunday)
+        const oldDow = session.sessionDayOfWeek as number
+        const newDow = oldDow === 0 ? 6 : oldDow - 1
+
+        insertStmt.run(
+          session.id,
+          session.uuid,
+          session.startTime,
+          session.endTime,
+          session.durationSeconds,
+          session.launchMethod,
+          session.exitCode,
+          session.sessionDate,
+          session.sessionYear,
+          session.sessionMonth,
+          session.sessionWeek,
+          newDow,
+          session.isCompleted,
+          session.createdAt
+        )
+        migratedCount++
+      } catch (error) {
+        console.error(`Failed to migrate session ${session.id}:`, error)
+      }
+    }
+
+    console.log(`Successfully migrated ${migratedCount} sessions`)
+
+    // Drop old table and rename
+    statsDb.prepare('DROP TABLE game').run()
+    statsDb.prepare('ALTER TABLE game_new RENAME TO game').run()
+
+    // Recreate indexes
+    statsDb.prepare('CREATE INDEX IF NOT EXISTS idx_game_uuid ON game (uuid)').run()
+    statsDb.prepare('CREATE INDEX IF NOT EXISTS idx_game_date ON game (sessionDate)').run()
+    statsDb.prepare('CREATE INDEX IF NOT EXISTS idx_game_year_month ON game (sessionYear, sessionMonth)').run()
+    statsDb.prepare('CREATE INDEX IF NOT EXISTS idx_game_start_time ON game (startTime)').run()
+    statsDb.prepare('CREATE INDEX IF NOT EXISTS idx_game_completed ON game (isCompleted)').run()
+    statsDb.prepare('CREATE INDEX IF NOT EXISTS idx_game_launch_method ON game (launchMethod)').run()
+
+    console.log('Statistics table rebuilt and indexes recreated')
+  })
+
+  try {
+    migrate()
+    console.log('statistics.db migration to V2 completed successfully!')
+  } catch (error) {
+    console.error('statistics.db migration to V2 failed:', error)
+    throw error
+  }
+}
+
 // ==========================================
 //  Database Initialization
 // ==========================================
@@ -584,7 +696,7 @@ export function initializeDatabases(config: DatabaseConfig) {
   createVersionTable(metaDb)
   const currentVersion = getCurrentVersion(metaDb)
 
-  console.log(`Current database version: ${currentVersion}`)
+  console.log(`Current metadata database version: ${currentVersion}`)
 
   // Execute migrations sequentially
   if (currentVersion < 1) {
@@ -605,22 +717,23 @@ export function initializeDatabases(config: DatabaseConfig) {
   console.log('Metadata database initialization completed')
 
   // Initialize statistics database schema
+  // Note: This schema is for V2+. Older versions will be migrated automatically.
   statsDb.prepare(`
     CREATE TABLE IF NOT EXISTS game (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       uuid TEXT NOT NULL,
-      title TEXT,                            -- Game title for easier querying
+      title TEXT,                            -- Deprecated: kept for V1 migration compatibility, removed in V2
       startTime NUMERIC NOT NULL,            -- Unix timestamp in milliseconds (UTC)
       endTime NUMERIC,                       -- Unix timestamp in milliseconds (UTC), NULL if session is ongoing
       durationSeconds INTEGER,               -- Duration in seconds, calculated when session ends
       launchMethod TEXT,                     -- Launch method name (e.g., "Direct Launch", "Steam", "Launcher")
-      executablePath TEXT,                   -- Path of the executable that was launched
+      executablePath TEXT,                   -- Deprecated: kept for V1 migration compatibility, removed in V2
       exitCode INTEGER,                      -- Process exit code, NULL if session is ongoing
       sessionDate TEXT NOT NULL,             -- YYYY-MM-DD format for easy date-based queries (local date)
       sessionYear INTEGER NOT NULL,          -- Year for yearly statistics (local time)
       sessionMonth INTEGER NOT NULL,         -- Month (1-12) for monthly statistics (local time)
       sessionWeek INTEGER NOT NULL,          -- Week number (1-53) for weekly statistics (local time)
-      sessionDayOfWeek INTEGER NOT NULL,     -- Day of week (0=Sunday, 6=Saturday) (local time)
+      sessionDayOfWeek INTEGER NOT NULL,     -- Day of week (0=Monday, 6=Sunday) (local time)
       isCompleted BOOLEAN DEFAULT 0,         -- Whether the session ended normally
       createdAt NUMERIC DEFAULT (strftime('%s', 'now') * 1000) -- Unix timestamp in milliseconds
     )
@@ -643,6 +756,13 @@ export function initializeDatabases(config: DatabaseConfig) {
     migrateStatsToV1(statsDb, libPath)
     updateVersion(statsDb, 1)
   }
+
+  if (statsVersion < 2) {
+    migrateStatsToV2(statsDb, libPath)
+    updateVersion(statsDb, 2)
+  }
+
+  console.log('Statistics database initialization completed')
 
   return { metaDb, statsDb }
 }

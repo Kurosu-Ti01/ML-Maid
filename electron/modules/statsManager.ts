@@ -27,10 +27,11 @@ function getStartOfWeek(): string {
 
 interface StatsModuleConfig {
   statsDb: any
+  metaDb: any
 }
 
 export function setupStatsHandlers(config: StatsModuleConfig) {
-  const { statsDb } = config
+  const { statsDb, metaDb } = config
 
   // ────────────────────────────
   //   Overall Tab IPC Handlers
@@ -50,7 +51,7 @@ export function setupStatsHandlers(config: StatsModuleConfig) {
   // ────────────────────────────
   // Get daily game sessions for a specific date
   ipcMain.handle('get-daily-game-sessions', (_, dateString: string) => {
-    return getDailyGameSessions(dateString, statsDb)
+    return getDailyGameSessions(dateString, statsDb, metaDb)
   })
 
   // ────────────────────────────
@@ -58,7 +59,7 @@ export function setupStatsHandlers(config: StatsModuleConfig) {
   // ────────────────────────────
   // Get weekly statistics for specified date string
   ipcMain.handle('get-weekly-stats-by-date', (_, dateString: string) => {
-    return getWeeklyStatisticsByDate(dateString, statsDb)
+    return getWeeklyStatisticsByDate(dateString, statsDb, metaDb)
   })
 
   // ────────────────────────────
@@ -92,12 +93,12 @@ export function setupStatsHandlers(config: StatsModuleConfig) {
 
   // Get top played games
   ipcMain.handle('get-top-games-stats', (_, limit: number = 10) => {
-    return getTopGamesStats(limit, statsDb)
+    return getTopGamesStats(limit, statsDb, metaDb)
   })
 
   // Get recent game sessions (updated to include launch method)
   ipcMain.handle('get-recent-sessions', (_, limit: number = 20) => {
-    return getRecentSessions(limit, statsDb)
+    return getRecentSessions(limit, statsDb, metaDb)
   })
 
   // Get launch method statistics
@@ -126,7 +127,7 @@ function getGameDailyStatsByRange(gameUuid: string, startDate: string, endDate: 
 }
 
 // Internal function to get weekly statistics by date string
-function getWeeklyStatisticsByDate(dateString: string, statsDb: any) {
+function getWeeklyStatisticsByDate(dateString: string, statsDb: any, metaDb: any) {
   const date = new Date(dateString)
   const year = date.getFullYear()
   const weekNumber = getWeekNumber(date)
@@ -136,25 +137,30 @@ function getWeeklyStatisticsByDate(dateString: string, statsDb: any) {
       sessionDate,
       sessionDayOfWeek,
       uuid,
-      title,
       SUM(durationSeconds) as totalSeconds,
       COUNT(*) as sessionCount
     FROM game 
     WHERE isCompleted = 1 
     AND sessionYear = ? 
     AND sessionWeek = ?
-    GROUP BY sessionDate, sessionDayOfWeek, uuid, title
-    ORDER BY sessionDayOfWeek ASC, title ASC
+    GROUP BY sessionDate, sessionDayOfWeek, uuid
+    ORDER BY sessionDayOfWeek ASC, uuid ASC
   `
-  return statsDb.prepare(query).all(year, weekNumber)
+  const rows = statsDb.prepare(query).all(year, weekNumber)
+
+  // Look up titles from metadata.db
+  const getTitle = metaDb.prepare('SELECT title FROM games WHERE uuid = ?')
+  return rows.map((row: any) => {
+    const gameData = getTitle.get(row.uuid)
+    return { ...row, title: gameData?.title || 'Unknown Game' }
+  })
 }
 
 // Internal function to get daily game sessions for Profile chart
-function getDailyGameSessions(dateString: string, statsDb: any) {
+function getDailyGameSessions(dateString: string, statsDb: any, metaDb: any) {
   const query = `
     SELECT 
       uuid,
-      title,
       startTime,
       endTime,
       durationSeconds,
@@ -164,7 +170,14 @@ function getDailyGameSessions(dateString: string, statsDb: any) {
     AND sessionDate = ?
     ORDER BY startTime ASC
   `
-  return statsDb.prepare(query).all(dateString)
+  const rows = statsDb.prepare(query).all(dateString)
+
+  // Look up titles from metadata.db
+  const getTitle = metaDb.prepare('SELECT title FROM games WHERE uuid = ?')
+  return rows.map((row: any) => {
+    const gameData = getTitle.get(row.uuid)
+    return { ...row, title: gameData?.title || 'Unknown Game' }
+  })
 }
 
 // Internal function to get overall statistics
@@ -208,21 +221,27 @@ function getOverallStats(statsDb: any) {
 }
 
 // Internal function to get top played games statistics
-function getTopGamesStats(limit: number, statsDb: any) {
+function getTopGamesStats(limit: number, statsDb: any, metaDb: any) {
   const query = `
     SELECT 
       uuid,
-      title,
       SUM(durationSeconds) as totalSeconds,
       COUNT(*) as sessionCount,
       MAX(sessionDate) as lastPlayed
     FROM game 
     WHERE isCompleted = 1
-    GROUP BY uuid, title
+    GROUP BY uuid
     ORDER BY totalSeconds DESC
     LIMIT ?
   `
-  return statsDb.prepare(query).all(limit)
+  const rows = statsDb.prepare(query).all(limit)
+
+  // Look up titles from metadata.db
+  const getTitle = metaDb.prepare('SELECT title FROM games WHERE uuid = ?')
+  return rows.map((row: any) => {
+    const gameData = getTitle.get(row.uuid)
+    return { ...row, title: gameData?.title || 'Unknown Game' }
+  })
 }
 
 // Internal function to get monthly statistics
@@ -278,12 +297,11 @@ function getYearlyDailyStats(year: number | undefined, statsDb: any) {
 }
 
 // Internal function to get recent game sessions
-function getRecentSessions(limit: number, statsDb: any) {
+function getRecentSessions(limit: number, statsDb: any, metaDb: any) {
   const query = `
     SELECT 
       id,
       uuid,
-      title,
       startTime,
       endTime,
       durationSeconds,
@@ -294,7 +312,14 @@ function getRecentSessions(limit: number, statsDb: any) {
     ORDER BY startTime DESC
     LIMIT ?
   `
-  return statsDb.prepare(query).all(limit)
+  const rows = statsDb.prepare(query).all(limit)
+
+  // Look up titles from metadata.db
+  const getTitle = metaDb.prepare('SELECT title FROM games WHERE uuid = ?')
+  return rows.map((row: any) => {
+    const gameData = getTitle.get(row.uuid)
+    return { ...row, title: gameData?.title || 'Unknown Game' }
+  })
 }
 
 // Internal function to get launch method statistics

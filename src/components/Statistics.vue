@@ -111,7 +111,8 @@
             <h3>{{ $t('statistics.dailyStatistics') }}</h3>
             <div class="day-selector">
               <n-date-picker v-model:formatted-value="selectedDay" type="date" value-format="yyyy-MM-dd"
-                :placeholder="$t('statistics.datePicker.today')" @update:formatted-value="onDayChange" />
+                :placeholder="$t('statistics.datePicker.today')" :first-day-of-week="0"
+                @update:formatted-value="onDayChange" />
             </div>
           </div>
           <div class="chart-container">
@@ -129,7 +130,7 @@
             <h3>{{ $t('statistics.weeklyStatistics') }}</h3>
             <div class="week-selector">
               <n-date-picker v-model:formatted-value="selectedWeek" type="week" value-format="yyyy-MM-dd"
-                :placeholder="$t('statistics.datePicker.thisWeek')" :first-day-of-week="1"
+                :placeholder="$t('statistics.datePicker.thisWeek')" :first-day-of-week="0"
                 @update:formatted-value="onWeekChange" />
             </div>
           </div>
@@ -148,7 +149,8 @@
             <h3>{{ $t('statistics.monthlyStatistics') }}</h3>
             <div class="month-selector">
               <n-date-picker v-model:formatted-value="selectedMonth" type="month" value-format="yyyy-MM"
-                :placeholder="$t('statistics.datePicker.thisMonth')" @update:formatted-value="onMonthChange" />
+                :placeholder="$t('statistics.datePicker.thisMonth')" :first-day-of-week="0"
+                @update:formatted-value="onMonthChange" />
             </div>
           </div>
           <div class="chart-container">
@@ -901,10 +903,9 @@
 
       // For each game, find its data for this day
       uniqueGames.forEach(gameTitle => {
-        // Convert display index back to database dayOfWeek (0=Sunday, 1=Monday, ...)
-        const dbDayOfWeek = displayIndex === 6 ? 0 : displayIndex + 1
+        // displayIndex directly matches sessionDayOfWeek (0=Monday, 6=Sunday)
         const gameData = weeklyData.find(d =>
-          d.sessionDayOfWeek === dbDayOfWeek && d.title === gameTitle
+          d.sessionDayOfWeek === displayIndex && d.title === gameTitle
         )
         const hours = gameData ? (gameData.totalSeconds / 3600).toFixed(2) : '0'
         row.push(hours)

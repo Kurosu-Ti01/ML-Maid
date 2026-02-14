@@ -22,7 +22,7 @@ interface GameLaunchParams {
 }
 
 export function setupLauncherHandlers(config: LauncherModuleConfig) {
-  const { metaDb, statsDb, win } = config
+  const { statsDb, win } = config
 
   // Launch game with enhanced monitoring
   ipcMain.handle('launch-game', async (_, params: GameLaunchParams) => {
@@ -45,10 +45,6 @@ export function setupLauncherHandlers(config: LauncherModuleConfig) {
       console.log(`Working directory: ${workingDir}`)
       console.log(`Process monitor mode: ${procMonMode}`)
       console.log(`Process names: ${procNames}`)
-
-      // Get game name for statistics
-      const gameData = metaDb.prepare('SELECT title FROM games WHERE uuid = ?').get(gameUuid)
-      const gameName = gameData ? gameData.title : 'Unknown Game'
 
       // Use provided launch method name
       if (!launchMethodName) {
@@ -78,22 +74,22 @@ export function setupLauncherHandlers(config: LauncherModuleConfig) {
       const sessionYear = startTime.getFullYear()
       const sessionMonth = startTime.getMonth() + 1 // JavaScript months are 0-based
       const sessionWeek = getWeekNumber(startTime)
-      const sessionDayOfWeek = startTime.getDay() // 0=Sunday, 6=Saturday
+      const sessionDayOfWeek = (startTime.getDay() + 6) % 7 // 0=Monday, 6=Sunday
 
       // Create session record in statistics database
       const sessionStmt = statsDb.prepare(`
         INSERT INTO game (
-          uuid, title, startTime, launchMethod, executablePath, sessionDate, 
+          uuid, startTime, launchMethod, sessionDate, 
           sessionYear, sessionMonth, sessionWeek, sessionDayOfWeek
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `)
       const sessionResult = sessionStmt.run(
-        gameUuid, gameName, startTimeTs, launchMethodName, executablePath, sessionDate,
+        gameUuid, startTimeTs, launchMethodName, sessionDate,
         sessionYear, sessionMonth, sessionWeek, sessionDayOfWeek
       )
       const sessionId = sessionResult.lastInsertRowid as number
 
-      console.log(`Created game session ${sessionId} for game ${gameUuid} (${gameName})`)
+      console.log(`Created game session ${sessionId} for game ${gameUuid}`)
 
       // Store process info for tracking
       activeGameProcesses.set(processKey, {
