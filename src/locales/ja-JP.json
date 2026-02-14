@@ -21,6 +21,7 @@
     "noGameSelected": "ゲームが選択されていません",
     "selectGameHint": "サイドバーからゲームを選択してください",
     "play": "プレイ",
+    "playing": "プレイ中",
     "edit": "編集",
     "timePlayed": "プレイ時間",
     "lastPlayed": "最終プレイ",

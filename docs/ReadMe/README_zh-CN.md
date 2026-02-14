@@ -1,5 +1,5 @@
 <div align="center">
-  <img src=".\public\default\ML-Maid-Icon-M.png" width="128" height="128" alt="cover">
+  <img src="..\..\public\default\ML-Maid-Icon-M.png" width="128" height="128" alt="cover">
 
   <h1 align="center">
     ML-Maid
@@ -19,40 +19,40 @@
   </p>
 </div>
 
-**English** | [简体中文](./docs/ReadMe/README_zh-CN.md)
+[English](README.md) | **简体中文**
 
-A clean, simple, and bare-bones visual novel manager (for self use).
+一个简洁简单简略的视觉小说管理器（自用）。
 
-## ✨ Features
+## ✨ 功能特性
 
-Some basic functionality is currently implemented:
+目前实现了一些基础的功能：
 
-- **Game library management**: Basic functions for adding, editing and deleting games, and provides a game information page that is tentatively intended to be concise and good-looking.
-- **Game Launcher**: Launching games directly from within the app and tracks game progress. Also basic functionality.
-- **Game logging statistics**: Logging the time of each game process, providing multiple statistical views. Maybe a little redundant, but better to have it and not need it.
+- **游戏库管理**：有基本的添加、编辑和删除游戏的功能，提供一个暂且以简明好看为目的的游戏信息页面。
+- **游戏启动器**：直接从应用内启动游戏，并追踪游戏进程。也是基本功能。
+- **游戏记录统计**：记录每次游戏进程时间，提供多种统计视图。或许有些鸡肋，但可以没用而不能没有。
 
-## 📷 Screenshots
+## 📷 截图预览
 
 <details open="True">
   <summary>Light</summary>
 
-  ![Light01](./docs/ReadMe/img/Light01.png)
-  ![Light02](./docs/ReadMe/img/Light02.png)
-  ![Light03](./docs/ReadMe/img/Light03.png)
-  ![Light04](./docs/ReadMe/img/Light04.png)
+  ![Light01](./img/Light01.png)
+  ![Light02](./img/Light02.png)
+  ![Light03](./img/Light03.png)
+  ![Light04](./img/Light04.png)
 
 </details>
 
 <details>
   <summary>Dark</summary>
 
-  ![Dark01](./docs/ReadMe/img/Dark01.png)
-  ![Dark02](./docs/ReadMe/img/Dark02.png)
-  ![Dark03](./docs/ReadMe/img/Dark03.png)
-  ![Dark04](./docs/ReadMe/img/Dark04.png)
+  ![Dark01](./img/Dark01.png)
+  ![Dark02](./img/Dark02.png)
+  ![Dark03](./img/Dark03.png)
+  ![Dark04](./img/Dark04.png)
 
 </details>
 
-## 🌏 Translation
+## 🌏 翻译
 
-Currently, official translations are available in English and Simplified Chinese, as well as a machine-translated Japanese version. Contributions to improve translations are welcome via Pull Requests.
+现在有官方支持的英语、简体中文，以及机翻的日语。欢迎提交 Pull Request 来完善翻译。

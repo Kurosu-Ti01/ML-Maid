@@ -21,6 +21,7 @@
     "noGameSelected": "未选择游戏",
     "selectGameHint": "请从侧边栏选择一个游戏",
     "play": "启动",
+    "playing": "游戏中",
     "edit": "编辑",
     "timePlayed": "游戏时长",
     "lastPlayed": "上次游玩",

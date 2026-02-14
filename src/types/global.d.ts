@@ -137,6 +137,7 @@ interface Window {
       startTime: number,
       endTime: number
     }) => void) => void
+    onGameStopped: (callback: (data: { gameUuid: string }) => void) => void
     // settings operations
     getSettings: () => Promise<any>
     saveSettings: (settings: any) => Promise<boolean>

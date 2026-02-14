@@ -95,6 +95,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('game-session-ended', (_, data) => callback(data));
   },
 
+  // listen for game tracking stopped events (fires for ALL session endings)
+  onGameStopped: (callback: (data: { gameUuid: string }) => void) => {
+    ipcRenderer.on('game-stopped', (_, data) => callback(data));
+  },
+
   // settings operations
   getSettings: () => ipcRenderer.invoke('settings-get'),
   saveSettings: (settings: any) => ipcRenderer.invoke('settings-save', settings),

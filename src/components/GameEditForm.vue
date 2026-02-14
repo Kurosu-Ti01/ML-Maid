@@ -101,9 +101,9 @@
             </n-grid>
 
             <n-form-item :label="$t('gameForm.fields.lastPlayed')">
-              <n-date-picker v-model:value="gameForm.lastPlayed" type="date"
-                :placeholder="$t('gameForm.placeholders.lastPlayed')"
-                style="width: 100%;" />
+              <n-date-picker v-model:value="gameForm.lastPlayed" type="datetime"
+                :placeholder="$t('gameForm.placeholders.lastPlayed')" style="width: 100%;"
+                :is-date-disabled="() => false" />
             </n-form-item>
 
             <n-form-item :label="$t('gameForm.fields.monitorMode')">

@@ -279,6 +279,11 @@ async function finalizeGameSession(
     console.error('Error finalizing game session:', error)
   }
 
+  // Always notify the frontend that game tracking has stopped
+  if (win && !win.isDestroyed()) {
+    win.webContents.send('game-stopped', { gameUuid })
+  }
+
   // Clean up tracking
   activeGameProcesses.delete(processKey)
 }

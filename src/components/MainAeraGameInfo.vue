@@ -34,8 +34,10 @@
             <div class="button-group">
               <n-button type="primary" size="large" color="#4080ff"
                 style="font-weight: bold; font-size: 1.2em; margin: 10px 5px; padding: 0 40px;"
-                @click="handlePlayGame"><span style="color: var(--button-info-content)">{{ $t('gameInfo.play')
-                }}</span></n-button>
+                :disabled="isCurrentGamePlaying" @click="handlePlayGame"><span
+                  style="color: var(--button-info-content)">{{ isCurrentGamePlaying ? $t('gameInfo.playing') :
+                    $t('gameInfo.play')
+                  }}</span></n-button>
               <n-button type="primary" size="large" color="#4080ff"
                 style="font-weight: bold; font-size: 1.2em; margin: 10px 5px;" @click="openEditWindow"><span
                   style="color: var(--button-info-content)">{{ $t('gameInfo.edit') }}</span></n-button>
@@ -228,7 +230,7 @@
 
 <script setup lang="ts" name="MainAeraGameInfo">
   import { storeToRefs } from 'pinia';
-  import { ref, watch, computed, h } from 'vue'
+  import { ref, watch, computed, h, onMounted } from 'vue'
   import { useGameStore } from '../stores/game'
   import { useMessage, useDialog } from 'naive-ui'
   import type { DropdownOption } from 'naive-ui'
@@ -248,8 +250,23 @@
       : null
   })
   const isLoading = ref(false)
+  const playingGameUuids = ref(new Set<string>())
   const message = useMessage()
   const dialog = useDialog()
+
+  // Whether the currently displayed game is playing
+  const isCurrentGamePlaying = computed(() => {
+    return currentGameUuid.value ? playingGameUuids.value.has(currentGameUuid.value) : false
+  })
+
+  // Listen for game-stopped events to reset playing state
+  onMounted(() => {
+    window.electronAPI?.onGameStopped?.((data: { gameUuid: string }) => {
+      playingGameUuids.value.delete(data.gameUuid)
+      // Trigger reactivity
+      playingGameUuids.value = new Set(playingGameUuids.value)
+    })
+  })
 
   // Dropdown menu options
   const renderIcon = (icon: any) => {
@@ -373,29 +390,27 @@
       return
     }
 
+    // Validate executable path before showing loading message
+    let executablePath: string | undefined
+    let launchMethodName: string | undefined
+
+    if (gameData.value.actions && gameData.value.actions.length > 0) {
+      const fileAction = gameData.value.actions.find(action => action.type === 'File' && action.executablePath)
+      if (fileAction && fileAction.executablePath) {
+        executablePath = fileAction.executablePath
+        launchMethodName = fileAction.name
+      }
+    }
+
+    if (!executablePath) {
+      message.error(t('gameInfo.messages.noExecutable'))
+      return
+    }
+
+    // Show loading message only after validation passes
+    const loadingMsg = message.loading(t('gameInfo.messages.launching'), { duration: 0 })
+
     try {
-      // Show loading message
-      const loadingMsg = message.loading(t('gameInfo.messages.launching'), { duration: 0 })
-
-      // Launch the game using the electronAPI
-      // First try to find a File type action
-      let executablePath: string | undefined
-      let launchMethodName: string | undefined
-
-      if (gameData.value.actions && gameData.value.actions.length > 0) {
-        const fileAction = gameData.value.actions.find(action => action.type === 'File' && action.executablePath)
-        if (fileAction && fileAction.executablePath) {
-          executablePath = fileAction.executablePath
-          launchMethodName = fileAction.name
-        }
-      }
-
-      if (!executablePath) {
-        loadingMsg.destroy()
-        message.error(t('gameInfo.messages.noExecutable'))
-        return
-      }
-
       // Create a clean object to avoid IPC cloning issues
       const launchParams = {
         gameUuid: String(gameData.value.uuid || ''),
@@ -410,16 +425,19 @@
 
       const result = await window.electronAPI?.launchGame(launchParams)
 
-      loadingMsg.destroy()
-
       if (result?.success) {
         message.success(t('gameInfo.messages.launchSuccess'))
+        // Mark the game as playing
+        playingGameUuids.value.add(launchParams.gameUuid)
+        playingGameUuids.value = new Set(playingGameUuids.value)
       } else {
         message.error(t('gameInfo.messages.launchFailed'))
       }
     } catch (error) {
       console.error('Failed to launch game:', error)
       message.error(t('gameInfo.messages.launchError', { error: error instanceof Error ? error.message : t('gameInfo.messages.unknownError') }))
+    } finally {
+      loadingMsg.destroy()
     }
   }
 

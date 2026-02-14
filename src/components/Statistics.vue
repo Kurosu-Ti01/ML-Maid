@@ -116,7 +116,8 @@
             </div>
           </div>
           <div class="chart-container">
-            <v-chart v-if="isDayChartReady && activeTab === 'day'" class="chart" :option="dayChartOption" autoresize />
+            <v-chart v-if="isDayChartReady && activeTab === 'day'" class="chart" :option="dayChartOption"
+              :update-options="{ notMerge: true }" autoresize />
             <div v-else class="loading-placeholder">
               {{ $t('statistics.loadingChart') }}
             </div>
@@ -135,7 +136,8 @@
             </div>
           </div>
           <div class="chart-container">
-            <v-chart v-if="isChartReady && activeTab === 'week'" class="chart" :option="weekChartOption" autoresize />
+            <v-chart v-if="isChartReady && activeTab === 'week'" class="chart" :option="weekChartOption"
+              :update-options="{ notMerge: true }" autoresize />
             <div v-else class="loading-placeholder">
               {{ $t('statistics.loadingChart') }}
             </div>
@@ -155,7 +157,7 @@
           </div>
           <div class="chart-container">
             <v-chart v-if="isMonthChartReady && activeTab === 'month'" class="chart" :option="monthChartOption"
-              autoresize />
+              :update-options="{ notMerge: true }" autoresize />
             <div v-else class="loading-placeholder">
               {{ $t('statistics.loadingChart') }}
             </div>
@@ -174,7 +176,7 @@
           </div>
           <div class="chart-container">
             <v-chart v-if="isYearChartReady && activeTab === 'year'" class="chart" :option="yearChartOption"
-              autoresize />
+              :update-options="{ notMerge: true }" autoresize />
             <div v-else class="loading-placeholder">
               {{ $t('statistics.loadingChart') }}
             </div>
