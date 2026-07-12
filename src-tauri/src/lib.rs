@@ -1,4 +1,6 @@
+mod db;
 mod paths;
+mod settings;
 
 use tauri::{
     menu::{Menu, MenuItem},
@@ -26,6 +28,31 @@ fn show_main_window(app: &tauri::AppHandle) {
     }
 }
 
+/// Tray menu labels per settings language (tray.show / tray.exit in src/locales)
+fn tray_labels(language: &str) -> (&'static str, &'static str) {
+    match language {
+        "zh-CN" => ("显示 ML-Maid", "退出"),
+        "ja-JP" => ("ML-Maidを表示", "終了"),
+        _ => ("Show ML-Maid", "Exit"),
+    }
+}
+
+fn build_tray_menu(app: &tauri::AppHandle, language: &str) -> tauri::Result<Menu<tauri::Wry>> {
+    let (show_label, exit_label) = tray_labels(language);
+    let show = MenuItem::with_id(app, "show", show_label, true, None::<&str>)?;
+    let quit = MenuItem::with_id(app, "quit", exit_label, true, None::<&str>)?;
+    Menu::with_items(app, &[&show, &quit])
+}
+
+/// Rebuild the tray menu after a language change (called from settings_save)
+pub fn update_tray_language(app: &tauri::AppHandle, language: &str) {
+    if let Some(tray) = app.tray_by_id("main-tray") {
+        if let Ok(menu) = build_tray_menu(app, language) {
+            let _ = tray.set_menu(Some(menu));
+        }
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -36,14 +63,20 @@ pub fn run() {
         .setup(|app| {
             let app_paths = paths::resolve();
             println!("App data path: {}", app_paths.app_data_path.display());
+
+            // Settings (config/settings.conf)
+            let settings_state = settings::SettingsState::load(&app_paths.config_path)?;
+            let language = settings_state.get().general.language;
+
+            // Databases (library/metadata.db + library/statistics.db)
+            let database = db::init(&app_paths.lib_path)?;
+
             app.manage(app_paths);
+            app.manage(settings_state);
+            app.manage(database);
 
             // Tray icon with Show / Exit menu
-            // TODO(Phase 2): localize labels from settings language
-            let show = MenuItem::with_id(app, "show", "Show", true, None::<&str>)?;
-            let quit = MenuItem::with_id(app, "quit", "Exit", true, None::<&str>)?;
-            let menu = Menu::with_items(app, &[&show, &quit])?;
-
+            let menu = build_tray_menu(app.handle(), &language)?;
             TrayIconBuilder::with_id("main-tray")
                 .icon(app.default_window_icon().unwrap().clone())
                 .tooltip("ML-Maid")
@@ -65,16 +98,26 @@ pub fn run() {
         })
         .on_window_event(|window, event| {
             if let WindowEvent::CloseRequested { api, .. } = event {
-                // Minimize-to-tray behavior for the main window.
-                // TODO(Phase 2): respect settings.general.minimizeToTray
-                // (current default matches the Electron app: enabled)
                 if window.label() == "main" {
-                    let _ = window.hide();
-                    api.prevent_close();
+                    let minimize_to_tray = window
+                        .app_handle()
+                        .try_state::<settings::SettingsState>()
+                        .map(|s| s.get().general.minimize_to_tray)
+                        .unwrap_or(true);
+                    if minimize_to_tray {
+                        let _ = window.hide();
+                        api.prevent_close();
+                    }
+                    // else: allow close; the app exits when the last window closes
                 }
             }
         })
-        .invoke_handler(tauri::generate_handler![ping, get_app_paths])
+        .invoke_handler(tauri::generate_handler![
+            ping,
+            get_app_paths,
+            settings::settings_get,
+            settings::settings_save
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
