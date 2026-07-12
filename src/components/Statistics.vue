@@ -215,6 +215,7 @@
   import { graphic } from 'echarts/core'
   import VChart, { THEME_KEY } from 'vue-echarts'
   import { useTheme } from '@/composables/useTheme'
+  import { api } from '@/api'
   import { DarkTheme } from '@/assets/echarts/dark-theme'
   import { useI18n } from 'vue-i18n'
   import type { ComposeOption } from 'echarts/core'
@@ -649,7 +650,7 @@
       console.log(`Loading statistics for day: ${dateString}`)
 
       // Call the API
-      const dailyData = await window.electronAPI?.getDailyGameSessions(dateString)
+      const dailyData = await api.getDailyGameSessions(dateString)
       if (dailyData) {
         console.log('Daily data received:', dailyData)
         updateDailyChart(dailyData)
@@ -867,7 +868,7 @@
       console.log(`Loading statistics for week starting: ${dateString}`)
 
       // Call the API
-      const weeklyData = await window.electronAPI?.getWeeklyStatsByDate(dateString)
+      const weeklyData = await api.getWeeklyStatsByDate(dateString)
       if (weeklyData) {
         console.log('Weekly data received:', weeklyData)
 
@@ -962,8 +963,8 @@
 
       console.log(`Loading statistics for month: ${year}-${month.toString().padStart(2, '0')}`)
 
-      // Call the API exposed by preload (camelCase)
-      const monthlyData = await window.electronAPI?.getMonthlyDailyStats(year, month)
+      // Call the API
+      const monthlyData = await api.getMonthlyDailyStats(year, month)
       if (monthlyData) {
         console.log('Monthly daily data received:', monthlyData)
         updateMonthChart(year, month, monthlyData)
@@ -1024,7 +1025,7 @@
     try {
       const year = parseInt(selectedYear.value, 10)
       console.log('Loading yearly daily stats for', year)
-      const data = await window.electronAPI?.getYearlyDailyStats(year)
+      const data = await api.getYearlyDailyStats(year)
       if (data) updateYearChart(year, data)
     } catch (e) {
       console.error('Failed to load yearly daily stats', e)
@@ -1052,7 +1053,7 @@
   const loadOverallStats = async () => {
     try {
       console.log('Loading overall statistics...')
-      const data = await window.electronAPI?.getOverallStats()
+      const data = await api.getOverallStats()
       if (data) {
         console.log('Overall stats received:', data)
         overallStats.value = data
@@ -1065,7 +1066,7 @@
   // Load recent game sessions
   async function loadRecentSessions() {
     try {
-      const data = await window.electronAPI?.getRecentSessions()
+      const data = await api.getRecentSessions()
       if (Array.isArray(data)) {
         recentSessions.value = data.slice(0, 10)
       }

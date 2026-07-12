@@ -1,5 +1,28 @@
 import { ipcRenderer, contextBridge } from 'electron'
 
+// --------- Subscription bridge with reliable unsubscribe ---------
+// contextBridge proxies functions per-call, so removal by reference is unreliable;
+// keep the real listeners here and hand the renderer an id instead.
+let nextListenerId = 0
+const listenersById = new Map<number, { channel: string; wrapper: (event: Electron.IpcRendererEvent, ...args: any[]) => void }>()
+
+contextBridge.exposeInMainWorld('ipcBridge', {
+  subscribe(channel: string, callback: (data: any) => void): number {
+    const wrapper = (_event: Electron.IpcRendererEvent, data: any) => callback(data)
+    ipcRenderer.on(channel, wrapper)
+    const id = ++nextListenerId
+    listenersById.set(id, { channel, wrapper })
+    return id
+  },
+  unsubscribe(id: number): void {
+    const entry = listenersById.get(id)
+    if (entry) {
+      ipcRenderer.off(entry.channel, entry.wrapper)
+      listenersById.delete(id)
+    }
+  }
+})
+
 // --------- Expose some API to the Renderer process ---------
 contextBridge.exposeInMainWorld('ipcRenderer', {
   on(...args: Parameters<typeof ipcRenderer.on>) {

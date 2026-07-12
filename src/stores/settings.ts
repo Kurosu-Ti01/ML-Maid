@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { api } from '@/api'
 
 export const useSettingsStore = defineStore('settings', () => {
   const settings = ref<Settings>({
@@ -20,12 +21,9 @@ export const useSettingsStore = defineStore('settings', () => {
       updateSettings(newSettings)
 
       // Save to file via IPC
-      if (window.electronAPI?.saveSettings) {
-        await window.electronAPI.saveSettings(newSettings)
-        console.log('Settings saved successfully')
-        return true
-      }
-      return false
+      await api.saveSettings(newSettings)
+      console.log('Settings saved successfully')
+      return true
     } catch (error) {
       console.error('Failed to save settings:', error)
       return false

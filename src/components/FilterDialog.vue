@@ -141,6 +141,7 @@
   import { AddFilled as AddIcon } from '@vicons/material'
   import { storeToRefs } from 'pinia'
   import { useI18n } from 'vue-i18n'
+  import { api } from '@/api'
 
   const message = useMessage()
   const { t } = useI18n()
@@ -260,36 +261,25 @@
   // Fetch metadata from backend
   async function fetchMetadata() {
     try {
-      if (window.electronAPI?.getAllGenres &&
-        window.electronAPI?.getAllDevelopers &&
-        window.electronAPI?.getAllPublishers &&
-        window.electronAPI?.getAllTags) {
-        // Fetch all metadata from database
-        const [genres, developers, publishers, tags] = await Promise.all([
-          window.electronAPI.getAllGenres(),
-          window.electronAPI.getAllDevelopers(),
-          window.electronAPI.getAllPublishers(),
-          window.electronAPI.getAllTags()
-        ])
+      // Fetch all metadata from database
+      const [genres, developers, publishers, tags] = await Promise.all([
+        api.getAllGenres(),
+        api.getAllDevelopers(),
+        api.getAllPublishers(),
+        api.getAllTags()
+      ])
 
-        allGenres.value = genres || []
-        allDevelopers.value = developers || []
-        allPublishers.value = publishers || []
-        allTags.value = tags || []
+      allGenres.value = genres || []
+      allDevelopers.value = developers || []
+      allPublishers.value = publishers || []
+      allTags.value = tags || []
 
-        console.log('Metadata loaded:', {
-          genres: genres.length,
-          developers: developers.length,
-          publishers: publishers.length,
-          tags: tags.length
-        })
-      } else {
-        console.warn('Metadata API not available')
-        allGenres.value = []
-        allDevelopers.value = []
-        allPublishers.value = []
-        allTags.value = []
-      }
+      console.log('Metadata loaded:', {
+        genres: genres.length,
+        developers: developers.length,
+        publishers: publishers.length,
+        tags: tags.length
+      })
     } catch (error) {
       console.error('Failed to fetch metadata:', error)
       message.error(t('filter.messages.failedLoadOptions'))
