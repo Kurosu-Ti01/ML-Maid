@@ -7,6 +7,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:front": "vite --mode tauri",
+    "dev:tauri": "tauri dev",
+    "build:front": "vue-tsc && vite build --mode tauri",
+    "build:tauri": "tauri build",
     "build": "vue-tsc && vite build && electron-builder",
     "build:all": "vue-tsc && vite build && electron-builder --win --x64 --ia32",
     "build:x64": "vue-tsc && vite build && electron-builder --win --x64",
@@ -16,6 +20,7 @@
   },
   "dependencies": {
     "@intlify/unplugin-vue-i18n": "^11.0.3",
+    "@tauri-apps/api": "^2.11.1",
     "@vueuse/core": "^13.9.0",
     "better-sqlite3": "^12.2.0",
     "bindings": "^1.5.0",
@@ -31,6 +36,7 @@
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
+    "@tauri-apps/cli": "^2.11.4",
     "@tsconfig/node22": "^22.0.1",
     "@types/better-sqlite3": "^7.6.13",
     "@types/ini": "^4.1.1",

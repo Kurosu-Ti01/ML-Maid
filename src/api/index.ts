@@ -4,6 +4,9 @@
 // by changing only this directory.
 
 import { electronApi } from './electron'
+import { tauriApi } from './tauri'
+
+export const isTauri = '__TAURI_INTERNALS__' in window
 
 export type Unsubscribe = () => void
 
@@ -133,8 +136,6 @@ export interface BackendApi {
   onGameStopped(callback: (data: { gameUuid: string }) => void): Unsubscribe
 }
 
-// Backend selection: Tauri adapter will be added here in Phase 1
-// ('__TAURI_INTERNALS__' in window ? tauriApi : electronApi)
-export const api: BackendApi = electronApi
+export const api: BackendApi = isTauri ? tauriApi : electronApi
 
 export { formatTimestamp, formatDateOnly } from './format'
