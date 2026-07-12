@@ -8,11 +8,17 @@ import electron from 'vite-plugin-electron/simple'
 import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
-export default defineConfig({
+// mode 'tauri' (dev:front / build:front) skips the Electron plugin;
+// default mode keeps the legacy Electron dev/build flow working during migration
+export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
     },
+  },
+  clearScreen: false,
+  server: {
+    strictPort: true,
   },
   build: {
     target: 'esnext', // Support latest ES features, including top-level await
@@ -40,7 +46,7 @@ export default defineConfig({
       include: [path.resolve(__dirname, 'src/locales/**')],
       strictMessage: false, // Allow HTML in translation strings for tooltips
     }),
-    electron({
+    mode === 'tauri' ? undefined : electron({
       main: {
         // Shortcut of `build.lib.entry`.
         entry: 'electron/main.ts',
@@ -59,4 +65,4 @@ export default defineConfig({
         : {},
     }),
   ],
-})
+}))

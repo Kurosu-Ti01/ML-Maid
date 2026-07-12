@@ -5,7 +5,7 @@ import pinia from './stores'
 import i18n from './i18n'
 const t = i18n.global.t
 import { useSettingsStore } from './stores/settings'
-import { api } from './api'
+import { api, isTauri } from './api'
 import './styles/base.css'
 import './styles/dark-theme.css'
 
@@ -22,6 +22,43 @@ dayjs.locale({
   ...dayjs.Ls.en,
   weekStart: 1 // Monday = 1, Sunday = 0
 })
+
+// Tauri runs with decorations disabled, so the titlebar must provide its own
+// drag region and window control buttons (Electron supplies these natively
+// via titleBarOverlay)
+async function applyTauriTitlebarExtras(titlebar: HTMLElement) {
+  if (!isTauri) return
+
+  titlebar.setAttribute('data-tauri-drag-region', '')
+  titlebar.querySelectorAll('.titlebar-title, .titlebar-title *, .titlebar-divider')
+    .forEach(el => el.setAttribute('data-tauri-drag-region', ''))
+
+  const { getCurrentWindow } = await import('@tauri-apps/api/window')
+  const win = getCurrentWindow()
+
+  const controls = document.createElement('div')
+  controls.className = 'titlebar-window-controls'
+
+  const makeButton = (className: string, svgPath: string, onClick: () => void) => {
+    const btn = document.createElement('button')
+    btn.className = `titlebar-window-control ${className}`
+    btn.innerHTML = `<svg width="10" height="10" viewBox="0 0 10 10">${svgPath}</svg>`
+    btn.onclick = onClick
+    return btn
+  }
+
+  controls.appendChild(makeButton('minimize',
+    '<path d="M0 5h10" stroke="currentColor" stroke-width="1" fill="none"/>',
+    () => { win.minimize() }))
+  controls.appendChild(makeButton('maximize',
+    '<rect x="0.5" y="0.5" width="9" height="9" stroke="currentColor" stroke-width="1" fill="none"/>',
+    () => { win.toggleMaximize() }))
+  controls.appendChild(makeButton('close',
+    '<path d="M0 0l10 10M10 0L0 10" stroke="currentColor" stroke-width="1" fill="none"/>',
+    () => { win.close() }))
+
+  titlebar.appendChild(controls)
+}
 
 // initialize the title bar based on the current route
 async function initTitlebar() {
@@ -157,6 +194,8 @@ async function initTitlebar() {
         titlebar.className = 'titlebar main-titlebar'
         break
     }
+
+    await applyTauriTitlebarExtras(titlebar)
   }
 }
 

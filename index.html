@@ -6,7 +6,7 @@
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: local-file:; media-src 'self'; connect-src 'self' https: http://localhost:5173 ws://localhost:5173;">
+    content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: local-file: asset: http://asset.localhost https://asset.localhost; media-src 'self'; connect-src 'self' https: http://localhost:5173 ws://localhost:5173 ipc: http://ipc.localhost;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ML-Maid</title>
 </head>
@@ -206,6 +206,39 @@
     background: #409EFF;
   }
 
+
+  /* Tauri custom window controls (decorations: false) */
+  .titlebar-window-controls {
+    margin-left: auto;
+    margin-right: -20px;
+    /* cancel titlebar padding so buttons reach the window edge */
+    display: flex;
+    align-self: stretch;
+    -webkit-app-region: no-drag;
+  }
+
+  .titlebar-window-control {
+    width: 46px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: var(--titlebar-button);
+    padding: 0;
+    cursor: default;
+  }
+
+  .titlebar-window-control:hover {
+    background: rgba(128, 128, 128, 0.25);
+  }
+
+  .titlebar-window-control.close:hover {
+    background: #e81123;
+    color: #ffffff;
+  }
 
   /* edit-window title */
   .edit-titlebar {
