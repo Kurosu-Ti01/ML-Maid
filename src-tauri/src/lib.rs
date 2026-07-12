@@ -1,4 +1,6 @@
 mod db;
+mod file_manager;
+mod game_manager;
 mod paths;
 mod settings;
 
@@ -60,9 +62,14 @@ pub fn run() {
             // Second launch: focus the existing window instead
             show_main_window(app);
         }))
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_opener::init())
         .setup(|app| {
             let app_paths = paths::resolve();
             println!("App data path: {}", app_paths.app_data_path.display());
+
+            // Grant asset protocol access to the (runtime-resolved) data dir
+            file_manager::allow_asset_scope(app.handle(), &app_paths);
 
             // Settings (config/settings.conf)
             let settings_state = settings::SettingsState::load(&app_paths.config_path)?;
@@ -116,7 +123,19 @@ pub fn run() {
             ping,
             get_app_paths,
             settings::settings_get,
-            settings::settings_save
+            settings::settings_save,
+            game_manager::get_game_by_id,
+            game_manager::get_games_list,
+            game_manager::add_game,
+            game_manager::update_game,
+            game_manager::delete_game,
+            game_manager::get_all_genres,
+            game_manager::get_all_developers,
+            game_manager::get_all_publishers,
+            game_manager::get_all_tags,
+            file_manager::process_game_image,
+            file_manager::finalize_game_images,
+            file_manager::cleanup_temp_images
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
