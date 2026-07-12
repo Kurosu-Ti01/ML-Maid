@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useSettingsStore } from './settings'
+import { api, formatTimestamp } from '@/api'
 
 export const useGameStore = defineStore('game', () => {
   // State - Only cache lightweight list data and a small amount of full data
@@ -127,13 +128,9 @@ export const useGameStore = defineStore('game', () => {
     error.value = null
 
     try {
-      if (window.electronAPI?.getGamesList) {
-        gamesList.value = await window.electronAPI.getGamesList()
-        listLastUpdated.value = new Date()
-        console.log('Games list loaded:', gamesList.value.length, 'games')
-      } else {
-        throw new Error('electronAPI.getGamesList not available')
-      }
+      gamesList.value = await api.getGamesList()
+      listLastUpdated.value = new Date()
+      console.log('Games list loaded:', gamesList.value.length, 'games')
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to load games list'
       console.error('Error loading games list:', err)
@@ -162,15 +159,11 @@ export const useGameStore = defineStore('game', () => {
     isLoadingDetail.value.add(uuid)
 
     try {
-      if (window.electronAPI?.getGameById) {
-        const gameData = await window.electronAPI.getGameById(uuid)
-        if (gameData) {
-          gameDetailsCache.value.set(uuid, gameData)
-          console.log('Game detail loaded:', gameData.title)
-          return gameData
-        }
-      } else {
-        throw new Error('electronAPI.getGameById not available')
+      const gameData = await api.getGameById(uuid)
+      if (gameData) {
+        gameDetailsCache.value.set(uuid, gameData)
+        console.log('Game detail loaded:', gameData.title)
+        return gameData
       }
     } catch (err) {
       console.error('Error loading game detail:', err)
@@ -183,15 +176,11 @@ export const useGameStore = defineStore('game', () => {
 
   async function addGame(game: gameData) {
     try {
-      if (window.electronAPI?.addGame) {
-        // Update database
-        await window.electronAPI.addGame(game)
+      // Update database
+      await api.addGame(game)
 
-        listLastUpdated.value = new Date()
-        console.log('Game added to store:', game.title)
-      } else {
-        throw new Error('electronAPI.addGame not available')
-      }
+      listLastUpdated.value = new Date()
+      console.log('Game added to store:', game.title)
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to add game'
       console.error('Error adding game:', err)
@@ -201,14 +190,10 @@ export const useGameStore = defineStore('game', () => {
 
   async function updateGame(updatedGame: gameData) {
     try {
-      if (window.electronAPI?.updateGame) {
-        // Update database
-        await window.electronAPI.updateGame(updatedGame)
+      // Update database
+      await api.updateGame(updatedGame)
 
-        console.log('Game updated in store:', updatedGame.title)
-      } else {
-        throw new Error('electronAPI.updateGame not available')
-      }
+      console.log('Game updated in store:', updatedGame.title)
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to update game'
       console.error('Error updating game:', err)
@@ -218,12 +203,8 @@ export const useGameStore = defineStore('game', () => {
 
   async function deleteGame(uuid: string) {
     try {
-      // Call electron API to delete game from database
-      if (window.electronAPI?.deleteGame) {
-        await window.electronAPI.deleteGame(uuid)
-      } else {
-        throw new Error('electronAPI.deleteGame not available')
-      }
+      // Delete game from database
+      await api.deleteGame(uuid)
 
       // Remove from lightweight list
       const listIndex = gamesList.value.findIndex(game => game.uuid === uuid)
@@ -270,46 +251,22 @@ export const useGameStore = defineStore('game', () => {
 
   // Set up cross-window communication listeners
   function setupCrossWindowListeners() {
-    if (window.electronAPI?.onGameStoreChanged) {
-      console.log('🔧 Setting up cross-window listener')
+    api.onGameStoreChanged((data) => {
+      console.log('📡 Received game list change notification:', data)
+      handleGameStoreChange(data)
+    })
 
-      window.electronAPI.onGameStoreChanged((data) => {
-        console.log('📡 Received game list change notification:', data)
-        handleGameStoreChange(data)
-      })
+    api.onGameLaunched((data) => {
+      console.log('🎮 Received game launched notification:', data)
+      handleGameLaunched(data)
+    })
 
-      console.log('✅ Cross-window listener setup complete')
-    } else {
-      console.warn('❌ electronAPI.onGameStoreChanged not available')
-    }
+    api.onGameSessionEnded((data) => {
+      console.log('🏁 Received game session ended notification:', data)
+      handleGameSessionEnded(data)
+    })
 
-    // Set up game launched listener
-    if (window.electronAPI?.onGameLaunched) {
-      console.log('🔧 Setting up game launched listener')
-
-      window.electronAPI.onGameLaunched((data) => {
-        console.log('🎮 Received game launched notification:', data)
-        handleGameLaunched(data)
-      })
-
-      console.log('✅ Game launched listener setup complete')
-    } else {
-      console.warn('❌ electronAPI.onGameLaunched not available')
-    }
-
-    // Set up game session ended listener
-    if (window.electronAPI?.onGameSessionEnded) {
-      console.log('🔧 Setting up game session ended listener')
-
-      window.electronAPI.onGameSessionEnded((data) => {
-        console.log('🏁 Received game session ended notification:', data)
-        handleGameSessionEnded(data)
-      })
-
-      console.log('✅ Game session ended listener setup complete')
-    } else {
-      console.warn('❌ electronAPI.onGameSessionEnded not available')
-    }
+    console.log('✅ Cross-window listeners setup complete')
   }
 
   // Logic to handle changes in the game store
@@ -410,8 +367,7 @@ export const useGameStore = defineStore('game', () => {
     console.log(`⏱️ Session duration: ${data.sessionTimeSeconds}s, Total time: ${data.totalTimePlayed}s`)
 
     // Format endTime timestamp for display
-    const endDate = new Date(data.endTime)
-    const displayTime = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')} ${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}:${String(endDate.getSeconds()).padStart(2, '0')}`
+    const displayTime = formatTimestamp(data.endTime)
 
     // Update lastPlayed time in games list
     const listIndex = gamesList.value.findIndex(g => g.uuid === data.gameUuid)

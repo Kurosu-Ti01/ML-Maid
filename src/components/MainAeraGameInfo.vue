@@ -230,8 +230,9 @@
 
 <script setup lang="ts" name="MainAeraGameInfo">
   import { storeToRefs } from 'pinia';
-  import { ref, watch, computed, h, onMounted } from 'vue'
+  import { ref, watch, computed, h, onMounted, onUnmounted } from 'vue'
   import { useGameStore } from '../stores/game'
+  import { api } from '@/api'
   import { useMessage, useDialog } from 'naive-ui'
   import type { DropdownOption } from 'naive-ui'
   import { NIcon } from 'naive-ui'
@@ -260,12 +261,16 @@
   })
 
   // Listen for game-stopped events to reset playing state
+  let unsubscribeGameStopped: (() => void) | null = null
   onMounted(() => {
-    window.electronAPI?.onGameStopped?.((data: { gameUuid: string }) => {
+    unsubscribeGameStopped = api.onGameStopped((data: { gameUuid: string }) => {
       playingGameUuids.value.delete(data.gameUuid)
       // Trigger reactivity
       playingGameUuids.value = new Set(playingGameUuids.value)
     })
+  })
+  onUnmounted(() => {
+    unsubscribeGameStopped?.()
   })
 
   // Dropdown menu options
@@ -423,7 +428,7 @@
 
       console.log('Launch parameters:', launchParams) // Debug info
 
-      const result = await window.electronAPI?.launchGame(launchParams)
+      const result = await api.launchGame(launchParams)
 
       if (result?.success) {
         message.success(t('gameInfo.messages.launchSuccess'))
@@ -443,15 +448,15 @@
 
   // open edit window function
   async function openEditWindow() {
-    if (window.electronAPI?.createEditWindow && gameData.value) {
-      try {
-        // Pass a plain object to avoid IPC clone errors
-        await window.electronAPI.createEditWindow(JSON.parse(JSON.stringify(gameData.value)))
-      } catch (error) {
-        console.error('Failed to open edit window:', error)
-      }
-    } else {
-      console.error('electronAPI not available or no game data')
+    if (!gameData.value) {
+      console.error('No game data available')
+      return
+    }
+    try {
+      // Pass a plain object to avoid IPC clone errors
+      await api.createEditWindow(JSON.parse(JSON.stringify(gameData.value)))
+    } catch (error) {
+      console.error('Failed to open edit window:', error)
     }
   }
 
@@ -521,12 +526,7 @@
     }
 
     try {
-      if (window.electronAPI?.openExternalLink) {
-        await window.electronAPI.openExternalLink(url)
-      } else {
-        // Fallback: try to open with window.open (might not work in Electron)
-        message.warning(t('gameInfo.messages.externalLinkUnavailable'))
-      }
+      await api.openExternalLink(url)
     } catch (error) {
       console.error('Failed to open external link:', error)
       message.error(t('gameInfo.messages.linkError', { error: error instanceof Error ? error.message : t('gameInfo.messages.unknownError') }))
@@ -541,12 +541,8 @@
     }
 
     try {
-      if (window.electronAPI?.openFolder) {
-        await window.electronAPI.openFolder(gameData.value.workingDir)
-        message.success(t('gameInfo.messages.openedFolder'))
-      } else {
-        message.warning(t('gameInfo.messages.folderApiUnavailable'))
-      }
+      await api.openFolder(gameData.value.workingDir)
+      message.success(t('gameInfo.messages.openedFolder'))
     } catch (error) {
       console.error('Failed to open install path:', error)
       message.error(t('gameInfo.messages.folderError', { error: error instanceof Error ? error.message : t('gameInfo.messages.unknownError') }))

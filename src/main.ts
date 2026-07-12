@@ -5,6 +5,7 @@ import pinia from './stores'
 import i18n from './i18n'
 const t = i18n.global.t
 import { useSettingsStore } from './stores/settings'
+import { api } from './api'
 import './styles/base.css'
 import './styles/dark-theme.css'
 
@@ -64,16 +65,14 @@ async function initTitlebar() {
           <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"></path></svg>
         `
         addGameButton.onclick = () => {
-          if (window.electronAPI) {
-            window.electronAPI.createAddGameWindow();
-          }
+          api.createAddGameWindow()
         }
         buttonsContainer.appendChild(addGameButton)
 
         // Check if filters are active
         let activeFilterCount = 0
         try {
-          const settings = await window.electronAPI?.getSettings()
+          const settings = await api.getSettings()
           if (settings?.filtering) {
             const { genres, developers, publishers, tags } = settings.filtering
             if (genres?.length > 0) activeFilterCount++
@@ -172,19 +171,16 @@ window.addEventListener('filters-updated', initTitlebar)
 
 const app = createApp(App).use(router).use(pinia).use(i18n)
 
-// Initialize settings store and listen for initial settings from main process
+// Initialize settings store from main process
 const settingsStore = useSettingsStore()
-
-// // Listen for initial settings from main process
-// if (window.electronAPI?.onSettingsInitial) {
-//   window.electronAPI.onSettingsInitial((settings: any) => {
-//     settingsStore.updateSettings(settings)
-//   })
-// }
 
 // Await fetch user settings from main process on startup
 // Make sure ever use settings.conf never use default settings
-const userSettings = await window.electronAPI?.getSettings()
-settingsStore.updateSettings(userSettings)
+try {
+  const userSettings = await api.getSettings()
+  settingsStore.updateSettings(userSettings)
+} catch (error) {
+  console.error('Failed to load settings on startup, using defaults:', error)
+}
 
 app.mount('#app')

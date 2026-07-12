@@ -405,6 +405,7 @@
   import { useGameStore } from '../stores/game'
   import { PROC_MON_MODE } from '../constants/procMonMode'
   import { useI18n } from 'vue-i18n'
+  import { api } from '@/api'
 
   // Use game store
   const gameStore = useGameStore()
@@ -484,16 +485,12 @@
   // Handle image selection from file system
   async function selectImageFromPath(imageType: 'icon' | 'background' | 'cover') {
     try {
-      // Call electron API to open file dialog
-      if (window.electronAPI?.selectImageFile) {
-        const result = await window.electronAPI.selectImageFile()
+      // Open file dialog via backend
+      const result = await api.selectImageFile()
 
-        if (result && !result.canceled && result.filePaths.length > 0) {
-          const selectedPath = result.filePaths[0]
-          await processSelectedImage(selectedPath, imageType)
-        }
-      } else {
-        message.error(t('gameForm.messages.fileSelectionUnavailable'))
+      if (result && !result.canceled && result.filePaths.length > 0) {
+        const selectedPath = result.filePaths[0]
+        await processSelectedImage(selectedPath, imageType)
       }
     } catch (error) {
       console.error('Error selecting image:', error)
@@ -504,42 +501,38 @@
   // Process selected image (copy and rename)
   async function processSelectedImage(sourcePath: string, imageType: 'icon' | 'background' | 'cover') {
     try {
-      if (window.electronAPI?.processGameImage) {
-        const result = await window.electronAPI.processGameImage({
-          sourcePath,
-          gameUuid: gameForm.value.uuid,
-          imageType
-        })
+      const result = await api.processGameImage({
+        sourcePath,
+        gameUuid: gameForm.value.uuid,
+        imageType
+      })
 
-        if (result.success) {
-          // Update gameForm with temp image path
-          switch (imageType) {
-            case 'icon':
-              if (result.tempPath && result.previewUrl) {
-                gameForm.value.iconImage = result.tempPath
-                iconPreview.value = result.previewUrl
-              }
-              break
-            case 'background':
-              if (result.tempPath && result.previewUrl) {
-                gameForm.value.backgroundImage = result.tempPath
-                backgroundPreview.value = result.previewUrl
-              }
-              break
-            case 'cover':
-              if (result.tempPath && result.previewUrl) {
-                gameForm.value.coverImage = result.tempPath
-                coverPreview.value = result.previewUrl
-              }
-              break
-          }
-
-          message.success(t('gameForm.messages.imageUpdated', { imageType }))
-        } else {
-          message.error(result.error || t('gameForm.messages.failedProcessImage'))
+      if (result.success) {
+        // Update gameForm with temp image path
+        switch (imageType) {
+          case 'icon':
+            if (result.tempPath && result.previewUrl) {
+              gameForm.value.iconImage = result.tempPath
+              iconPreview.value = result.previewUrl
+            }
+            break
+          case 'background':
+            if (result.tempPath && result.previewUrl) {
+              gameForm.value.backgroundImage = result.tempPath
+              backgroundPreview.value = result.previewUrl
+            }
+            break
+          case 'cover':
+            if (result.tempPath && result.previewUrl) {
+              gameForm.value.coverImage = result.tempPath
+              coverPreview.value = result.previewUrl
+            }
+            break
         }
+
+        message.success(t('gameForm.messages.imageUpdated', { imageType }))
       } else {
-        message.error(t('gameForm.messages.imageApiUnavailable'))
+        message.error(result.error || t('gameForm.messages.failedProcessImage'))
       }
     } catch (error) {
       console.error('Error processing image:', error)
@@ -587,18 +580,14 @@
 
   async function selectExecutablePath(index: number) {
     try {
-      if (window.electronAPI?.selectExecutableFile) {
-        const result = await window.electronAPI.selectExecutableFile()
+      const result = await api.selectExecutableFile()
 
-        if (result && !result.canceled && result.filePaths.length > 0) {
-          const selectedPath = result.filePaths[0]
-          if (gameForm.value.actions && gameForm.value.actions[index]) {
-            gameForm.value.actions[index].executablePath = selectedPath
-            message.success(t('gameForm.messages.executableUpdated'))
-          }
+      if (result && !result.canceled && result.filePaths.length > 0) {
+        const selectedPath = result.filePaths[0]
+        if (gameForm.value.actions && gameForm.value.actions[index]) {
+          gameForm.value.actions[index].executablePath = selectedPath
+          message.success(t('gameForm.messages.executableUpdated'))
         }
-      } else {
-        message.error(t('gameForm.messages.fileSelectionUnavailable'))
       }
     } catch (error) {
       console.error('Error selecting executable:', error)
@@ -608,16 +597,12 @@
 
   async function selectworkingDir() {
     try {
-      if (window.electronAPI?.selectFolder) {
-        const result = await window.electronAPI.selectFolder()
+      const result = await api.selectFolder()
 
-        if (result && !result.canceled && result.filePaths.length > 0) {
-          const selectedPath = result.filePaths[0]
-          gameForm.value.workingDir = selectedPath
-          message.success(t('gameForm.messages.installPathUpdated'))
-        }
-      } else {
-        message.error(t('gameForm.messages.folderSelectionUnavailable'))
+      if (result && !result.canceled && result.filePaths.length > 0) {
+        const selectedPath = result.filePaths[0]
+        gameForm.value.workingDir = selectedPath
+        message.success(t('gameForm.messages.installPathUpdated'))
       }
     } catch (error) {
       console.error('Error selecting folder:', error)
@@ -665,10 +650,8 @@
     try {
       // Fetch genres
       loadingGenres.value = true
-      if (window.electronAPI?.getAllGenres) {
-        const genres = await window.electronAPI.getAllGenres()
-        genreOptions.value = genres.map(name => ({ label: name, value: name }))
-      }
+      const genres = await api.getAllGenres()
+      genreOptions.value = genres.map(name => ({ label: name, value: name }))
     } catch (error) {
       console.error('Error fetching genres:', error)
     } finally {
@@ -678,10 +661,8 @@
     try {
       // Fetch developers
       loadingDevelopers.value = true
-      if (window.electronAPI?.getAllDevelopers) {
-        const developers = await window.electronAPI.getAllDevelopers()
-        developerOptions.value = developers.map(name => ({ label: name, value: name }))
-      }
+      const developers = await api.getAllDevelopers()
+      developerOptions.value = developers.map(name => ({ label: name, value: name }))
     } catch (error) {
       console.error('Error fetching developers:', error)
     } finally {
@@ -691,10 +672,8 @@
     try {
       // Fetch publishers
       loadingPublishers.value = true
-      if (window.electronAPI?.getAllPublishers) {
-        const publishers = await window.electronAPI.getAllPublishers()
-        publisherOptions.value = publishers.map(name => ({ label: name, value: name }))
-      }
+      const publishers = await api.getAllPublishers()
+      publisherOptions.value = publishers.map(name => ({ label: name, value: name }))
     } catch (error) {
       console.error('Error fetching publishers:', error)
     } finally {
@@ -704,10 +683,8 @@
     try {
       // Fetch tags
       loadingTags.value = true
-      if (window.electronAPI?.getAllTags) {
-        const tags = await window.electronAPI.getAllTags()
-        tagOptions.value = tags.map(name => ({ label: name, value: name }))
-      }
+      const tags = await api.getAllTags()
+      tagOptions.value = tags.map(name => ({ label: name, value: name }))
     } catch (error) {
       console.error('Error fetching tags:', error)
     } finally {
@@ -792,13 +769,13 @@
 
   // Load existing image preview
   async function loadExistingImagePreview(imagePath: string, imageType: 'icon' | 'background' | 'cover') {
-    if (!imagePath || !window.electronAPI?.processGameImage) return
+    if (!imagePath) return
 
     console.log(`Loading existing ${imageType} image:`, imagePath)
 
     try {
       // Convert file path to base64 for preview
-      const result = await window.electronAPI.processGameImage({
+      const result = await api.processGameImage({
         sourcePath: imagePath,
         gameUuid: gameForm.value.uuid,
         imageType: 'preview' // Special type for loading existing images
@@ -864,17 +841,18 @@
   // close the edit window
   const closeWindow = async () => {
     // Clean up temporary images when closing without saving
-    if (window.electronAPI?.cleanupTempImages) {
-      await window.electronAPI.cleanupTempImages(gameForm.value.uuid)
+    try {
+      await api.cleanupTempImages(gameForm.value.uuid)
+    } catch (error) {
+      console.error('Failed to clean up temp images:', error)
     }
     window.close()
   }
 
   // listen for game data from the main process
   onMounted(() => {
-    if (window.electronAPI?.onEditGameData) {
-      window.electronAPI.onEditGameData((data: gameData) => {
-        console.log('Received game data:', data)
+    api.onEditGameData((data: gameData) => {
+      console.log('Received game data:', data)
 
         gameForm.value.uuid = data.uuid || ''
         gameForm.value.title = data.title || ''
@@ -909,7 +887,6 @@
           loadExistingImagePreview(data.coverImage, 'cover')
         }
       })
-    }
   })
 </script>
 
