@@ -12,6 +12,9 @@
     "core:window:allow-hide",
     "core:window:allow-show",
     "core:window:allow-set-focus",
-    "core:window:allow-start-dragging"
+    "core:window:allow-start-dragging",
+    "dialog:allow-open",
+    "opener:allow-open-url",
+    "opener:allow-open-path"
   ]
 }
