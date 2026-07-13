@@ -388,10 +388,10 @@
       </n-tab-pane>
     </n-tabs>
 
-    <!-- Buttons fixed at the bottom -->
-    <div class="fixed-buttons">
+    <!-- Footer action bar -->
+    <div class="form-footer">
+      <n-button quaternary @click="closeWindow">{{ $t('gameForm.buttons.cancel') }}</n-button>
       <n-button type="primary" @click="saveGame" :loading="saving">{{ $t('gameForm.buttons.save') }}</n-button>
-      <n-button type="error" @click="closeWindow">{{ $t('gameForm.buttons.cancel') }}</n-button>
     </div>
   </div>
 </template>
@@ -406,6 +406,9 @@
   import { PROC_MON_MODE } from '../constants/procMonMode'
   import { useI18n } from 'vue-i18n'
   import { api } from '@/api'
+
+  const props = defineProps<{ game: gameData }>()
+  const emit = defineEmits<{ close: [] }>()
 
   // Use game store
   const gameStore = useGameStore()
@@ -838,7 +841,7 @@
     }
   }
 
-  // close the edit window
+  // close the modal
   const closeWindow = async () => {
     // Clean up temporary images when closing without saving
     try {
@@ -846,53 +849,52 @@
     } catch (error) {
       console.error('Failed to clean up temp images:', error)
     }
-    window.close()
+    emit('close')
   }
 
-  // listen for game data from the main process
+  // populate form from the game prop (passed by the edit modal)
   onMounted(() => {
-    api.onEditGameData((data: gameData) => {
-      console.log('Received game data:', data)
+    const data = props.game
+    console.log('Loading game data into edit form:', data.title)
 
-        gameForm.value.uuid = data.uuid || ''
-        gameForm.value.title = data.title || ''
-        gameForm.value.coverImage = data.coverImage || ''
-        gameForm.value.backgroundImage = data.backgroundImage || ''
-        gameForm.value.iconImage = data.iconImage || ''
-        gameForm.value.lastPlayed = data.lastPlayed ?? null
-        gameForm.value.timePlayed = data.timePlayed || 0
-        gameForm.value.workingDir = data.workingDir || ''
-        gameForm.value.folderSize = data.folderSize || 0
-        gameForm.value.genre = Array.isArray(data.genre) ? data.genre : []
-        gameForm.value.developer = Array.isArray(data.developer) ? data.developer : []
-        gameForm.value.publisher = Array.isArray(data.publisher) ? data.publisher : []
-        gameForm.value.releaseDate = data.releaseDate ?? null
-        gameForm.value.communityScore = data.communityScore || 0
-        gameForm.value.personalScore = data.personalScore || 0
-        gameForm.value.tags = Array.isArray(data.tags) ? data.tags : []
-        gameForm.value.description = Array.isArray(data.description) ? data.description : []
-        gameForm.value.links = Array.isArray(data.links) ? data.links : []
-        gameForm.value.actions = Array.isArray(data.actions) ? data.actions : []
-        gameForm.value.procMonMode = data.procMonMode ?? PROC_MON_MODE.FOLDER  // Default to folder mode
-        gameForm.value.procNames = Array.isArray(data.procNames) ? data.procNames : []  // Default to empty array
-        gameForm.value.dateAdded = data.dateAdded || Date.now()  // Set dateAdded from data
-        // Load existing image previews
-        if (data.iconImage) {
-          loadExistingImagePreview(data.iconImage, 'icon')
-        }
-        if (data.backgroundImage) {
-          loadExistingImagePreview(data.backgroundImage, 'background')
-        }
-        if (data.coverImage) {
-          loadExistingImagePreview(data.coverImage, 'cover')
-        }
-      })
+    gameForm.value.uuid = data.uuid || ''
+    gameForm.value.title = data.title || ''
+    gameForm.value.coverImage = data.coverImage || ''
+    gameForm.value.backgroundImage = data.backgroundImage || ''
+    gameForm.value.iconImage = data.iconImage || ''
+    gameForm.value.lastPlayed = data.lastPlayed ?? null
+    gameForm.value.timePlayed = data.timePlayed || 0
+    gameForm.value.workingDir = data.workingDir || ''
+    gameForm.value.folderSize = data.folderSize || 0
+    gameForm.value.genre = Array.isArray(data.genre) ? data.genre : []
+    gameForm.value.developer = Array.isArray(data.developer) ? data.developer : []
+    gameForm.value.publisher = Array.isArray(data.publisher) ? data.publisher : []
+    gameForm.value.releaseDate = data.releaseDate ?? null
+    gameForm.value.communityScore = data.communityScore || 0
+    gameForm.value.personalScore = data.personalScore || 0
+    gameForm.value.tags = Array.isArray(data.tags) ? data.tags : []
+    gameForm.value.description = Array.isArray(data.description) ? data.description : []
+    gameForm.value.links = Array.isArray(data.links) ? data.links : []
+    gameForm.value.actions = Array.isArray(data.actions) ? data.actions : []
+    gameForm.value.procMonMode = data.procMonMode ?? PROC_MON_MODE.FOLDER  // Default to folder mode
+    gameForm.value.procNames = Array.isArray(data.procNames) ? data.procNames : []  // Default to empty array
+    gameForm.value.dateAdded = data.dateAdded || Date.now()  // Set dateAdded from data
+    // Load existing image previews
+    if (data.iconImage) {
+      loadExistingImagePreview(data.iconImage, 'icon')
+    }
+    if (data.backgroundImage) {
+      loadExistingImagePreview(data.backgroundImage, 'background')
+    }
+    if (data.coverImage) {
+      loadExistingImagePreview(data.coverImage, 'cover')
+    }
   })
 </script>
 
 <style scoped>
   .edit-container {
-    height: 100vh;
+    height: 100%;
     padding: 0;
     display: flex;
     flex-direction: column;
@@ -947,8 +949,8 @@
   }
 
   :deep(.n-scrollbar-content) {
-    /* Add bottom padding to prevent content from being hidden behind fixed buttons */
-    padding-bottom: 160px;
+    /* Breathing room below the last field */
+    padding-bottom: 24px;
   }
 
   .tab-form {
@@ -971,19 +973,20 @@
     margin-left: 2px;
   }
 
-  /* Styles for the fixed bottom buttons */
-  .fixed-buttons {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: var(--titlebar-sub-bg);
-    border-top: 1px solid var(--fixed-bottom-border);
-    padding: 15px 20px;
+  /* Footer action bar (in-flow flex footer; the old position:fixed bar
+     escaped the modal and pinned to the main window) */
+  .form-footer {
+    flex-shrink: 0;
     display: flex;
-    justify-content: center;
-    gap: 15px;
-    z-index: 100;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 24px;
+    border-top: 1px solid var(--fixed-bottom-border);
+  }
+
+  .form-footer .n-button {
+    min-width: 88px;
   }
 
   /* Media tab specific styles */

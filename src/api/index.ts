@@ -80,10 +80,6 @@ export interface BackendApi {
   openExternalLink(url: string): Promise<void>
   openFolder(folderPath: string): Promise<void>
 
-  // windows
-  createEditWindow(game: gameData): Promise<number>
-  createAddGameWindow(): Promise<number>
-
   // images
   processGameImage(params: ProcessGameImageParams): Promise<ProcessGameImageResult>
   finalizeGameImages(gameUuid: string): Promise<{ success: boolean; movedFiles?: any[]; message?: string; error?: string }>
@@ -129,7 +125,6 @@ export interface BackendApi {
   getAllTags(): Promise<string[]>
 
   // event subscriptions — all return an unsubscribe function
-  onEditGameData(callback: (data: gameData) => void): Unsubscribe
   onGameStoreChanged(callback: (data: { action: string; game?: gameData }) => void): Unsubscribe
   onGameLaunched(callback: (data: { gameUuid: string }) => void): Unsubscribe
   onGameSessionEnded(callback: (data: GameSessionEndedData) => void): Unsubscribe

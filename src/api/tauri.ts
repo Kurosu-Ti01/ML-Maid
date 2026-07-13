@@ -92,9 +92,6 @@ export const tauriApi: BackendApi = {
   openExternalLink: (url) => openUrl(url),
   openFolder: (folderPath) => openPath(folderPath),
 
-  createEditWindow: (game) => invoke('create_edit_window', { game }),
-  createAddGameWindow: () => invoke('create_add_game_window'),
-
   processGameImage: (params) => invoke<ProcessGameImageResult>('process_game_image', { params }).then(toDisplayUrl),
   finalizeGameImages: (gameUuid) => invoke('finalize_game_images', { gameUuid }),
   cleanupTempImages: (gameUuid) => invoke('cleanup_temp_images', { gameUuid }),
@@ -119,9 +116,6 @@ export const tauriApi: BackendApi = {
   getAllPublishers: () => invoke('get_all_publishers'),
   getAllTags: () => invoke('get_all_tags'),
 
-  onEditGameData: (cb) => subscribe('load-edit-game-data', async (data) => {
-    cb(await enrichGameImages(enrichGameDisplayFields(data)))
-  }),
   onGameStoreChanged: (cb) => subscribe('game-store-changed', async (data) => {
     if (data?.game) {
       enrichGameDisplayFields(data.game)

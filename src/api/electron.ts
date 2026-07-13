@@ -43,9 +43,6 @@ export const electronApi: BackendApi = {
   openExternalLink: (url) => invoke('open-external-link', url),
   openFolder: (folderPath) => invoke('open-folder', folderPath),
 
-  createEditWindow: (game) => invoke('create-edit-window', JSON.parse(JSON.stringify(game))),
-  createAddGameWindow: () => invoke('create-add-game-window'),
-
   processGameImage: (params) => invoke('process-game-image', params),
   finalizeGameImages: (gameUuid) => invoke('finalize-game-images', gameUuid),
   cleanupTempImages: (gameUuid) => invoke('cleanup-temp-images', gameUuid),
@@ -70,7 +67,6 @@ export const electronApi: BackendApi = {
   getAllPublishers: () => invoke('get-all-publishers'),
   getAllTags: () => invoke('get-all-tags'),
 
-  onEditGameData: (cb) => subscribe('load-edit-game-data', (data) => cb(enrichGameDisplayFields(data))),
   onGameStoreChanged: (cb) => subscribe('game-store-changed', (data) => {
     if (data?.game) enrichGameDisplayFields(data.game)
     cb(data)

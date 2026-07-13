@@ -19,6 +19,9 @@
       <!-- Settings -->
       <Settings v-else-if="currentPage === 'settings'" />
     </div>
+
+    <!-- In-app add/edit game modals -->
+    <GameFormModals />
   </div>
 </template>
 
@@ -28,6 +31,7 @@
   import MainAeraGameInfo from '@/components/MainAeraGameInfo.vue';
   import Statistics from '@/components/Statistics.vue';
   import Settings from '@/components/Settings.vue';
+  import GameFormModals from '@/components/GameFormModals.vue';
   import { usePageStore } from '@/stores/page';
   import { storeToRefs } from 'pinia';
 
