@@ -102,7 +102,7 @@ async function initTitlebar() {
           <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"></path></svg>
         `
         addGameButton.onclick = () => {
-          api.createAddGameWindow()
+          window.dispatchEvent(new CustomEvent('open-add-game'))
         }
         buttonsContainer.appendChild(addGameButton)
 
@@ -174,18 +174,6 @@ async function initTitlebar() {
         titlebar.appendChild(divider)
         titlebar.appendChild(buttonsContainer)
         titlebar.appendChild(searchContainer)
-        break
-
-      case '#/edit':
-        // edit-window titlebar
-        titlebar.textContent = t('titlebar.editGame')
-        titlebar.className = 'titlebar edit-titlebar'
-        break
-
-      case '#/add':
-        // add-game-window titlebar
-        titlebar.textContent = t('titlebar.addGame')
-        titlebar.className = 'titlebar add-titlebar'
         break
 
       default:

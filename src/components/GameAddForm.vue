@@ -387,10 +387,10 @@
       </n-tab-pane>
     </n-tabs>
 
-    <!-- Buttons fixed at the bottom -->
-    <div class="fixed-buttons">
+    <!-- Footer action bar -->
+    <div class="form-footer">
+      <n-button quaternary @click="closeWindow">{{ $t('gameForm.buttons.cancel') }}</n-button>
       <n-button type="primary" @click="saveGame" :loading="saving">{{ $t('gameForm.buttons.save') }}</n-button>
-      <n-button type="error" @click="closeWindow">{{ $t('gameForm.buttons.cancel') }}</n-button>
     </div>
   </div>
 </template>
@@ -406,6 +406,8 @@
   import { PROC_MON_MODE } from '../constants/procMonMode'
   import { useI18n } from 'vue-i18n'
   import { api } from '@/api'
+
+  const emit = defineEmits<{ close: [] }>()
 
   // Use game store
   const gameStore = useGameStore()
@@ -807,7 +809,7 @@
     }
   }
 
-  // close the edit window
+  // close the modal
   const closeWindow = async () => {
     // Clean up temporary images when closing without saving
     try {
@@ -815,13 +817,13 @@
     } catch (error) {
       console.error('Failed to clean up temp images:', error)
     }
-    window.close()
+    emit('close')
   }
 </script>
 
 <style scoped>
   .edit-container {
-    height: 100vh;
+    height: 100%;
     padding: 0;
     display: flex;
     flex-direction: column;
@@ -876,8 +878,8 @@
   }
 
   :deep(.n-scrollbar-content) {
-    /* Add bottom padding to prevent content from being hidden behind fixed buttons */
-    padding-bottom: 160px;
+    /* Breathing room below the last field */
+    padding-bottom: 24px;
   }
 
   .tab-form {
@@ -900,19 +902,20 @@
     margin-left: 2px;
   }
 
-  /* Styles for the fixed bottom buttons */
-  .fixed-buttons {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: var(--titlebar-sub-bg);
-    border-top: 1px solid var(--fixed-bottom-border);
-    padding: 15px 20px;
+  /* Footer action bar (in-flow flex footer; the old position:fixed bar
+     escaped the modal and pinned to the main window) */
+  .form-footer {
+    flex-shrink: 0;
     display: flex;
-    justify-content: center;
-    gap: 15px;
-    z-index: 100;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 24px;
+    border-top: 1px solid var(--fixed-bottom-border);
+  }
+
+  .form-footer .n-button {
+    min-width: 88px;
   }
 
   /* Media tab specific styles */

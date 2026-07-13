@@ -11,6 +11,7 @@ declare module 'vue' {
     FilterDialog: typeof import('./src/components/FilterDialog.vue')['default']
     GameAddForm: typeof import('./src/components/GameAddForm.vue')['default']
     GameEditForm: typeof import('./src/components/GameEditForm.vue')['default']
+    GameFormModals: typeof import('./src/components/GameFormModals.vue')['default']
     MainAeraGameInfo: typeof import('./src/components/MainAeraGameInfo.vue')['default']
     NAutoComplete: typeof import('naive-ui')['NAutoComplete']
     NButton: typeof import('naive-ui')['NButton']

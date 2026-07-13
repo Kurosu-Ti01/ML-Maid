@@ -232,6 +232,7 @@
   import { storeToRefs } from 'pinia';
   import { ref, watch, computed, h, onMounted, onUnmounted } from 'vue'
   import { useGameStore } from '../stores/game'
+  import { useModalStore } from '../stores/modal'
   import { api } from '@/api'
   import { useMessage, useDialog } from 'naive-ui'
   import type { DropdownOption } from 'naive-ui'
@@ -244,6 +245,7 @@
   const { t } = useI18n()
 
   const gameStore = useGameStore()
+  const modalStore = useModalStore()
   const { gameDetailsCache, currentGameUuid } = storeToRefs(gameStore)
   const gameData = computed(() => {
     return currentGameUuid.value
@@ -446,18 +448,13 @@
     }
   }
 
-  // open edit window function
+  // open the in-app edit modal
   async function openEditWindow() {
     if (!gameData.value) {
       console.error('No game data available')
       return
     }
-    try {
-      // Pass a plain object to avoid IPC clone errors
-      await api.createEditWindow(JSON.parse(JSON.stringify(gameData.value)))
-    } catch (error) {
-      console.error('Failed to open edit window:', error)
-    }
+    modalStore.openEditModal(JSON.parse(JSON.stringify(gameData.value)))
   }
 
   // handle dropdown menu command
