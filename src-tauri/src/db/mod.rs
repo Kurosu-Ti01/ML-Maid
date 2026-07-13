@@ -27,6 +27,13 @@ pub fn init(lib_path: &Path) -> Result<Db, String> {
     let stats = Connection::open(&stats_path).map_err(|e| format!("open statistics.db: {e}"))?;
     migrations::migrate_statistics(&stats, &stats_path)?;
 
+    // ATTACH metadata.db so stats queries can join game titles in one query
+    // (the Electron version did an N+1 title lookup per row)
+    let meta_path_sql = meta_path.to_string_lossy().replace('\'', "''");
+    stats
+        .execute_batch(&format!("ATTACH DATABASE '{meta_path_sql}' AS meta"))
+        .map_err(|e| format!("attach metadata.db: {e}"))?;
+
     Ok(Db {
         meta: Mutex::new(meta),
         stats: Mutex::new(stats),
