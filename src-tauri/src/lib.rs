@@ -3,6 +3,7 @@ mod file_manager;
 mod game_manager;
 mod paths;
 mod settings;
+mod stats_manager;
 
 use tauri::{
     menu::{Menu, MenuItem},
@@ -135,7 +136,18 @@ pub fn run() {
             game_manager::get_all_tags,
             file_manager::process_game_image,
             file_manager::finalize_game_images,
-            file_manager::cleanup_temp_images
+            file_manager::cleanup_temp_images,
+            stats_manager::get_game_recent_daily_stats,
+            stats_manager::get_game_daily_stats_range,
+            stats_manager::get_weekly_stats_by_date,
+            stats_manager::get_daily_game_sessions,
+            stats_manager::get_overall_stats,
+            stats_manager::get_top_games_stats,
+            stats_manager::get_monthly_stats,
+            stats_manager::get_monthly_daily_stats,
+            stats_manager::get_yearly_daily_stats,
+            stats_manager::get_recent_sessions,
+            stats_manager::get_launch_method_stats
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
