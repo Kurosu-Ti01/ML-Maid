@@ -1,7 +1,9 @@
 mod db;
 mod file_manager;
+mod game_launcher;
 mod game_manager;
 mod paths;
+mod process_monitor;
 mod settings;
 mod stats_manager;
 
@@ -147,7 +149,8 @@ pub fn run() {
             stats_manager::get_monthly_daily_stats,
             stats_manager::get_yearly_daily_stats,
             stats_manager::get_recent_sessions,
-            stats_manager::get_launch_method_stats
+            stats_manager::get_launch_method_stats,
+            game_launcher::launch_game
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
