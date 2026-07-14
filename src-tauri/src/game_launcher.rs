@@ -23,10 +23,42 @@ pub struct LaunchParams {
     pub proc_mon_mode: i64,
     #[serde(default)]
     pub proc_names: Vec<String>,
+    /// 0 = off, 1 = Locale Emulator, 2 = basic env-var mode
+    #[serde(default)]
+    pub locale_emulation: i64,
 }
 
 fn default_mode() -> i64 {
     1 // FOLDER
+}
+
+/// Look for LEProc.exe in common Locale Emulator install locations.
+/// Returns the path if found, None otherwise (user can browse manually).
+#[tauri::command]
+pub fn detect_locale_emulator() -> Option<String> {
+    let mut candidates: Vec<PathBuf> = Vec::new();
+
+    for env_var in ["ProgramFiles", "ProgramFiles(x86)", "LOCALAPPDATA"] {
+        if let Ok(base) = std::env::var(env_var) {
+            candidates.push(PathBuf::from(&base).join("Locale Emulator").join("LEProc.exe"));
+            candidates.push(
+                PathBuf::from(&base)
+                    .join("Programs")
+                    .join("Locale Emulator")
+                    .join("LEProc.exe"),
+            );
+        }
+    }
+    if let Ok(user) = std::env::var("USERPROFILE") {
+        for dir in ["Locale Emulator", "Tools\\Locale Emulator", "Downloads\\Locale Emulator"] {
+            candidates.push(PathBuf::from(&user).join(dir).join("LEProc.exe"));
+        }
+    }
+
+    candidates
+        .into_iter()
+        .find(|p| p.exists())
+        .map(|p| p.to_string_lossy().to_string())
 }
 
 #[derive(Serialize)]
@@ -41,6 +73,7 @@ pub struct LaunchResult {
 pub fn launch_game(
     app: tauri::AppHandle,
     db: tauri::State<Db>,
+    settings: tauri::State<crate::settings::SettingsState>,
     params: LaunchParams,
 ) -> CmdResult<LaunchResult> {
     let exe = PathBuf::from(&params.executable_path);
@@ -60,11 +93,41 @@ pub fn launch_game(
         PathBuf::from(&params.working_dir)
     };
 
+    // Build the command according to the locale-emulation mode. Do this
+    // BEFORE opening the session row so a missing LEProc fails cleanly.
+    let mut command = match params.locale_emulation {
+        // Locale Emulator: delegate to LEProc.exe <game.exe> (default profile).
+        // LE hooks the NLS APIs at kernel level, which is the only approach
+        // that works reliably for old VN engines.
+        1 => {
+            let le_path = settings.get().launcher.locale_emulator_path;
+            if le_path.is_empty() {
+                return Err("Locale Emulator path is not configured in Settings".into());
+            }
+            if !Path::new(&le_path).exists() {
+                return Err(format!("LEProc.exe not found at: {le_path}"));
+            }
+            let mut cmd = std::process::Command::new(le_path);
+            cmd.arg(&exe);
+            cmd
+        }
+        // Basic mode: Japanese env vars only; helps some engines, labeled
+        // "basic" in the UI because it cannot help ANSI-codepage ones
+        2 => {
+            let mut cmd = std::process::Command::new(&exe);
+            cmd.env("LANG", "ja_JP.UTF-8").env("LC_ALL", "ja_JP.UTF-8");
+            cmd
+        }
+        _ => std::process::Command::new(&exe),
+    };
+    command.current_dir(&working_dir);
+
     println!(
-        "Launching game: {} (cwd: {}, mode: {})",
+        "Launching game: {} (cwd: {}, mode: {}, locale: {})",
         params.executable_path,
         working_dir.display(),
-        params.proc_mon_mode
+        params.proc_mon_mode,
+        params.locale_emulation
     );
 
     // Session date fields (local time; ISO week, Monday=0 like the frontend)
@@ -100,8 +163,7 @@ pub fn launch_game(
     println!("Created game session {session_id} for game {}", params.game_uuid);
 
     // Spawn the game process
-    let child = std::process::Command::new(&exe)
-        .current_dir(&working_dir)
+    let child = command
         .spawn()
         .map_err(|e| format!("failed to launch: {e}"))?;
 

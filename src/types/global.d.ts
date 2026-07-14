@@ -166,6 +166,9 @@ interface Settings {
     publishers: string[]
     tags: string[]
   }
+  launcher?: {
+    localeEmulatorPath?: string
+  }
 }
 
 interface gameData {
@@ -203,6 +206,7 @@ interface gameData {
   }[];
   procMonMode: number;    // 0: file, 1: folder, 2: process
   procNames?: string[];   // Process names to monitor when procMonMode=2
+  localeEmulation?: number; // 0: off, 1: Locale Emulator, 2: basic env mode
   dateAdded: number;      // Unix timestamp in milliseconds (when game was added to library)
 }
 

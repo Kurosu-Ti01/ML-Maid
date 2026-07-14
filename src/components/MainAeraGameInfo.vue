@@ -425,7 +425,8 @@
         launchMethodName: String(launchMethodName || ''),
         workingDir: String(gameData.value.workingDir || executablePath.substring(0, executablePath.lastIndexOf('\\'))),
         procMonMode: Number(gameData.value.procMonMode || 1), // Default to FOLDER mode
-        procNames: Array.isArray(gameData.value.procNames) ? [...gameData.value.procNames] : []
+        procNames: Array.isArray(gameData.value.procNames) ? [...gameData.value.procNames] : [],
+        localeEmulation: Number(gameData.value.localeEmulation || 0)
       }
 
       console.log('Launch parameters:', launchParams) // Debug info

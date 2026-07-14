@@ -102,7 +102,8 @@
       "parameters": "Parameters",
       "linkName": "Link Name",
       "linkUrl": "URL",
-      "url": "URL"
+      "url": "URL",
+      "localeEmulation": "Locale Emulation"
     },
     "placeholders": {
       "enterTitle": "Enter game title",
@@ -172,14 +173,15 @@
     },
     "tooltip": {
       "monitorModeInfo": "This option affects how game statistics are recorded:",
-      "monitorMode": "This option affects how game statistics are recorded:<br>\u2022 <strong>File mode:</strong> monitors only the process launched by actions<br>\u2022 <strong>Folder mode:</strong> monitors all executable processes created in the game's working directory<br>\u2022 <strong>Process mode:</strong> for handling extreme cases - enter process names to monitor specific process activities<hr><strong>Attention: Only Folder mode is well maintained and reliable Now.</strong>",
+      "monitorMode": "This option affects how game statistics are recorded:<br>• <strong>File mode:</strong> monitors only the process launched by actions<br>• <strong>Folder mode:</strong> monitors all executable processes created in the game's working directory<br>• <strong>Process mode:</strong> for handling extreme cases - enter process names to monitor specific process activities<hr><strong>Attention: Only Folder mode is well maintained and reliable Now.</strong>",
       "fileMode": "File mode:",
       "fileModeDesc": "monitors only the process launched by actions",
       "folderMode": "Folder mode:",
       "folderModeDesc": "monitors all executable processes created in the game's working directory",
       "processMode": "Process mode:",
       "processModeDesc": "for handling extreme cases - enter process names to monitor specific process activities",
-      "attention": "Attention: Only Folder mode is well maintained and reliable Now."
+      "attention": "Attention: Only Folder mode is well maintained and reliable Now.",
+      "localeEmulationInfo": "Launch the game with a Japanese locale. Locale Emulator mode delegates to LEProc.exe (configure its path in Settings) and works with most old VN engines. Basic mode only sets Japanese environment variables and helps only some engines."
     },
     "options": {
       "fileMode": "File Mode",
@@ -187,7 +189,10 @@
       "processMode": "Process Mode",
       "file": "File",
       "link": "Link",
-      "script": "Script"
+      "script": "Script",
+      "localeOff": "Off",
+      "localeLE": "Locale Emulator",
+      "localeBasic": "Basic (env vars)"
     },
     "messages": {
       "fileSelectionUnavailable": "File selection API not available",
@@ -278,7 +283,15 @@
     "switchTrue": "True",
     "switchFalse": "False",
     "true": "True",
-    "false": "False"
+    "false": "False",
+    "launcherSettings": "Launcher",
+    "localeEmulatorPath": "Locale Emulator",
+    "localeEmulatorPathPlaceholder": "Path to LEProc.exe",
+    "browse": "Browse",
+    "detect": "Detect",
+    "localeEmulatorHint": "Used by the per-game \"Locale Emulator\" launch mode to run Japanese games with a Japanese locale. Install Locale Emulator, then browse to LEProc.exe or click Detect.",
+    "localeEmulatorFound": "Found LEProc.exe: {path}",
+    "localeEmulatorNotFound": "Locale Emulator not found in common locations; please browse to LEProc.exe manually"
   },
   "statistics": {
     "tabs": {

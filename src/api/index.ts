@@ -17,6 +17,7 @@ export interface LaunchGameParams {
   workingDir?: string
   procMonMode?: number
   procNames?: string[]
+  localeEmulation?: number
 }
 
 export interface LaunchGameResult {
@@ -70,6 +71,8 @@ export interface BackendApi {
 
   // game launch
   launchGame(params: LaunchGameParams): Promise<LaunchGameResult>
+  // locale emulator autodetect (Tauri backend only; Electron returns null)
+  detectLocaleEmulator(): Promise<string | null>
 
   // dialogs
   selectExecutableFile(): Promise<FileDialogResult>

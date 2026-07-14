@@ -101,6 +101,11 @@ pub fn migrate_metadata(conn: &Connection, db_path: &Path) -> DbResult<()> {
         set_version(conn, 4)?;
     }
 
+    if get_version(conn) < 5 {
+        migrate_metadata_v5(conn)?;
+        set_version(conn, 5)?;
+    }
+
     println!("Metadata database initialization completed");
     Ok(())
 }
@@ -201,6 +206,21 @@ fn migrate_statistics_v3(conn: &Connection, db_path: &Path, from_version: i64) -
     Ok(())
 }
 
+/// v5: per-game locale-emulation launch mode (0=off, 1=Locale Emulator,
+/// 2=basic env-var mode) for the new Japanese-locale launch feature.
+fn migrate_metadata_v5(conn: &Connection) -> DbResult<()> {
+    if column_exists(conn, "games", "localeEmulation")? {
+        return Ok(());
+    }
+    println!("Migrating metadata.db to v5: adding localeEmulation column");
+    conn.execute(
+        "ALTER TABLE games ADD COLUMN localeEmulation INTEGER NOT NULL DEFAULT 0",
+        [],
+    )
+    .map_err(err("add localeEmulation"))?;
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -235,10 +255,12 @@ mod tests {
 
         migrate_metadata(&conn, &path).unwrap();
 
-        assert_eq!(get_version(&conn), 4);
+        assert_eq!(get_version(&conn), 5);
         for col in ["genre", "developer", "publisher", "tags"] {
             assert!(!column_exists(&conn, "games", col).unwrap(), "{col} should be dropped");
         }
+        // v5 added the locale emulation column
+        assert!(column_exists(&conn, "games", "localeEmulation").unwrap());
         // Data survives
         let title: String = conn
             .query_row("SELECT title FROM games WHERE uuid='u1'", [], |r| r.get(0))
@@ -260,7 +282,7 @@ mod tests {
         .unwrap();
 
         migrate_metadata(&conn, &path).unwrap();
-        assert_eq!(get_version(&conn), 4);
+        assert_eq!(get_version(&conn), 5);
         drop(conn);
         let _ = fs::remove_file(&path);
     }
@@ -326,10 +348,11 @@ mod tests {
         let meta_path = temp_db("meta-fresh");
         let conn = Connection::open(&meta_path).unwrap();
         migrate_metadata(&conn, &meta_path).unwrap();
-        assert_eq!(get_version(&conn), 4);
+        assert_eq!(get_version(&conn), 5);
         for col in ["genre", "developer", "publisher", "tags"] {
             assert!(!column_exists(&conn, "games", col).unwrap());
         }
+        assert!(column_exists(&conn, "games", "localeEmulation").unwrap());
         drop(conn);
         let _ = fs::remove_file(&meta_path);
 

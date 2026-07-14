@@ -84,6 +84,7 @@ export const tauriApi: BackendApi = {
   deleteGame: (uuid) => invoke('delete_game', { uuid }),
 
   launchGame: (params) => invoke('launch_game', { params }),
+  detectLocaleEmulator: () => invoke('detect_locale_emulator'),
 
   selectExecutableFile: () => pickFile(EXE_FILTERS),
   selectFolder: () => pickFile(undefined, true),
