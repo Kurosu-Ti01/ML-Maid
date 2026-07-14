@@ -1,12 +1,9 @@
-// Backend-agnostic API layer.
-// Components and stores must import { api } from '@/api' instead of touching
-// window.electronAPI directly, so the backend can be swapped (Electron → Tauri)
-// by changing only this directory.
+// Backend API layer.
+// Components and stores import { api } from '@/api' instead of talking to the
+// backend directly; the Tauri adapter (tauri.ts) is the single place that
+// knows about invoke()/listen()/convertFileSrc.
 
-import { electronApi } from './electron'
 import { tauriApi } from './tauri'
-
-export const isTauri = '__TAURI_INTERNALS__' in window
 
 export type Unsubscribe = () => void
 
@@ -71,7 +68,7 @@ export interface BackendApi {
 
   // game launch
   launchGame(params: LaunchGameParams): Promise<LaunchGameResult>
-  // locale emulator autodetect (Tauri backend only; Electron returns null)
+  // locale emulator autodetect (scans common install locations)
   detectLocaleEmulator(): Promise<string | null>
 
   // dialogs
@@ -134,6 +131,6 @@ export interface BackendApi {
   onGameStopped(callback: (data: { gameUuid: string }) => void): Unsubscribe
 }
 
-export const api: BackendApi = isTauri ? tauriApi : electronApi
+export const api: BackendApi = tauriApi
 
 export { formatTimestamp, formatDateOnly } from './format'

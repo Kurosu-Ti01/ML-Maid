@@ -349,16 +349,5 @@
       "sat": "Sat",
       "sun": "Sun"
     }
-  },
-  "electron": {
-    "tray": {
-      "show": "Show ML-Maid",
-      "exit": "Exit"
-    },
-    "dialog": {
-      "imagesOrExecutables": "Images or Executable Files",
-      "allFiles": "All Files",
-      "executableFiles": "Executable Files"
-    }
   }
 }

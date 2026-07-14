@@ -8,7 +8,8 @@
   <p align="center">
     <a href="https://www.gnu.org/licenses/gpl-3.0.en.html" target="_blank"><img alt="Static Badge" src="https://img.shields.io/badge/GPL_3.0-%23BD0000?style=for-the-badge&logo=gplv3&logoColor=FFFFFF&logoSize=auto&label=license"></a>
     <br>
-    <a href="https://www.electronjs.org/" target="_blank"><img alt="Static Badge" src="https://img.shields.io/badge/Electron-47848F?style=for-the-badge&logo=electron&logoColor=FFFFFF&logoSize=auto"></a>
+    <a href="https://tauri.app/" target="_blank"><img alt="Static Badge" src="https://img.shields.io/badge/Tauri_2-24C8D8?style=for-the-badge&logo=tauri&logoColor=FFFFFF&logoSize=auto"></a>
+    <a href="https://www.rust-lang.org/" target="_blank"><img alt="Static Badge" src="https://img.shields.io/badge/Rust-000000?style=for-the-badge&logo=rust&logoColor=FFFFFF&logoSize=auto"></a>
     <a href="https://vuejs.org/" target="_blank"><img alt="Static Badge" src="https://img.shields.io/badge/Vue3-4FC08D?style=for-the-badge&logo=vuedotjs&logoColor=FFFFFF&logoSize=auto"></a>
     <a href="https://www.typescriptlang.org/" target="_blank"><img alt="Static Badge" src="https://img.shields.io/badge/TypeScript-%233178C6?style=for-the-badge&logo=typescript&logoColor=FFFFFF&logoSize=auto"></a>
     <br>
@@ -28,8 +29,17 @@
 目前实现了一些基础的功能：
 
 - **游戏库管理**：有基本的添加、编辑和删除游戏的功能，提供一个暂且以简明好看为目的的游戏信息页面。
-- **游戏启动器**：直接从应用内启动游戏，并追踪游戏进程。也是基本功能。
+- **游戏启动器**：直接从应用内启动游戏，并追踪游戏进程。支持通过 [Locale Emulator](https://github.com/xupefei/Locale-Emulator) 转区启动日文游戏。
 - **游戏记录统计**：记录每次游戏进程时间，提供多种统计视图。或许有些鸡肋，但可以没用而不能没有。
+
+## ⬆️ 从 0.4.x（Electron 版）升级
+
+自 v0.5.0 起，ML-Maid 由 Electron 迁移至 Tauri 2（WebView2 + Rust）：
+
+- 数据自动沿用——安装版继续使用 `文档\ML-Maid`，便携版继续使用 exe 旁的目录。
+- 首次启动会迁移数据库（旁边会生成 `*.backup.*` 备份）。迁移后数据库不再兼容 0.4.x，如需回退请用备份恢复。
+- 请手动卸载旧的 Electron 版本，新安装包不会覆盖它。
+- 仅支持 Windows 10/11 x64（系统已预装 WebView2 Runtime）。
 
 ## 📷 截图预览
 
