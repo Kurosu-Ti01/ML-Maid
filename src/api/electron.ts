@@ -35,6 +35,8 @@ export const electronApi: BackendApi = {
   deleteGame: (uuid) => invoke('delete-game', uuid),
 
   launchGame: (params) => invoke('launch-game', params),
+  // Not available on the Electron backend
+  detectLocaleEmulator: () => Promise.resolve(null),
 
   selectExecutableFile: () => invoke('select-executable-file'),
   selectFolder: () => invoke('select-folder'),

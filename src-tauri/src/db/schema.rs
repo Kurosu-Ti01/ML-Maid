@@ -21,7 +21,8 @@ CREATE TABLE IF NOT EXISTS games (
   actions TEXT,
   procMonMode NUMERIC DEFAULT 1,
   procNames TEXT,
-  dateAdded NUMERIC
+  dateAdded NUMERIC,
+  localeEmulation INTEGER NOT NULL DEFAULT 0
 )";
 
 pub const METADATA_LOOKUP_TABLES: &[&str] = &[

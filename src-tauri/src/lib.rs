@@ -150,7 +150,8 @@ pub fn run() {
             stats_manager::get_yearly_daily_stats,
             stats_manager::get_recent_sessions,
             stats_manager::get_launch_method_stats,
-            game_launcher::launch_game
+            game_launcher::launch_game,
+            game_launcher::detect_locale_emulator
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

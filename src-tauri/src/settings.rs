@@ -38,6 +38,14 @@ pub struct FilteringSettings {
     pub tags: Vec<String>,
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct LauncherSettings {
+    /// Path to Locale Emulator's LEProc.exe (empty = not configured)
+    #[serde(default)]
+    pub locale_emulator_path: String,
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Settings {
@@ -46,6 +54,8 @@ pub struct Settings {
     pub sorting: SortingSettings,
     #[serde(default)]
     pub filtering: FilteringSettings,
+    #[serde(default)]
+    pub launcher: LauncherSettings,
 }
 
 fn default_sorting() -> SortingSettings {
@@ -65,6 +75,7 @@ impl Default for Settings {
             },
             sorting: default_sorting(),
             filtering: FilteringSettings::default(),
+            launcher: LauncherSettings::default(),
         }
     }
 }
@@ -141,6 +152,7 @@ fn parse_ini(content: &str) -> Settings {
             ("filtering", "developers[]") => settings.filtering.developers.push(value),
             ("filtering", "publishers[]") => settings.filtering.publishers.push(value),
             ("filtering", "tags[]") => settings.filtering.tags.push(value),
+            ("launcher", "localeEmulatorPath") => settings.launcher.locale_emulator_path = value,
             _ => {} // unknown keys are ignored
         }
     }
@@ -178,6 +190,14 @@ fn to_ini(s: &Settings) -> String {
                 out.push_str(&format!("{key}[]={v}\n"));
             }
         }
+    }
+
+    if !s.launcher.locale_emulator_path.is_empty() {
+        out.push_str("\n[launcher]\n");
+        out.push_str(&format!(
+            "localeEmulatorPath={}\n",
+            s.launcher.locale_emulator_path
+        ));
     }
 
     out

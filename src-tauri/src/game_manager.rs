@@ -56,6 +56,9 @@ pub struct Game {
     pub proc_names: Vec<String>,
     #[serde(default)]
     pub date_added: i64,
+    /// 0 = off, 1 = Locale Emulator, 2 = basic env-var mode
+    #[serde(default)]
+    pub locale_emulation: i64,
 }
 
 #[derive(Serialize, Clone, Debug)]
@@ -179,7 +182,8 @@ pub fn get_game_by_id(db: tauri::State<Db>, uuid: String) -> CmdResult<Option<Ga
     let game = conn.query_row(
         "SELECT uuid, title, coverImage, backgroundImage, iconImage, lastPlayed,
                 timePlayed, workingDir, folderSize, releaseDate, communityScore,
-                personalScore, links, description, actions, procMonMode, procNames, dateAdded
+                personalScore, links, description, actions, procMonMode, procNames, dateAdded,
+                localeEmulation
          FROM games WHERE uuid = ?1",
         params![uuid],
         |row| {
@@ -202,6 +206,7 @@ pub fn get_game_by_id(db: tauri::State<Db>, uuid: String) -> CmdResult<Option<Ga
                 proc_mon_mode: row.get::<_, Option<i64>>(15)?.unwrap_or(1),
                 proc_names: parse_json_array(row.get(16)?),
                 date_added: row.get::<_, Option<i64>>(17)?.unwrap_or(0),
+                locale_emulation: row.get::<_, Option<i64>>(18)?.unwrap_or(0),
                 genre: vec![],
                 developer: vec![],
                 publisher: vec![],
@@ -285,13 +290,14 @@ fn write_game_row(conn: &Connection, game: &Game, is_insert: bool) -> CmdResult<
         conn.execute(
             "INSERT INTO games (uuid, title, coverImage, backgroundImage, iconImage, lastPlayed,
                 timePlayed, workingDir, folderSize, releaseDate, communityScore, personalScore,
-                links, description, actions, procMonMode, procNames, dateAdded)
-             VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18)",
+                links, description, actions, procMonMode, procNames, dateAdded, localeEmulation)
+             VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19)",
             params![
                 game.uuid, game.title, game.cover_image, game.background_image, game.icon_image,
                 game.last_played, game.time_played, game.working_dir, game.folder_size,
                 game.release_date, game.community_score, game.personal_score,
-                links, description, actions, mode, proc_names, game.date_added
+                links, description, actions, mode, proc_names, game.date_added,
+                game.locale_emulation
             ],
         )
         .map_err(e("insert game"))?;
@@ -300,12 +306,12 @@ fn write_game_row(conn: &Connection, game: &Game, is_insert: bool) -> CmdResult<
             "UPDATE games SET title=?2, coverImage=?3, backgroundImage=?4, iconImage=?5,
                 lastPlayed=?6, timePlayed=?7, workingDir=?8, folderSize=?9, releaseDate=?10,
                 communityScore=?11, personalScore=?12, links=?13, description=?14, actions=?15,
-                procMonMode=?16, procNames=?17 WHERE uuid=?1",
+                procMonMode=?16, procNames=?17, localeEmulation=?18 WHERE uuid=?1",
             params![
                 game.uuid, game.title, game.cover_image, game.background_image, game.icon_image,
                 game.last_played, game.time_played, game.working_dir, game.folder_size,
                 game.release_date, game.community_score, game.personal_score,
-                links, description, actions, mode, proc_names
+                links, description, actions, mode, proc_names, game.locale_emulation
             ],
         )
         .map_err(e("update game"))?;

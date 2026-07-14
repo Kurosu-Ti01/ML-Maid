@@ -102,7 +102,8 @@
       "parameters": "パラメータ",
       "linkName": "リンク名",
       "linkUrl": "URL",
-      "url": "URL"
+      "url": "URL",
+      "localeEmulation": "ロケールエミュレーション"
     },
     "placeholders": {
       "enterTitle": "ゲームタイトルを入力",
@@ -179,7 +180,8 @@
       "folderModeDesc": "ゲームの作業ディレクトリ内で作成されたすべての実行可能プロセスを監視します",
       "processMode": "プロセスモード：",
       "processModeDesc": "極端なケースに対応 - プロセス名を入力して特定のプロセスアクティビティを監視します",
-      "attention": "注意：現在、フォルダモードのみが十分にメンテナンスされ、信頼性があります。"
+      "attention": "注意：現在、フォルダモードのみが十分にメンテナンスされ、信頼性があります。",
+      "localeEmulationInfo": "日本語ロケールでゲームを起動します。Locale Emulator モードは LEProc.exe に委任し（設定でパスを指定）、ほとんどの古い VN エンジンで動作します。簡易モードは日本語環境変数のみ設定し、一部のエンジンにのみ有効です。"
     },
     "options": {
       "fileMode": "ファイルモード",
@@ -187,7 +189,10 @@
       "processMode": "プロセスモード",
       "file": "ファイル",
       "link": "リンク",
-      "script": "スクリプト"
+      "script": "スクリプト",
+      "localeOff": "オフ",
+      "localeLE": "Locale Emulator",
+      "localeBasic": "簡易モード（環境変数）"
     },
     "messages": {
       "fileSelectionUnavailable": "ファイル選択APIが利用できません",
@@ -278,7 +283,15 @@
     "switchTrue": "オン",
     "switchFalse": "オフ",
     "true": "オン",
-    "false": "オフ"
+    "false": "オフ",
+    "launcherSettings": "ランチャー",
+    "localeEmulatorPath": "Locale Emulator",
+    "localeEmulatorPathPlaceholder": "LEProc.exe のパス",
+    "browse": "参照",
+    "detect": "自動検出",
+    "localeEmulatorFound": "LEProc.exe が見つかりました：{path}",
+    "localeEmulatorNotFound": "一般的な場所に Locale Emulator が見つかりません。LEProc.exe を手動で選択してください",
+    "localeEmulatorHint": "ゲームごとの「Locale Emulator」起動モードで使用され、日本語ロケールで日本語ゲームを実行します。Locale Emulator をインストールし、LEProc.exe を選択するか自動検出をクリックしてください。"
   },
   "statistics": {
     "tabs": {

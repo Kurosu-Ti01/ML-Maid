@@ -102,7 +102,8 @@
       "parameters": "参数",
       "linkName": "链接名称",
       "linkUrl": "URL",
-      "url": "URL"
+      "url": "URL",
+      "localeEmulation": "转区启动"
     },
     "placeholders": {
       "enterTitle": "输入游戏标题",
@@ -179,7 +180,8 @@
       "folderModeDesc": "监控在游戏工作目录中创建的所有可执行进程",
       "processMode": "进程模式：",
       "processModeDesc": "用于处理极端情况 - 输入进程名称以监控特定的进程活动",
-      "attention": "注意：目前只有文件夹模式经过充分维护和可靠。"
+      "attention": "注意：目前只有文件夹模式经过充分维护和可靠。",
+      "localeEmulationInfo": "以日文区域设置启动游戏。Locale Emulator 模式委托 LEProc.exe 启动（需在设置中配置路径），对绝大多数老 VN 引擎有效；基础模式仅设置日文环境变量，只对部分引擎有效。"
     },
     "options": {
       "fileMode": "文件模式",
@@ -187,7 +189,10 @@
       "processMode": "进程模式",
       "file": "文件",
       "link": "链接",
-      "script": "脚本"
+      "script": "脚本",
+      "localeOff": "关闭",
+      "localeLE": "Locale Emulator",
+      "localeBasic": "基础模式（环境变量）"
     },
     "messages": {
       "fileSelectionUnavailable": "文件选择 API 不可用",
@@ -278,7 +283,15 @@
     "switchTrue": "开",
     "switchFalse": "关",
     "true": "开",
-    "false": "关"
+    "false": "关",
+    "launcherSettings": "启动器",
+    "localeEmulatorPath": "Locale Emulator",
+    "localeEmulatorPathPlaceholder": "LEProc.exe 的路径",
+    "browse": "浏览",
+    "detect": "自动检测",
+    "localeEmulatorHint": "供游戏的「Locale Emulator」转区启动模式使用，以日文区域运行日文游戏。安装 Locale Emulator 后选择 LEProc.exe 或点击自动检测。",
+    "localeEmulatorFound": "已找到 LEProc.exe：{path}",
+    "localeEmulatorNotFound": "未在常见位置找到 Locale Emulator，请手动选择 LEProc.exe"
   },
   "statistics": {
     "tabs": {

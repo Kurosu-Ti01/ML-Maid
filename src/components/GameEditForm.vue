@@ -156,6 +156,23 @@
                 </div>
               </div>
             </n-form-item>
+
+            <n-form-item :label="$t('gameForm.fields.localeEmulation')">
+              <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+                <n-select v-model:value="gameForm.localeEmulation" style="width: calc(100% - 32px);"
+                  :options="localeEmulationOptions" />
+                <n-tooltip trigger="hover" placement="top">
+                  <template #trigger>
+                    <n-icon size="24" style="color: #909399; cursor: help; flex-shrink: 0;">
+                      <InfoOutlined />
+                    </n-icon>
+                  </template>
+                  <div style="max-width: 280px; line-height: 1.5;">
+                    {{ $t('gameForm.tooltip.localeEmulationInfo') }}
+                  </div>
+                </n-tooltip>
+              </div>
+            </n-form-item>
           </n-form>
         </n-scrollbar>
       </n-tab-pane>
@@ -422,6 +439,13 @@
     { label: t('gameForm.options.processMode'), value: PROC_MON_MODE.PROCESS }
   ])
 
+  // Locale emulation options
+  const localeEmulationOptions = computed(() => [
+    { label: t('gameForm.options.localeOff'), value: 0 },
+    { label: t('gameForm.options.localeLE'), value: 1 },
+    { label: t('gameForm.options.localeBasic'), value: 2 }
+  ])
+
   // Action type options
   const actionTypeOptions = computed(() => [
     { label: t('gameForm.options.file'), value: 'File' },
@@ -469,6 +493,7 @@
     actions: [],
     procMonMode: 1,  // Default to folder mode
     procNames: [],   // Default to empty array
+    localeEmulation: 0,  // Locale emulation off by default
     dateAdded: 0     // Will be set from received data
   })
 
@@ -878,6 +903,7 @@
     gameForm.value.actions = Array.isArray(data.actions) ? data.actions : []
     gameForm.value.procMonMode = data.procMonMode ?? PROC_MON_MODE.FOLDER  // Default to folder mode
     gameForm.value.procNames = Array.isArray(data.procNames) ? data.procNames : []  // Default to empty array
+    gameForm.value.localeEmulation = data.localeEmulation ?? 0
     gameForm.value.dateAdded = data.dateAdded || Date.now()  // Set dateAdded from data
     // Load existing image previews
     if (data.iconImage) {
