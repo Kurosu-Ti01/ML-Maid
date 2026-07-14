@@ -31,7 +31,7 @@
     if (!imagePath) {
       return defaultIcon; // default icon if no image path is provided
     }
-    // Return the provided image path (should be a local-file:// URL from backend)
+    // Return the provided image path (an asset: URL produced by the api layer)
     return imagePath || defaultIcon;
   }
 

@@ -349,16 +349,5 @@
       "sat": "土",
       "sun": "日"
     }
-  },
-  "electron": {
-    "tray": {
-      "show": "ML-Maidを表示",
-      "exit": "終了"
-    },
-    "dialog": {
-      "imagesOrExecutables": "画像または実行可能ファイル",
-      "allFiles": "すべてのファイル",
-      "executableFiles": "実行可能ファイル"
-    }
   }
 }

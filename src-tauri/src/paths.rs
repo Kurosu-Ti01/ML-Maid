@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use serde::Serialize;
 
@@ -21,6 +21,31 @@ pub struct AppPaths {
     pub config_path: PathBuf,
 }
 
+/// Installed vs portable detection. Installed means data goes to
+/// Documents\ML-Maid; anything else is portable (data beside the exe).
+///
+/// - NSIS installs put `uninstall.exe` next to the app
+///   (the legacy Electron installer used `Uninstall ML-Maid.exe`)
+/// - MSI (WiX) installs create no uninstaller exe, so also treat any
+///   location under Program Files / Program Files (x86) as installed —
+///   those directories are not writable without elevation anyway
+fn is_installed(exe_dir: &Path) -> bool {
+    if exe_dir.join("uninstall.exe").exists()
+        || exe_dir.join("Uninstall ML-Maid.exe").exists()
+    {
+        return true;
+    }
+
+    for env_var in ["ProgramFiles", "ProgramFiles(x86)"] {
+        if let Ok(program_files) = std::env::var(env_var) {
+            if exe_dir.starts_with(&program_files) {
+                return true;
+            }
+        }
+    }
+    false
+}
+
 pub fn resolve() -> AppPaths {
     let is_dev = cfg!(debug_assertions);
 
@@ -36,10 +61,7 @@ pub fn resolve() -> AppPaths {
             .and_then(|p| p.parent().map(|p| p.to_path_buf()))
             .expect("cannot resolve executable directory");
 
-        let installed = exe_dir.join("uninstall.exe").exists()
-            || exe_dir.join("Uninstall ML-Maid.exe").exists();
-
-        if installed {
+        if is_installed(&exe_dir) {
             dirs::document_dir()
                 .expect("cannot resolve Documents directory")
                 .join("ML-Maid")

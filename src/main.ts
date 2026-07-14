@@ -5,7 +5,7 @@ import pinia from './stores'
 import i18n from './i18n'
 const t = i18n.global.t
 import { useSettingsStore } from './stores/settings'
-import { api, isTauri } from './api'
+import { api } from './api'
 import './styles/base.css'
 import './styles/dark-theme.css'
 
@@ -23,12 +23,9 @@ dayjs.locale({
   weekStart: 1 // Monday = 1, Sunday = 0
 })
 
-// Tauri runs with decorations disabled, so the titlebar must provide its own
-// drag region and window control buttons (Electron supplies these natively
-// via titleBarOverlay)
-async function applyTauriTitlebarExtras(titlebar: HTMLElement) {
-  if (!isTauri) return
-
+// The window runs with decorations disabled, so the titlebar provides its own
+// drag region and window control buttons
+async function applyTitlebarWindowControls(titlebar: HTMLElement) {
   titlebar.setAttribute('data-tauri-drag-region', '')
   titlebar.querySelectorAll('.titlebar-title, .titlebar-title *, .titlebar-divider')
     .forEach(el => el.setAttribute('data-tauri-drag-region', ''))
@@ -183,7 +180,7 @@ async function initTitlebar() {
         break
     }
 
-    await applyTauriTitlebarExtras(titlebar)
+    await applyTitlebarWindowControls(titlebar)
   }
 }
 

@@ -349,16 +349,5 @@
       "sat": "周六",
       "sun": "周日"
     }
-  },
-  "electron": {
-    "tray": {
-      "show": "显示 ML-Maid",
-      "exit": "退出"
-    },
-    "dialog": {
-      "imagesOrExecutables": "图片或可执行文件",
-      "allFiles": "所有文件",
-      "executableFiles": "可执行文件"
-    }
   }
 }
