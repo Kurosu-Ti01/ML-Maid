@@ -22,6 +22,12 @@ src-tauri/gen/schemas
 # docs (testing)
 docs/*
 !docs/ReadMe/
+!docs/ML-Maid-Docs/
+!docs/ML-Maid-Docs/**
+docs/ML-Maid-Docs/node_modules/
+docs/ML-Maid-Docs/docs/.vuepress/.cache/
+docs/ML-Maid-Docs/docs/.vuepress/.temp/
+docs/ML-Maid-Docs/docs/.vuepress/dist/
 
 # files created while running the app
 library
