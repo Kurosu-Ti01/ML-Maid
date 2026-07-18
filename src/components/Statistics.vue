@@ -217,6 +217,7 @@
   import { useTheme } from '@/composables/useTheme'
   import { api } from '@/api'
   import { DarkTheme } from '@/assets/echarts/dark-theme'
+  import { CHART_PALETTE, HEATMAP_RANGE_LIGHT, HEATMAP_RANGE_DARK } from '@/assets/echarts/palette'
   import { useI18n } from 'vue-i18n'
   import type { ComposeOption } from 'echarts/core'
   import type {
@@ -232,7 +233,8 @@
     GridComponentOption,
     DatasetComponentOption,
     DataZoomComponentOption,
-    CalendarComponentOption
+    CalendarComponentOption,
+    VisualMapComponentOption
   } from 'echarts/components'
 
   // Register required ECharts components
@@ -288,6 +290,7 @@
     | TooltipComponentOption
     | LegendComponentOption
     | CalendarComponentOption
+    | VisualMapComponentOption
   >
 
   const activeTab = ref('main')
@@ -296,14 +299,16 @@
   const isMonthChartReady = ref(false)
   const isYearChartReady = ref(false)
 
-  // Register custom dark theme
+  // Register custom themes (light gets the shared brand palette; without it
+  // light mode silently falls back to ECharts defaults)
   registerTheme('dark', DarkTheme)
+  registerTheme('mlmaid-light', { color: CHART_PALETTE })
 
   // Use theme
   const { isDark } = useTheme()
 
   // Provide theme to all child ECharts components
-  provide(THEME_KEY, computed(() => isDark.value ? 'dark' : undefined))
+  provide(THEME_KEY, computed(() => isDark.value ? 'dark' : 'mlmaid-light'))
 
   const { t } = useI18n()
 
@@ -577,7 +582,7 @@
       bottom: '40%',
       itemHeight: 1000,
       calculable: true,
-      inRange: { color: ['#e0f3ff', '#0066cc'] }
+      inRange: { color: isDark.value ? HEATMAP_RANGE_DARK : HEATMAP_RANGE_LIGHT }
     },
     calendar: [{ range: getCurrentYearString(), cellSize: ['auto', 20] }],
     series: [{
@@ -585,6 +590,13 @@
       coordinateSystem: 'calendar',
       data: []
     }]
+  })
+
+  // Keep the heatmap ramp in sync when the theme changes while the chart is open
+  watch(isDark, (dark) => {
+    if (yearChartOption.value.visualMap && !Array.isArray(yearChartOption.value.visualMap)) {
+      yearChartOption.value.visualMap.inRange = { color: dark ? HEATMAP_RANGE_DARK : HEATMAP_RANGE_LIGHT }
+    }
   })
 
   onMounted(async () => {
@@ -670,17 +682,12 @@
       return
     }
 
-    // Get unique games and assign colors using ECharts default palette
+    // Get unique games and assign colors from the shared brand palette
     const uniqueGames = [...new Set(dailyData.map(d => d.title))].sort()
 
-    // Generate colors using ECharts default color palette
-    const defaultColors = [
-      '#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de',
-      '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc', '#ff9f7f'
-    ]
     const gameColors: { [key: string]: string } = {}
     uniqueGames.forEach((game, index) => {
-      gameColors[game] = defaultColors[index % defaultColors.length]
+      gameColors[game] = CHART_PALETTE[index % CHART_PALETTE.length]
     })
 
     // Convert time strings to decimal hours for easier processing
@@ -757,7 +764,7 @@
         )
 
         // Use game-specific color
-        const color = gameColors[gameTitle] || defaultColors[0]
+        const color = gameColors[gameTitle] || CHART_PALETTE[0]
 
         return clippedShape && {
           type: 'rect',
@@ -765,7 +772,8 @@
           shape: clippedShape,
           style: {
             fill: color,
-            stroke: '#fff',
+            // Separator between session blocks matches the page background
+            stroke: isDark.value ? '#1e1e1e' : '#fff',
             lineWidth: 1,
             opacity: 0.8
           }
@@ -1074,16 +1082,6 @@
       console.error('Failed to load recent sessions', e)
     }
   }
-
-  // Initial data load
-  onMounted(async () => {
-    loadOverallStats()
-    loadDailyStatistics()
-    loadWeeklyStatistics()
-    loadMonthlyDailyStats()
-    loadYearlyDailyStats()
-    loadRecentSessions()
-  })
 </script>
 
 <style scoped>
@@ -1094,12 +1092,6 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-  }
-
-  .statistics h2 {
-    color: #333;
-    margin-bottom: 20px;
-    text-align: center;
   }
 
   .statistics-tabs {
@@ -1117,7 +1109,7 @@
   }
 
   .tab-content h3 {
-    color: #409eff;
+    color: var(--primary);
     margin-top: 0;
     margin-bottom: 15px;
     border-bottom: 2px solid var(--border-info-row);
@@ -1154,7 +1146,7 @@
   }
 
   .tab-content p {
-    color: #666;
+    color: var(--color-muted);
     font-size: 16px;
     line-height: 1.6;
   }
@@ -1176,7 +1168,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #666;
+    color: var(--color-muted);
     font-size: 16px;
   }
 
@@ -1202,14 +1194,16 @@
 
   .stat-card {
     background: var(--bg-info-content, #fff);
-    border: 1px solid rgba(64, 128, 255, 0.15);
-    border-radius: 4px;
+    border: 1px solid var(--primary-tint);
+    border-radius: var(--radius-md);
     padding: 24px 20px;
     display: flex;
     align-items: center;
     gap: 20px;
-    box-shadow: 0 4px 12px rgba(64, 128, 255, 0.05);
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--duration-base) var(--ease-standard),
+      box-shadow var(--duration-base) var(--ease-standard),
+      border-color var(--duration-base) var(--ease-standard);
     position: relative;
     overflow: hidden;
   }
@@ -1221,14 +1215,14 @@
     top: 0;
     bottom: 0;
     width: 4px;
-    background: #4080ff;
+    background: var(--primary);
     opacity: 0.8;
   }
 
   .stat-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(64, 128, 255, 0.15);
-    border-color: rgba(64, 128, 255, 0.4);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-tint-strong);
   }
 
   .stat-icon-wrapper {
@@ -1238,13 +1232,15 @@
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    background: rgba(64, 128, 255, 0.1);
-    color: #4080ff;
-    transition: all 0.3s ease;
+    background: var(--primary-tint);
+    color: var(--primary);
+    transition: background-color var(--duration-base) var(--ease-standard),
+      color var(--duration-base) var(--ease-standard),
+      transform var(--duration-base) var(--ease-standard);
   }
 
   .stat-card:hover .stat-icon-wrapper {
-    background: #4080ff;
+    background: var(--primary);
     color: #fff;
     transform: scale(1.1);
   }
@@ -1259,40 +1255,14 @@
     color: var(--stat-value-color);
     line-height: 1.2;
     margin-bottom: 4px;
+    font-variant-numeric: tabular-nums;
   }
 
   .stat-label {
     font-size: 0.95em;
-    color: #888;
+    color: var(--color-muted);
     font-weight: 500;
     letter-spacing: 0.5px;
-  }
-
-  .stats-placeholder {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 4px;
-    min-height: 300px;
-  }
-
-  .placeholder-content {
-    text-align: center;
-    color: white;
-  }
-
-  .placeholder-icon {
-    font-size: 4em;
-    margin-bottom: 20px;
-    opacity: 0.8;
-  }
-
-  .placeholder-content p {
-    font-size: 1.2em;
-    margin: 0;
-    opacity: 0.9;
   }
 
   /* Recent Sessions scrollbar and card */
@@ -1301,14 +1271,16 @@
     width: 55%;
     margin-left: 10px;
     background: var(--bg-info-content);
-    border-radius: 4px;
+    border-radius: var(--radius-md);
     box-shadow: var(--shadow-info-table);
     padding: 6px 0 12px 12px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     border: 1px solid var(--border-info-row);
-    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    transition: background-color var(--duration-base) var(--ease-standard),
+      border-color var(--duration-base) var(--ease-standard),
+      box-shadow var(--duration-base) var(--ease-standard);
   }
 
   .stats-recent-sessions h4 {
@@ -1336,15 +1308,18 @@
   }
 
   .recent-session-card {
-    border-radius: 6px;
-    transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
-    background-color: var(--siderbar-list-bg);
+    border-radius: var(--radius-sm);
+    transition: transform var(--duration-fast) var(--ease-standard),
+      box-shadow var(--duration-fast) var(--ease-standard),
+      background-color var(--duration-fast) var(--ease-standard),
+      border-color var(--duration-fast) var(--ease-standard);
+    background-color: var(--sidebar-list-bg);
     border: 1px solid var(--game-item-border);
   }
 
   .recent-session-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow-md);
     background-color: var(--game-item-hover-bg);
     border-color: var(--color-link);
   }
@@ -1371,7 +1346,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    transition: color 0.3s ease;
+    transition: color var(--duration-fast) var(--ease-standard);
   }
 
   .recent-session-card:hover .recent-session-title {
@@ -1381,6 +1356,7 @@
   .recent-session-time {
     color: var(--color-muted);
     font-size: 0.85em;
+    font-variant-numeric: tabular-nums;
   }
 
   .session-duration-tag {
@@ -1389,9 +1365,11 @@
     color: var(--color-playtime);
     background-color: rgba(161, 116, 233, 0.1);
     padding: 4px 10px;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     white-space: nowrap;
-    transition: all 0.3s ease;
+    font-variant-numeric: tabular-nums;
+    transition: background-color var(--duration-fast) var(--ease-standard),
+      color var(--duration-fast) var(--ease-standard);
   }
 
   .recent-session-card:hover .session-duration-tag {

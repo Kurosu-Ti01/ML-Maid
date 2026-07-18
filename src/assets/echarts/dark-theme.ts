@@ -1,25 +1,7 @@
+import { CHART_PALETTE } from './palette'
+
 export const DarkTheme = {
-    color: [
-        "#87f7cf",
-        "#fc97af",
-        "#f7f494",
-        "#72ccff",
-        "#f7c5a0",
-        "#d4a4eb",
-        "#d2f5a6",
-        "#76f2f2",
-        '#4992ff',
-        '#7cffb2',
-        '#fddd60',
-        '#ff6e76',
-        '#58d9f9',
-        '#05c091',
-        '#ff8a45',
-        '#8d48e3',
-        '#dd79ff',
-        '#91ca8c',
-        '#f49f42'
-    ],
+    color: CHART_PALETTE,
     backgroundColor: 'rgba(0,0,0,0)',
     textStyle: {},
     title: {
@@ -102,9 +84,9 @@ export const DarkTheme = {
     },
     candlestick: {
         itemStyle: {
-            color: '#e098347',
+            color: '#e09834',
             color0: '#8fd3e8',
-            borderColor: '#e098347',
+            borderColor: '#e09834',
             borderColor0: '#8fd3e8',
             borderWidth: '2'
         }

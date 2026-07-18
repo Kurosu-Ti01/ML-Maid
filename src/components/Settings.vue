@@ -194,7 +194,7 @@
   }
 
   .settings-header {
-    color: #0071e1;
+    color: var(--primary);
     margin-bottom: 20px;
     display: flex;
     align-items: center;
@@ -207,7 +207,6 @@
   }
 
   .settings-card {
-    border-radius: 8px;
     background-color: var(--bg-info-content);
   }
 
@@ -216,7 +215,7 @@
     align-items: center;
     gap: 8px;
     font-weight: 600;
-    color: #409eff;
+    color: var(--primary);
   }
 
   .settings-form {
@@ -236,7 +235,7 @@
   .setting-hint {
     margin: -8px 0 0;
     font-size: 12px;
-    color: #909399;
+    color: var(--color-muted-dark);
     line-height: 1.5;
   }
 </style>

@@ -9,6 +9,221 @@
     content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: asset: http://asset.localhost https://asset.localhost; media-src 'self'; connect-src 'self' https: http://localhost:5173 ws://localhost:5173 ipc: http://ipc.localhost;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ML-Maid</title>
+  <style>
+    html,
+    body {
+      width: 100vw;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    #app {
+      width: 100vw;
+      /* Adjust height to account for the title bar */
+      /* This ensures the app fills the remaining space below the title bar */
+      height: calc(100vh - 50px);
+      overflow: hidden;
+    }
+
+    button {
+      -webkit-app-region: no-drag;
+    }
+
+    .titlebar {
+      font-size: 24px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      display: flex;
+      align-items: center;
+      height: 50px;
+      border-bottom: 1px solid var(--titlebar-border);
+      padding: 0 20px;
+      user-select: none;
+      -webkit-app-region: drag;
+    }
+
+    /* main-window title */
+    .main-titlebar {
+      background: var(--titlebar-main-bg);
+      color: var(--primary, #4080ff);
+    }
+
+    .titlebar-title {
+      display: flex;
+      align-items: center;
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--primary, #4080ff);
+      -webkit-app-region: drag;
+      margin-left: -14px;
+    }
+
+    .titlebar-title img {
+      width: 38px;
+      height: 38px;
+      vertical-align: middle;
+    }
+
+    .titlebar-title span {
+      margin-left: 10px;
+      font-size: 24px;
+      color: var(--primary, #4080ff);
+      font-weight: bold;
+    }
+
+    .titlebar-divider {
+      width: 1px;
+      height: 28px;
+      background: var(--titlebar-border);
+      margin: 0 15px;
+    }
+
+    .titlebar-buttons-container {
+      width: 15%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: -3px;
+    }
+
+    .titlebar-button {
+      background: transparent;
+      color: var(--titlebar-button);
+      border: none;
+      border-radius: var(--radius-sm, 6px);
+      padding: 0;
+      cursor: pointer;
+      transition: background-color var(--duration-fast, 150ms) var(--ease-standard, ease),
+        color var(--duration-fast, 150ms) var(--ease-standard, ease);
+      -webkit-app-region: no-drag;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+    }
+
+    .titlebar-button svg {
+      opacity: 0.8;
+      width: 30px;
+      height: 30px;
+    }
+
+    .titlebar-button:hover {
+      background: var(--primary-tint, rgba(64, 128, 255, 0.10));
+      color: var(--primary, #4080ff);
+    }
+
+    .titlebar-button:active {
+      background: var(--primary-tint-strong, rgba(64, 128, 255, 0.18));
+    }
+
+    .titlebar-button-active {
+      background: var(--primary-tint-strong, rgba(64, 128, 255, 0.18));
+      width: auto;
+      padding: 0 10px;
+    }
+
+    .filter-badge {
+      font-size: 12px;
+      color: var(--primary, #4080ff);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .titlebar-search-container {
+      display: flex;
+      align-items: center;
+      margin-left: 10px;
+      -webkit-app-region: no-drag;
+      position: relative;
+    }
+
+    .titlebar-search-icon {
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 24px;
+      height: 24px;
+      color: var(--color-muted-dark, #909399);
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .titlebar-search-input {
+      width: 300px;
+      height: 28px;
+      padding: 4px 12px 4px 36px;
+      font-size: 13px;
+      border: 1px solid var(--primary-tint-strong, rgba(64, 128, 255, 0.18));
+      border-radius: var(--radius-sm, 6px);
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--color-info-content, #303133);
+      outline: none;
+      transition: border-color var(--duration-fast, 150ms) var(--ease-standard, ease),
+        background-color var(--duration-fast, 150ms) var(--ease-standard, ease),
+        box-shadow var(--duration-fast, 150ms) var(--ease-standard, ease);
+      -webkit-app-region: no-drag;
+    }
+
+    .titlebar-search-input:focus {
+      border-color: var(--primary, #4080ff);
+      background: #ffffff;
+      box-shadow: 0 0 0 2px var(--primary-tint, rgba(64, 128, 255, 0.10));
+    }
+
+    .titlebar-search-input::placeholder {
+      color: var(--color-muted-dark, #909399);
+      font-size: 13px;
+    }
+
+    /* Dark theme backgrounds for search input (colors adapt via tokens) */
+    html.dark .titlebar-search-input {
+      background: rgba(42, 42, 42, 0.9);
+    }
+
+    html.dark .titlebar-search-input:focus {
+      background: #2a2a2a;
+    }
+
+    /* Tauri custom window controls (decorations: false) */
+    .titlebar-window-controls {
+      margin-left: auto;
+      margin-right: -20px;
+      /* cancel titlebar padding so buttons reach the window edge */
+      display: flex;
+      align-self: stretch;
+      -webkit-app-region: no-drag;
+    }
+
+    .titlebar-window-control {
+      width: 46px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      border-radius: 0;
+      background: transparent;
+      color: var(--titlebar-button);
+      padding: 0;
+      cursor: default;
+    }
+
+    .titlebar-window-control:hover {
+      background: rgba(128, 128, 128, 0.25);
+    }
+
+    .titlebar-window-control.close:hover {
+      background: #e81123;
+      color: #ffffff;
+    }
+  </style>
 </head>
 
 <body>
@@ -19,238 +234,3 @@
 </body>
 
 </html>
-
-<style>
-  html,
-  body {
-    width: 100vw;
-    height: 100vh;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-  }
-
-  #app {
-    width: 100vw;
-    /* Adjust height to account for the title bar */
-    /* This ensures the app fills the remaining space below the title bar */
-    height: calc(100vh - 50px);
-    overflow: hidden;
-  }
-
-  button {
-    -webkit-app-region: no-drag;
-  }
-
-  .titlebar {
-    font-size: 1.5rem;
-    font-weight: bold;
-    letter-spacing: 2px;
-    display: flex;
-    align-items: center;
-    height: 50px;
-    border-bottom: 1px solid var(--titlebar-border);
-    padding: 0 20px;
-    user-select: none;
-    -webkit-app-region: drag;
-  }
-
-  /* main-window title */
-  .main-titlebar {
-    background: var(--titlebar-main-bg);
-    color: #4080ff;
-  }
-
-  .titlebar-title {
-    display: flex;
-    align-items: center;
-    font-size: 1.4rem;
-    font-weight: bold;
-    color: #4080ff;
-    -webkit-app-region: drag;
-    margin-left: -14px;
-  }
-
-  .titlebar-title img {
-    width: 38px;
-    height: 38px;
-    vertical-align: middle;
-  }
-
-  .titlebar-title span {
-    margin-left: 10px;
-    font-size: 1.6rem;
-    color: #4080ff;
-    font-weight: bold;
-  }
-
-  .titlebar-divider {
-    width: 1px;
-    height: 28px;
-    background: rgba(0, 0, 0, 0.1);
-    margin: 0 15px;
-  }
-
-  .titlebar-buttons-container {
-    width: 15%;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-left: -3px;
-  }
-
-  .titlebar-button {
-    background: transparent;
-    color: var(--titlebar-button);
-    border: none;
-    border-radius: 4px;
-    padding: 0;
-    cursor: pointer;
-    transition: all 0.2s;
-    -webkit-app-region: no-drag;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-  }
-
-  .titlebar-button svg {
-    opacity: 0.8;
-    width: 30px;
-    height: 30px;
-  }
-
-  .titlebar-button-active {
-    background: rgba(64, 128, 255, 0.15);
-    width: auto;
-    padding: 0 10px;
-  }
-
-  .filter-badge {
-    font-size: 0.8rem;
-    color: #4080ff;
-    font-weight: 600;
-    white-space: nowrap;
-  }
-
-  .titlebar-search-container {
-    display: flex;
-    align-items: center;
-    margin-left: 10px;
-    -webkit-app-region: no-drag;
-    position: relative;
-  }
-
-  .titlebar-search-icon {
-    position: absolute;
-    left: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 24px;
-    height: 24px;
-    color: #909399;
-    pointer-events: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .titlebar-search-input {
-    width: 300px;
-    height: 28px;
-    padding: 4px 12px 4px 36px;
-    font-size: 0.85rem;
-    border: 1px solid rgba(64, 128, 255, 0.3);
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.9);
-    color: #303133;
-    outline: none;
-    transition: all 0.2s;
-    -webkit-app-region: no-drag;
-  }
-
-  .titlebar-search-input:focus {
-    border-color: #4080ff;
-    background: #ffffff;
-    box-shadow: 0 0 0 2px rgba(64, 128, 255, 0.1);
-  }
-
-  .titlebar-search-input::placeholder {
-    color: #909399;
-    font-size: 0.85rem;
-  }
-
-  /* Dark theme styles for search input */
-  html.dark .titlebar-search-input {
-    background: rgba(42, 42, 42, 0.9);
-    color: #e5eaf3;
-    border-color: rgba(121, 187, 255, 0.3);
-  }
-
-  html.dark .titlebar-search-input:focus {
-    border-color: #79bbff;
-    background: #2a2a2a;
-    box-shadow: 0 0 0 2px rgba(121, 187, 255, 0.15);
-  }
-
-  html.dark .titlebar-search-input::placeholder {
-    color: #6c6e72;
-  }
-
-  .titlebar-button:hover {
-    background: #72aaff;
-  }
-
-  .titlebar-button:active {
-    background: #409EFF;
-  }
-
-
-  /* Tauri custom window controls (decorations: false) */
-  .titlebar-window-controls {
-    margin-left: auto;
-    margin-right: -20px;
-    /* cancel titlebar padding so buttons reach the window edge */
-    display: flex;
-    align-self: stretch;
-    -webkit-app-region: no-drag;
-  }
-
-  .titlebar-window-control {
-    width: 46px;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    border-radius: 0;
-    background: transparent;
-    color: var(--titlebar-button);
-    padding: 0;
-    cursor: default;
-  }
-
-  .titlebar-window-control:hover {
-    background: rgba(128, 128, 128, 0.25);
-  }
-
-  .titlebar-window-control.close:hover {
-    background: #e81123;
-    color: #ffffff;
-  }
-
-  /* edit-window title */
-  .edit-titlebar {
-    background: var(--titlebar-sub-bg);
-    color: #E6A23C;
-    font-size: 1.2rem;
-  }
-
-  /* add-window title */
-  .add-titlebar {
-    background: var(--titlebar-sub-bg);
-    color: #E6A23C;
-    font-size: 1.2rem;
-  }
-</style>
