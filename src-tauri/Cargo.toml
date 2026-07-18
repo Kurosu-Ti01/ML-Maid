@@ -9,6 +9,12 @@ edition = "2021"
 name = "ml_maid_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
+[lints.rust]
+# The MSVC linker prints an informational "Creating library ... and object ..."
+# message to stdout when building the cdylib's import library; Rust >= 1.83
+# surfaces any linker output as a `linker_messages` warning. It is benign.
+linker_messages = "allow"
+
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 

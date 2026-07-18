@@ -7,9 +7,10 @@
           <span class="no-game-hint">{{ $t('gameInfo.selectGameHint') }}</span>
         </div>
       </div>
-      <div v-else-if="!isLoading && gameData">
-        <!-- Background & Title Container-->
-        <div class="background-title-container">
+      <div v-else-if="!isLoading && gameData" class="game-detail">
+        <div class="detail-content">
+          <!-- Background & Title Container-->
+          <div class="background-title-container">
           <div v-if="gameData.backgroundImageDisplay">
             <img :src="gameData.backgroundImageDisplay" alt="Game Background" class="game-background" />
           </div>
@@ -41,13 +42,13 @@
                 <n-button type="primary" size="large" class="action-bar-btn">...</n-button>
               </n-dropdown>
               <div class="game-playtime-text">
-                <div class="game-playtime">
-                  <p style="font-size: 1.1em;">{{ $t('gameInfo.timePlayed') }}</p>
-                  <p style="font-weight: bold;">{{ formatTimePlayed(gameData.timePlayed) }}</p>
+                <div class="playtime-item">
+                  <span class="playtime-label">{{ $t('gameInfo.timePlayed') }}</span>
+                  <span class="playtime-value">{{ formatTimePlayed(gameData.timePlayed) }}</span>
                 </div>
-                <div class="game-playtime">
-                  <p style="font-size: 1.1em;">{{ $t('gameInfo.lastPlayed') }}</p>
-                  <p style="font-weight: bold;">{{ gameData.lastPlayedDisplay }}</p>
+                <div class="playtime-item">
+                  <span class="playtime-label">{{ $t('gameInfo.lastPlayed') }}</span>
+                  <span class="playtime-value">{{ gameData.lastPlayedDisplay }}</span>
                 </div>
               </div>
             </div>
@@ -192,13 +193,12 @@
             </div>
           </div>
           <div class="description-container">
-            <n-card class="description-card">
-              <template #header>
-                <span class="description-title">{{ $t('gameInfo.description') }}</span>
-              </template>
+            <div class="description-card">
+              <div class="description-title">{{ $t('gameInfo.description') }}</div>
               <p v-for="(line, index) in gameData.description" :key="index" class="description-text">{{ line }}</p>
-            </n-card>
+            </div>
           </div>
+        </div>
         </div>
       </div>
     </n-spin>
@@ -537,120 +537,152 @@
     height: 100%;
   }
 
+  /* ---- Immersive detail shell (ambient wash is shared, in MainView) ---- */
+  .game-detail {
+    position: relative;
+    min-height: 100%;
+  }
+
+  .detail-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ---- Hero ---- */
   .background-title-container {
     position: relative;
     width: 100%;
-    max-height: 70%;
+    height: 52vh;
+    min-height: 320px;
     overflow: hidden;
-  }
-
-  .icon-title-container {
-    position: absolute;
-    height: 4em;
-    width: auto;
-    left: 9px;
-    bottom: 9px;
-    display: flex;
-    align-items: center;
-    z-index: 3;
-  }
-
-  .game-title {
-    font-size: 2em;
-    font-weight: 600;
-    color: var(--color-title);
-    letter-spacing: 1px;
-    margin-left: 0.2em;
-    text-shadow:
-      0 0 6px var(--shadow-title-1),
-      0 0 4px var(--shadow-title-2);
-  }
-
-  .game-icon {
-    width: auto;
-    height: 48px;
-    vertical-align: middle;
   }
 
   .game-background {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center center;
-    /* Fix image bottom white bar issue:
-       - display: block eliminates baseline alignment whitespace from inline elements
-       - height: 100% ensures image fully fills parent container height */
+    object-position: center 30%;
     display: block;
   }
 
+  /* Scrim darkens the lower hero so the title stays legible */
+  .background-title-container::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom,
+        rgba(0, 0, 0, 0) 45%,
+        rgba(0, 0, 0, 0.5) 100%);
+    pointer-events: none;
+  }
+
+  .icon-title-container {
+    position: absolute;
+    left: 24px;
+    bottom: 34px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 3;
+  }
+
+  .game-icon-container {
+    display: flex;
+  }
+
+  .game-icon {
+    width: auto;
+    height: 56px;
+    border-radius: var(--radius-sm);
+  }
+
+  .game-title {
+    font-size: 30px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.4px;
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6), 0 0 6px rgba(0, 0, 0, 0.45);
+  }
+
+  /* ---- Action bar (full-width, flush under the hero) ---- */
   .main-info-action-container {
     position: relative;
-    width: auto;
-    height: auto;
-    border-top: none;
-    padding: 0
+    z-index: 2;
+  }
+
+  /* Gradient lead-in: the (more opaque) action-bar colour rises out of the hero */
+  .main-info-action-container::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 100%;
+    height: 48px;
+    background: linear-gradient(to bottom, transparent 0%, var(--glass-strong) 100%);
+    pointer-events: none;
   }
 
   .action-button-container {
     position: relative;
-    width: calc(100% - 2px);
-    height: 100%;
-    bottom: 0;
-    box-shadow: var(--shadow-action-bar);
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    background: var(--bg-action-bar);
-    z-index: 1;
-    margin-left: 2px;
+    padding: 14px 20px;
+    background: var(--glass-strong);
+    box-shadow: var(--shadow-action-bar);
   }
 
   .button-group {
     display: flex;
     flex-direction: row;
     align-items: center;
-    margin-left: 10px;
   }
 
   .action-bar-btn {
     font-weight: bold;
-    font-size: 16px;
-    margin: 10px 5px;
+    font-size: 15px;
+    margin: 4px 5px;
   }
 
   .action-bar-btn--play {
-    padding: 0 40px;
+    padding: 0 34px;
   }
 
   .game-playtime-text {
-    width: auto;
-    height: 100%;
-    font-size: 0.85em;
-    margin-left: 18px;
+    margin-left: 24px;
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 16px;
+    gap: 28px;
   }
 
-  .game-playtime {
-    line-height: 0.5;
+  .playtime-item {
+    display: flex;
     flex-direction: column;
-    align-items: center;
+    gap: 3px;
+  }
+
+  .playtime-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    color: var(--color-muted);
+    text-transform: uppercase;
+  }
+
+  .playtime-value {
+    font-size: 14px;
+    font-weight: 700;
     color: var(--color-playtime);
     font-variant-numeric: tabular-nums;
   }
 
+  /* ---- Floating cover ---- */
   .game-cover {
     position: absolute;
-    right: 10px;
-    bottom: 0;
-    width: 25%;
-    height: auto;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
+    right: 24px;
+    bottom: 10px;
+    width: min(30%, 230px);
+    z-index: 3;
     pointer-events: none;
   }
 
@@ -658,62 +690,74 @@
     width: 100%;
     height: auto;
     object-fit: cover;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     display: block;
     pointer-events: auto;
   }
 
+  /* ---- Info + description ---- */
   .info-row-container {
     display: flex;
     flex-direction: row;
     width: 100%;
-    margin-top: 10px;
+    gap: 16px;
+    padding: 20px 18px 24px;
+    box-sizing: border-box;
   }
 
   .detail-info-container {
     width: 40%;
-    height: auto;
-    margin: 0 5px;
+    flex-shrink: 0;
   }
 
   .description-container {
-    width: 60%;
-    height: auto;
-    margin: 0 5px;
+    flex: 1;
+    min-width: 0;
   }
 
-  .description-card {
-    margin: 10px;
-    width: 97%;
-    background: var(--bg-info-content);
+  .custom-info-table {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
   }
 
-  .description-text {
-    word-break: break-all;
-    text-align: justify;
-    margin: 2px 0;
-    line-height: 1.7;
-  }
-
-  .tags-flex-wrap {
+  .info-row {
     display: flex;
-    flex-wrap: wrap;
-    gap: 4px 6px;
-    align-items: flex-start;
-    margin: 2px 0;
+    align-items: stretch;
+    border-bottom: 1px solid var(--border-info-row);
   }
 
-  .clickable-path {
-    color: var(--color-link);
-    text-decoration: none;
-    font-weight: 500;
-    cursor: pointer;
-    transition: color var(--duration-fast) var(--ease-standard);
+  .info-row:last-child {
+    border-bottom: none;
   }
 
-  .clickable-path:hover {
-    color: var(--color-link-hover);
-    text-decoration: underline;
+  .info-label {
+    width: 92px;
+    min-width: 92px;
+    padding: 11px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    color: var(--color-muted);
+    word-break: break-word;
+    overflow-wrap: break-word;
+    display: flex;
+    align-items: center;
+  }
+
+  .info-content {
+    flex: 1;
+    min-width: 0;
+    padding: 9px 14px;
+    color: var(--color-info-content);
+    word-break: break-word;
+    overflow-wrap: break-word;
+    display: flex;
+    align-items: center;
   }
 
   .info-icon {
@@ -727,78 +771,84 @@
     margin-left: 4px;
   }
 
-  .description-title {
-    font-size: 20px;
-    color: var(--primary);
-    font-weight: bold;
-  }
-
-  .custom-info-table {
-    border-radius: var(--radius-md);
+  .clickable-path {
+    color: var(--color-link);
+    text-decoration: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color var(--duration-fast) var(--ease-standard);
     overflow: hidden;
-    box-shadow: var(--shadow-info-table);
-    margin: 10px 0 10px 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
-  .info-row {
+  .clickable-path:hover {
+    color: var(--color-link-hover);
+    text-decoration: underline;
+  }
+
+  .tags-flex-wrap {
     display: flex;
-    border-bottom: 1px solid var(--border-info-row);
-  }
-
-  .info-row:last-child {
-    border-bottom: none;
-  }
-
-  .info-label {
-    width: 100px;
-    min-width: 100px;
-    padding: 12px;
-    background-color: var(--bg-info-label);
-    border-right: 1px solid var(--border-info-row);
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--color-info-label);
-    word-break: break-word;
-    overflow-wrap: break-word;
-  }
-
-  .info-content {
-    flex: 1;
-    padding: 6px 10px;
-    background-color: var(--bg-info-content);
-    color: var(--color-info-content);
-    word-break: break-word;
-    overflow-wrap: break-word;
-    display: flex;
-    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px 6px;
+    align-items: flex-start;
+    margin: 2px 0;
   }
 
   .info-row-tags {
     display: flex;
     flex-direction: column;
-    border-bottom: 1px solid var(--border-info-row);
+    border-top: 1px solid var(--border-info-row);
   }
 
   .info-label-tags {
     width: 100%;
-    padding: 12px 12px 8px 12px;
-    font-size: 14px;
+    padding: 11px 14px 6px 14px;
+    font-size: 12px;
     font-weight: 600;
-    background-color: var(--bg-info-label);
-    color: var(--color-info-label);
+    letter-spacing: 0.2px;
+    color: var(--color-muted);
     word-break: break-word;
     overflow-wrap: break-word;
   }
 
   .info-content-tags {
-    padding: 8px 12px 12px 12px;
-    background-color: var(--bg-info-content);
+    padding: 4px 14px 12px 14px;
     color: var(--color-info-content);
-    font-size: 0.8em;
+    font-size: 0.85em;
     word-break: break-word;
     overflow-wrap: break-word;
   }
 
+  .description-card {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 16px 18px;
+    border-radius: var(--radius-md);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  .description-title {
+    display: block;
+    font-size: 18px;
+    color: var(--primary);
+    font-weight: bold;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-info-row);
+  }
+
+  .description-text {
+    word-break: break-word;
+    text-align: justify;
+    margin: 2px 0;
+    line-height: 1.7;
+    color: var(--color-info-content);
+  }
+
+  /* ---- Empty state ---- */
   .no-game-container {
     display: flex;
     justify-content: center;

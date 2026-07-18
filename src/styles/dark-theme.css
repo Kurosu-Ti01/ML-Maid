@@ -17,6 +17,14 @@ html.dark {
     --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.36);
     --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.50);
 
+    /* Glass */
+    --glass-bg: rgba(24, 24, 27, 0.55);
+    --glass-strong: rgba(24, 24, 27, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+    --ambient-opacity: 0.16;
+    --ambient-filter: blur(16px) saturate(1.05) brightness(1.13);
+
     /* Page background */
     --bg-page: #1e1e1e;
 
