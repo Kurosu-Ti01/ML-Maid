@@ -23,6 +23,15 @@
     --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.10);
     --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.14);
 
+    /* Glass (translucent panels tinted by the ambient art wash) */
+    --glass-bg: rgba(255, 255, 255, 0.66);
+    --glass-strong: rgba(255, 255, 255, 0.88);
+    --glass-border: rgba(255, 255, 255, 0.6);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
+    --glass-blur: 20px;
+    --ambient-opacity: 0.16;
+    --ambient-filter: blur(16px) saturate(1.05) brightness(1.13);
+
     /* Motion */
     --duration-fast: 150ms;
     --duration-base: 250ms;

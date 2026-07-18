@@ -13,8 +13,11 @@
       <div v-else>
         <div v-for="game in gameStore.gamesForList" :key="game.uuid" class="game-item"
           :class="{ selected: game.uuid === gameStore.currentGameUuid }" @click="selectGame(game.uuid)">
-          <img :src="getIconFin(game.iconImageDisplay)" class="game-icon" alt="icon" />
-          <span class="game-title">{{ game.title }}</span>
+          <img :src="getIconFin(game.iconImageDisplay)" class="game-thumb" alt="icon" />
+          <div class="game-meta">
+            <span class="game-title">{{ game.title }}</span>
+            <span v-if="gameSubtitle(game)" class="game-sub">{{ gameSubtitle(game) }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -36,6 +39,13 @@
     return imagePath || defaultIcon;
   }
 
+  // Secondary line under the title: prefer developer, fall back to last-played
+  function gameSubtitle(game: GameListItem): string {
+    if (game.developer && game.developer.length) return game.developer.join(' · ')
+    if (game.lastPlayedDisplay) return game.lastPlayedDisplay
+    return ''
+  }
+
   function selectGame(uuid: string) {
     gameStore.currentGameUuid = uuid;
     gameStore.loadGameDetail(uuid)
@@ -44,24 +54,28 @@
 
 <style scoped>
   .sidebar-container {
-    background: var(--sidebar-list-bg);
+    background: var(--glass-bg);
     height: 100%;
   }
 
   .sidebar-content {
     flex: 1;
-    padding: 16px 8px 16px 16px;
+    padding: 8px;
     box-sizing: border-box;
   }
 
   .game-item {
     display: flex;
     align-items: center;
+    gap: 10px;
     padding: 5px 8px;
-    border-bottom: 1px solid var(--game-item-border);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     cursor: pointer;
     transition: background-color var(--duration-fast) var(--ease-standard);
+  }
+
+  .game-item + .game-item {
+    margin-top: 1px;
   }
 
   .game-item:hover {
@@ -72,22 +86,42 @@
     background: var(--primary-tint-strong);
   }
 
-  .game-item.selected .game-title {
-    color: var(--primary);
-    font-weight: 600;
+  .game-thumb {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14);
   }
 
-  .game-icon {
-    width: 32px;
-    height: 32px;
-    margin-right: 12px;
-    object-fit: cover;
+  .game-meta {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+    gap: 1px;
   }
 
   .game-title {
-    font-size: 16px;
-    font-weight: 500;
+    font-size: 14px;
+    font-weight: 600;
     color: var(--color-info-content);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .game-item.selected .game-title {
+    color: var(--primary);
+  }
+
+  .game-sub {
+    font-size: 12px;
+    color: var(--color-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .loading-container,
