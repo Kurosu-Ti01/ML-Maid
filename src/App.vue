@@ -60,17 +60,20 @@
     return naiveDateLocaleMap[lang] || dateEnUS
   })
 
+  // Keep the color/font values in sync with the design tokens in src/styles/base.css.
+  // Literal values (not var()) are required: Naive UI runs color composition on them.
   const themeOverrides: GlobalThemeOverrides = {
     common: {
-      primaryColor: '#409eff',
-      primaryColorHover: '#66b1ff',
-      primaryColorPressed: '#3a8ee6',
-      primaryColorSuppl: '#409eff',
-      errorColor: '#ff6b6b',
-      errorColorHover: '#ff8787',
-      errorColorPressed: '#fa5252',
-      errorColorSuppl: '#ff6b6b'
-    }
+      primaryColor: '#4080ff',
+      primaryColorHover: '#6699ff',
+      primaryColorPressed: '#3268d9',
+      primaryColorSuppl: '#4080ff',
+      borderRadius: '6px',
+      borderRadiusSmall: '4px',
+      fontFamily: '"Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif'
+    },
+    Card: { borderRadius: '8px' },
+    Dialog: { borderRadius: '10px' }
   }
 
   onMounted(async () => {
@@ -90,11 +93,12 @@
   /* Global base styles */
   html,
   body {
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color var(--duration-base) var(--ease-standard), color var(--duration-base) var(--ease-standard);
   }
 
   #app {
-    height: 100vh;
+    /* The custom titlebar (index.html) occupies the top 50px of the window */
+    height: calc(100vh - 50px);
     width: 100vw;
     overflow: hidden;
   }

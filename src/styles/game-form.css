@@ -1,0 +1,435 @@
+/* Shared styles for GameAddForm.vue and GameEditForm.vue.
+   Plain global stylesheet (NOT scoped): Naive UI internals are targeted by
+   their real class names, namespaced under .game-form to avoid leaking. */
+
+.game-form {
+  height: 100%;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.game-form .tabs-container {
+  flex: 1;
+  background-color: transparent;
+  padding: 0 15px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  /* Crucial for flex scrolling */
+  overflow: hidden;
+}
+
+.game-form .tabs-container .n-tabs-nav {
+  flex-shrink: 0;
+}
+
+.game-form .tabs-container .n-tabs-pane-wrapper {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  /* Crucial */
+}
+
+.game-form .n-tab-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  /* Force constraint so the inner scrollbar works */
+  height: 100% !important;
+}
+
+.game-form .tab-scrollbar {
+  flex: 1;
+  height: 60%;
+  min-height: 0;
+}
+
+/* Force constraints on scrollbar container */
+.game-form .n-scrollbar-container {
+  height: 100% !important;
+}
+
+.game-form .n-scrollbar-content {
+  /* Breathing room below the last field */
+  padding-bottom: 24px;
+}
+
+.game-form .tab-form {
+  padding: 10px 30px;
+}
+
+.game-form .placeholder-content {
+  padding: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* Subtract the height of the tab header and bottom buttons */
+  min-height: calc(100vh - 160px);
+}
+
+/* Footer action bar (in-flow flex footer; the old position:fixed bar
+   escaped the modal and pinned to the main window) */
+.game-form .form-footer {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  border-top: 1px solid var(--fixed-bottom-border);
+}
+
+.game-form .form-footer .n-button {
+  min-width: 88px;
+}
+
+/* Tooltip info icons beside selects */
+.game-form .hint-icon {
+  color: var(--color-muted-dark);
+  cursor: help;
+  flex-shrink: 0;
+}
+
+/* Media tab specific styles */
+.game-form .media-container {
+  display: flex;
+  gap: 0;
+  padding: 0 10px;
+  margin-bottom: 30px;
+  height: 100%;
+}
+
+.game-form .media-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.game-form .media-section {
+  padding: 10px 20px;
+}
+
+.game-form .media-section.full-height {
+  /* Cover section takes full height of right column */
+  flex: 1;
+  min-height: 400px;
+}
+
+.game-form .section-header {
+  margin-bottom: 15px;
+}
+
+.game-form .section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--primary);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.game-form .title-underline {
+  height: 2px;
+  background-color: var(--primary);
+  border-radius: 1px;
+  margin-bottom: 15px;
+}
+
+.game-form .image-display-area {
+  border: 2px dashed var(--fixed-bottom-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--image-area-bg);
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-muted-dark);
+  font-size: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Icon area - square shape */
+.game-form .icon-area {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 15px auto;
+}
+
+/* Background area - landscape rectangle */
+.game-form .background-area {
+  width: 100%;
+  height: 200px;
+  max-width: 400px;
+  margin: 0 auto 15px auto;
+}
+
+/* Cover area - portrait rectangle */
+.game-form .cover-area {
+  width: 240px;
+  height: 320px;
+  margin: 0 auto 15px auto;
+}
+
+.game-form .image-display-area.has-image {
+  border: 0;
+  border-radius: 0;
+}
+
+.game-form .image-preview {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Previews - maintain aspect ratio */
+.game-form .icon-preview,
+.game-form .background-preview,
+.game-form .cover-preview {
+  object-fit: contain;
+}
+
+.game-form .placeholder-text {
+  text-align: center;
+  color: var(--color-muted-light);
+  font-style: italic;
+}
+
+.game-form .action-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.game-form .action-btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--fixed-bottom-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--action-btn-bg);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard);
+}
+
+.game-form .action-btn:hover {
+  border-color: var(--primary);
+  background-color: var(--primary-tint);
+}
+
+.game-form .btn-icon {
+  width: 20px;
+  height: 20px;
+  opacity: 0.7;
+}
+
+.game-form .action-btn:hover .btn-icon {
+  opacity: 1;
+}
+
+/* Actions tab specific styles */
+.game-form .actions-container {
+  max-width: 800px;
+}
+
+.game-form .actions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--fixed-bottom-border);
+}
+
+.game-form .actions-header h3 {
+  margin: 0;
+  color: var(--primary);
+  font-size: 18px;
+}
+
+.game-form .actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.game-form .action-item {
+  border: 1px solid var(--fixed-bottom-border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  background-color: var(--link-action-item-bg);
+  position: relative;
+}
+
+.game-form .action-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.game-form .action-index,
+.game-form .link-index {
+  background-color: var(--primary);
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.game-form .executable-path-input,
+.game-form .install-path-input {
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.game-form .no-actions {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.game-form .hint-text {
+  color: var(--color-muted-dark);
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+/* Links tab specific styles */
+.game-form .links-container {
+  max-width: 800px;
+  margin-bottom: 30px;
+}
+
+.game-form .links-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--fixed-bottom-border);
+}
+
+.game-form .links-header h3 {
+  margin: 0;
+  color: var(--primary);
+  font-size: 18px;
+}
+
+.game-form .links-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.game-form .link-item {
+  border: 1px solid var(--fixed-bottom-border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  background-color: var(--link-action-item-bg);
+  position: relative;
+}
+
+.game-form .link-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.game-form .no-links {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+/* Process names specific styles */
+.game-form .process-names-container {
+  width: 100%;
+}
+
+.game-form .process-names-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--fixed-bottom-border);
+}
+
+.game-form .process-names-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.game-form .process-name-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.game-form .no-process-names {
+  text-align: center;
+  padding: 20px;
+  background-color: var(--image-area-bg);
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--fixed-bottom-border);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .game-form {
+    height: 100vh;
+  }
+
+  .game-form .tab-form {
+    padding: 20px;
+  }
+
+  .game-form .tab-scrollbar {
+    /* Adjust height for small screens */
+    height: calc(100vh - 140px);
+  }
+
+  /* Media tab responsive */
+  .game-form .media-container {
+    flex-direction: column;
+    padding: 20px;
+    gap: 20px;
+  }
+
+  .game-form .media-section {
+    padding: 15px;
+  }
+
+  /* Icon area - smaller on mobile */
+  .game-form .icon-area {
+    width: 80px;
+    height: 80px;
+  }
+
+  /* Background area - smaller on mobile */
+  .game-form .background-area {
+    height: 90px;
+    max-width: 300px;
+  }
+
+  /* Cover area - smaller on mobile */
+  .game-form .cover-area {
+    width: 160px;
+    height: 240px;
+  }
+}

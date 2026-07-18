@@ -46,6 +46,11 @@
     flex-direction: column;
   }
 
+  /* Compound selector outweighs Naive's runtime-injected .n-card rule */
+  .game-form-card.n-card {
+    border-radius: var(--radius-lg);
+  }
+
   .game-form-card :deep(.n-card__content) {
     flex: 1;
     min-height: 0;

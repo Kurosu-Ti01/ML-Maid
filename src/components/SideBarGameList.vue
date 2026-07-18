@@ -11,7 +11,8 @@
         <span>{{ $t('sidebar.noGames') }}</span>
       </div>
       <div v-else>
-        <div v-for="game in gameStore.gamesForList" :key="game.uuid" class="game-item" @click="selectGame(game.uuid)">
+        <div v-for="game in gameStore.gamesForList" :key="game.uuid" class="game-item"
+          :class="{ selected: game.uuid === gameStore.currentGameUuid }" @click="selectGame(game.uuid)">
           <img :src="getIconFin(game.iconImageDisplay)" class="game-icon" alt="icon" />
           <span class="game-title">{{ game.title }}</span>
         </div>
@@ -43,7 +44,7 @@
 
 <style scoped>
   .sidebar-container {
-    background: var(--siderbar-list-bg);
+    background: var(--sidebar-list-bg);
     height: 100%;
   }
 
@@ -56,38 +57,37 @@
   .game-item {
     display: flex;
     align-items: center;
-    padding: 5px 0;
+    padding: 5px 8px;
     border-bottom: 1px solid var(--game-item-border);
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background-color var(--duration-fast) var(--ease-standard);
   }
 
   .game-item:hover {
-    background: var(--game-item-hover-bg);
-    border-radius: 4px;
+    background: var(--primary-tint);
+  }
+
+  .game-item.selected {
+    background: var(--primary-tint-strong);
+  }
+
+  .game-item.selected .game-title {
+    color: var(--primary);
+    font-weight: 600;
   }
 
   .game-icon {
     width: 32px;
     height: 32px;
     margin-right: 12px;
-    /* border-radius: 8px; */
     object-fit: cover;
-    /* box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06); */
   }
 
   .game-title {
     font-size: 16px;
     font-weight: 500;
     color: var(--color-info-content);
-  }
-
-  .sidebar-resizer {
-    width: 6px;
-    cursor: ew-resize;
-    background: linear-gradient(to left, #f7f8fa 60%, #e0e0e0 100%);
-    height: 100%;
-    user-select: none;
   }
 
   .loading-container,
@@ -97,16 +97,16 @@
     justify-content: center;
     align-items: center;
     padding: 20px;
-    color: #666;
+    color: var(--color-muted);
     font-size: 14px;
   }
 
   .error-container {
-    color: #d32f2f;
+    color: var(--color-danger);
   }
 
   .no-games-container {
-    color: #999;
+    color: var(--color-muted-dark);
     font-style: italic;
   }
 </style>

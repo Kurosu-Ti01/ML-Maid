@@ -1,29 +1,66 @@
 /* Base theme styles */
 :root {
-    /* Main Aera */
+    /* ===== Design tokens ===== */
+    /* Primary (brand blue; keep in sync with themeOverrides in App.vue) */
+    --primary: #4080ff;
+    --primary-hover: #6699ff;
+    --primary-pressed: #3268d9;
+    --primary-tint: rgba(64, 128, 255, 0.10);
+    --primary-tint-strong: rgba(64, 128, 255, 0.18);
+
+    /* Semantic (matches Naive UI's built-in palette) */
+    --color-success: #18a058;
+    --color-warning: #f0a020;
+    --color-danger: #d03050;
+
+    /* Radius */
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 10px;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.10);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.14);
+
+    /* Motion */
+    --duration-fast: 150ms;
+    --duration-base: 250ms;
+    --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+
+    /* Typography — Latin UI font only; CJK intentionally has no named font here
+       so it falls through to the OS locale-aware fallback (one consistent font:
+       YaHei on zh Windows, Yu Gothic on ja Windows). Naming both CJK fonts made
+       glyph coverage differences mix two styles within the same sentence. */
+    --font-sans: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+
+    /* Page background */
+    --bg-page: #ffffff;
+
+    /* ===== Component-level variables ===== */
+    /* Main Area */
     --color-title: #ffffff;
     --shadow-title-1: rgba(34, 34, 34, 0.40);
     --shadow-title-2: rgba(34, 34, 34, 0.28);
     --shadow-action-bar: 0 2px 4px rgba(0, 0, 0, 0.10);
     --bg-action-bar: rgba(255, 255, 255, 0.92);
     --color-playtime: #a174e9;
-    --color-link: #409eff;
-    --color-link-hover: #66b1ff;
+    --color-link: var(--primary);
+    --color-link-hover: var(--primary-hover);
     --shadow-info-table: 0 2px 12px 0 rgba(0, 0, 0, 0.12);
     --border-info-row: #ebeef5;
     --bg-info-label: #fafafa;
-    --color-info-label: #409eff;
+    --color-info-label: var(--primary);
     --bg-info-content: #ffffff;
     --color-info-content: #303133;
-    --button-info-content: #fefefe;
     --color-muted: #666;
     --color-muted-dark: #909399;
     --color-muted-light: #c0c4cc;
 
     /* SideBar */
-    --siderbar-nav-bg: #f2f6fc;
-    --siderbar-nav-border: #d6d9dc;
-    --siderbar-list-bg: #f7f8fa;
+    --sidebar-nav-bg: #f2f6fc;
+    --sidebar-nav-border: #d6d9dc;
+    --sidebar-list-bg: #f7f8fa;
     --game-item-hover-bg: #e9ecef;
     --game-item-border: #e0e0e0;
 
@@ -32,15 +69,16 @@
     --titlebar-border: #dcdfe6;
     --titlebar-button: #000000;
 
-    /* Sub Win TitleBar */
-    --titlebar-sub-bg: #FFF7E6;
-
     /* Add & Edit Form */
     --fixed-bottom-border: #e4e7ed;
     --image-area-bg: #f8f9fa;
-    --ation-btn-bg: #ffffff;
+    --action-btn-bg: #ffffff;
     --link-action-item-bg: #fafafa;
 
     /* Statistics */
     --stat-value-color: #2c3e50;
+}
+
+body {
+    font-family: var(--font-sans);
 }

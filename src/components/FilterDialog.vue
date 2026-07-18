@@ -123,7 +123,7 @@
     <template #action>
       <div class="dialog-footer">
         <n-button @click="resetFilters">{{ $t('filter.buttons.resetFilters') }}</n-button>
-        <div style="display: flex; gap: 8px;">
+        <div class="dialog-footer-right">
           <n-button @click="visible = false">{{ $t('filter.buttons.cancel') }}</n-button>
           <n-button type="primary" @click="save">
             {{ $t('filter.buttons.confirm') }}
@@ -455,14 +455,15 @@
 </script>
 
 <style scoped>
-  .filter-dialog {
-    border-radius: 8px;
-  }
-
   .dialog-footer {
     display: flex;
     justify-content: space-between;
     width: 100%;
+  }
+
+  .dialog-footer-right {
+    display: flex;
+    gap: 12px;
   }
 
   :deep(.n-dynamic-tags) {

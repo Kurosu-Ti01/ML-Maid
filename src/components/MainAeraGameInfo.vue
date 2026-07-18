@@ -32,20 +32,13 @@
           <!-- Action Button Container -->
           <div class="action-button-container">
             <div class="button-group">
-              <n-button type="primary" size="large" color="#4080ff"
-                style="font-weight: bold; font-size: 1.2em; margin: 10px 5px; padding: 0 40px;"
-                :disabled="isCurrentGamePlaying" @click="handlePlayGame"><span
-                  style="color: var(--button-info-content)">{{ isCurrentGamePlaying ? $t('gameInfo.playing') :
-                    $t('gameInfo.play')
-                  }}</span></n-button>
-              <n-button type="primary" size="large" color="#4080ff"
-                style="font-weight: bold; font-size: 1.2em; margin: 10px 5px;" @click="openEditWindow"><span
-                  style="color: var(--button-info-content)">{{ $t('gameInfo.edit') }}</span></n-button>
+              <n-button type="primary" size="large" class="action-bar-btn action-bar-btn--play"
+                :disabled="isCurrentGamePlaying" @click="handlePlayGame">{{ isCurrentGamePlaying ?
+                  $t('gameInfo.playing') : $t('gameInfo.play') }}</n-button>
+              <n-button type="primary" size="large" class="action-bar-btn" @click="openEditWindow">{{
+                $t('gameInfo.edit') }}</n-button>
               <n-dropdown trigger="click" :options="dropdownOptions" @select="handleMenuCommand">
-                <n-button type="primary" size="large" color="#4080ff"
-                  style="font-weight: bold; font-size: 1.2em; margin: 10px 5px;">
-                  <span style="color: var(--button-info-content)">...</span>
-                </n-button>
+                <n-button type="primary" size="large" class="action-bar-btn">...</n-button>
               </n-dropdown>
               <div class="game-playtime-text">
                 <div class="game-playtime">
@@ -74,7 +67,7 @@
               <div class="info-row">
                 <div class="info-label">{{ $t('gameInfo.workingPath') }}</div>
                 <div class="info-content">
-                  <n-icon size="18" style="margin-right: 8px; color: #666">
+                  <n-icon size="18" class="info-icon">
                     <FolderOutlined />
                   </n-icon>
                   <span class="clickable-path" @click="openworkingDir" :title="gameData.workingDir">
@@ -85,12 +78,11 @@
               <div class="info-row">
                 <div class="info-label">{{ $t('gameInfo.folderSize') }}</div>
                 <div class="info-content">
-                  <n-icon size="18" style="margin-right: 8px; color: #666">
+                  <n-icon size="18" class="info-icon">
                     <SdStorageOutlined />
                   </n-icon>
                   <span style="font-weight: bold;">{{ formatFileSize(gameData.folderSize).value }}</span>
-                  <span style="font-size: 0.8em; color: #888; margin-left: 4px;">{{
-                    formatFileSize(gameData.folderSize).unit }}</span>
+                  <span class="size-unit">{{ formatFileSize(gameData.folderSize).unit }}</span>
                 </div>
               </div>
               <div class="info-row">
@@ -98,16 +90,12 @@
                 <div class="info-content">
                   <div class="tags-flex-wrap">
                     <template v-if="Array.isArray(gameData.genre)">
-                      <n-tag v-for="(item, index) in gameData.genre" :key="index"
-                        :color="{ color: 'rgba(64, 128, 255, 0.1)', textColor: '#4080ff', borderColor: 'rgba(64, 128, 255, 0.2)' }"
-                        style="margin: 2px 6px 2px 0;">
+                      <n-tag v-for="(item, index) in gameData.genre" :key="index" :color="tagColor">
                         {{ item }}
                       </n-tag>
                     </template>
                     <template v-else-if="gameData.genre">
-                      <n-tag
-                        :color="{ color: 'rgba(64, 128, 255, 0.1)', textColor: '#4080ff', borderColor: 'rgba(64, 128, 255, 0.2)' }"
-                        style="margin: 2px 6px 2px 0;">
+                      <n-tag :color="tagColor">
                         {{ gameData.genre }}
                       </n-tag>
                     </template>
@@ -119,16 +107,12 @@
                 <div class="info-content">
                   <div class="tags-flex-wrap">
                     <template v-if="Array.isArray(gameData.developer)">
-                      <n-tag v-for="(item, index) in gameData.developer" :key="index"
-                        :color="{ color: 'rgba(64, 128, 255, 0.1)', textColor: '#4080ff', borderColor: 'rgba(64, 128, 255, 0.2)' }"
-                        style="margin: 2px 6px 2px 0;">
+                      <n-tag v-for="(item, index) in gameData.developer" :key="index" :color="tagColor">
                         {{ item }}
                       </n-tag>
                     </template>
                     <template v-else-if="gameData.developer">
-                      <n-tag
-                        :color="{ color: 'rgba(64, 128, 255, 0.1)', textColor: '#4080ff', borderColor: 'rgba(64, 128, 255, 0.2)' }"
-                        style="margin: 2px 6px 2px 0;">
+                      <n-tag :color="tagColor">
                         {{ gameData.developer }}
                       </n-tag>
                     </template>
@@ -140,16 +124,12 @@
                 <div class="info-content">
                   <div class="tags-flex-wrap">
                     <template v-if="Array.isArray(gameData.publisher)">
-                      <n-tag v-for="(item, index) in gameData.publisher" :key="index"
-                        :color="{ color: 'rgba(64, 128, 255, 0.1)', textColor: '#4080ff', borderColor: 'rgba(64, 128, 255, 0.2)' }"
-                        style="margin: 2px 6px 2px 0;">
+                      <n-tag v-for="(item, index) in gameData.publisher" :key="index" :color="tagColor">
                         {{ item }}
                       </n-tag>
                     </template>
                     <template v-else-if="gameData.publisher">
-                      <n-tag
-                        :color="{ color: 'rgba(64, 128, 255, 0.1)', textColor: '#4080ff', borderColor: 'rgba(64, 128, 255, 0.2)' }"
-                        style="margin: 2px 6px 2px 0;">
+                      <n-tag :color="tagColor">
                         {{ gameData.publisher }}
                       </n-tag>
                     </template>
@@ -159,7 +139,7 @@
               <div class="info-row">
                 <div class="info-label">{{ $t('gameInfo.releaseDate') }}</div>
                 <div class="info-content">
-                  <n-icon size="18" style="margin-right: 8px; color: #666">
+                  <n-icon size="18" class="info-icon">
                     <CalendarTodayOutlined />
                   </n-icon>
                   {{ gameData.releaseDateDisplay }}
@@ -203,9 +183,7 @@
                 <div class="info-label-tags">{{ $t('gameInfo.tags') }}</div>
                 <div class="info-content-tags">
                   <div class="tags-flex-wrap">
-                    <n-tag
-                      :color="{ color: 'rgba(64, 128, 255, 0.1)', textColor: '#4080ff', borderColor: 'rgba(64, 128, 255, 0.2)' }"
-                      v-for="(tag, index) in gameData.tags" :key="index" style="margin: 2px 6px 2px 0;">
+                    <n-tag :color="tagColor" v-for="(tag, index) in gameData.tags" :key="index">
                       {{ tag }}
                     </n-tag>
                   </div>
@@ -216,8 +194,7 @@
           <div class="description-container">
             <n-card class="description-card">
               <template #header>
-                <span style="font-size: 1.5em; color: #409eff; font-weight: bold;">{{ $t('gameInfo.description')
-                }}</span>
+                <span class="description-title">{{ $t('gameInfo.description') }}</span>
               </template>
               <p v-for="(line, index) in gameData.description" :key="index" class="description-text">{{ line }}</p>
             </n-card>
@@ -256,6 +233,13 @@
   const playingGameUuids = ref(new Set<string>())
   const message = useMessage()
   const dialog = useDialog()
+
+  // Shared tint style for all metadata tags (CSS vars keep it theme-adaptive)
+  const tagColor = {
+    color: 'var(--primary-tint)',
+    textColor: 'var(--primary)',
+    borderColor: 'var(--primary-tint-strong)'
+  }
 
   // Whether the currently displayed game is playing
   const isCurrentGamePlaying = computed(() => {
@@ -368,13 +352,13 @@
     const is100Scale = num > 10
 
     if (is100Scale) {
-      if (num >= 80) return '#18a058' // Green
-      if (num >= 60) return '#f0a020' // Orange
-      return '#d11515' // Red
+      if (num >= 80) return 'var(--color-success)'
+      if (num >= 60) return 'var(--color-warning)'
+      return 'var(--color-danger)'
     } else {
-      if (num >= 8) return '#18a058'
-      if (num >= 6) return '#f0a020'
-      return '#d11515'
+      if (num >= 8) return 'var(--color-success)'
+      if (num >= 6) return 'var(--color-warning)'
+      return 'var(--color-danger)'
     }
   }
 
@@ -628,6 +612,16 @@
     margin-left: 10px;
   }
 
+  .action-bar-btn {
+    font-weight: bold;
+    font-size: 16px;
+    margin: 10px 5px;
+  }
+
+  .action-bar-btn--play {
+    padding: 0 40px;
+  }
+
   .game-playtime-text {
     width: auto;
     height: 100%;
@@ -644,6 +638,7 @@
     flex-direction: column;
     align-items: center;
     color: var(--color-playtime);
+    font-variant-numeric: tabular-nums;
   }
 
   .game-cover {
@@ -663,7 +658,7 @@
     width: 100%;
     height: auto;
     object-fit: cover;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     display: block;
     pointer-events: auto;
   }
@@ -708,25 +703,12 @@
     margin: 2px 0;
   }
 
-  .game-link {
-    color: var(--color-link);
-    text-decoration: none;
-    font-weight: 500;
-    cursor: pointer;
-    transition: color 0.3s ease;
-  }
-
-  .game-link:hover {
-    color: var(--color-link-hover);
-    text-decoration: underline;
-  }
-
   .clickable-path {
     color: var(--color-link);
     text-decoration: none;
     font-weight: 500;
     cursor: pointer;
-    transition: color 0.3s ease;
+    transition: color var(--duration-fast) var(--ease-standard);
   }
 
   .clickable-path:hover {
@@ -734,8 +716,25 @@
     text-decoration: underline;
   }
 
+  .info-icon {
+    margin-right: 8px;
+    color: var(--color-muted);
+  }
+
+  .size-unit {
+    font-size: 12px;
+    color: var(--color-muted);
+    margin-left: 4px;
+  }
+
+  .description-title {
+    font-size: 20px;
+    color: var(--primary);
+    font-weight: bold;
+  }
+
   .custom-info-table {
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     overflow: hidden;
     box-shadow: var(--shadow-info-table);
     margin: 10px 0 10px 10px;
@@ -756,7 +755,7 @@
     padding: 12px;
     background-color: var(--bg-info-label);
     border-right: 1px solid var(--border-info-row);
-    font: 1em;
+    font-size: 14px;
     font-weight: 600;
     color: var(--color-info-label);
     word-break: break-word;
@@ -783,7 +782,7 @@
   .info-label-tags {
     width: 100%;
     padding: 12px 12px 8px 12px;
-    font: 1em;
+    font-size: 14px;
     font-weight: 600;
     background-color: var(--bg-info-label);
     color: var(--color-info-label);

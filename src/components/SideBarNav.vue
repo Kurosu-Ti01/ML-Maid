@@ -71,17 +71,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 6px;
-    transition: background 0.2s;
+    border-radius: var(--radius-sm);
+    transition: background-color var(--duration-fast) var(--ease-standard),
+      color var(--duration-fast) var(--ease-standard);
   }
 
   .icon-btn:hover {
-    background: #72aaff;
+    background: var(--primary-tint);
+    color: var(--primary);
   }
 
   .icon-btn.active {
-    background: #409EFF;
+    background: var(--primary-tint-strong);
+    color: var(--primary);
   }
-
-
 </style>
