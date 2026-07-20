@@ -18,8 +18,8 @@ html.dark {
     --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.50);
 
     /* Glass */
-    --glass-bg: rgba(24, 24, 27, 0.55);
-    --glass-strong: rgba(24, 24, 27, 0.8);
+    --glass-bg: rgba(24, 24, 27, 0.45);
+    --glass-strong: rgba(24, 24, 27, 0.55);
     --glass-border: rgba(255, 255, 255, 0.08);
     --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
     --ambient-opacity: 0.16;

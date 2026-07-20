@@ -3,6 +3,11 @@
     <n-spin :show="isLoading" :description="$t('gameInfo.loading')">
       <div v-if="!isLoading && ((!gameStore.currentGameUuid) || (!gameData))" class="no-game-container">
         <div class="no-game-text">
+          <div class="no-game-icon-circle">
+            <n-icon size="46">
+              <SportsEsportsOutlined />
+            </n-icon>
+          </div>
           <p>{{ $t('gameInfo.noGameSelected') }}</p>
           <span class="no-game-hint">{{ $t('gameInfo.selectGameHint') }}</span>
         </div>
@@ -11,194 +16,200 @@
         <div class="detail-content">
           <!-- Background & Title Container-->
           <div class="background-title-container">
-          <div v-if="gameData.backgroundImageDisplay">
-            <img :src="gameData.backgroundImageDisplay" alt="Game Background" class="game-background" />
-          </div>
-          <div v-else>
-            <img :src="defaultBackground" alt="Default Background" class="game-background" />
-          </div>
-          <!-- Icon & Title Container -->
-          <div class="icon-title-container">
-            <div v-if="gameData.iconImageDisplay" class="game-icon-container">
-              <img :src="gameData.iconImageDisplay" alt="Game Icon" class="game-icon" />
+            <div v-if="gameData.backgroundImageDisplay">
+              <img :src="gameData.backgroundImageDisplay" alt="Game Background" class="game-background" />
             </div>
-            <div v-else class="game-icon-container">
-              <img :src="defaultIcon" alt="Default Icon" class="game-icon" />
+            <div v-else>
+              <img :src="defaultBackground" alt="Default Background" class="game-background" />
             </div>
-            <span class="game-title">{{ gameData.title }}</span>
-          </div>
-        </div>
-        <!-- Main Info & Actions Container  -->
-        <div class="main-info-action-container">
-          <!-- Action Button Container -->
-          <div class="action-button-container">
-            <div class="button-group">
-              <n-button type="primary" size="large" class="action-bar-btn action-bar-btn--play"
-                :disabled="isCurrentGamePlaying" @click="handlePlayGame">{{ isCurrentGamePlaying ?
-                  $t('gameInfo.playing') : $t('gameInfo.play') }}</n-button>
-              <n-button type="primary" size="large" class="action-bar-btn" @click="openEditWindow">{{
-                $t('gameInfo.edit') }}</n-button>
-              <n-dropdown trigger="click" :options="dropdownOptions" @select="handleMenuCommand">
-                <n-button type="primary" size="large" class="action-bar-btn">...</n-button>
-              </n-dropdown>
-              <div class="game-playtime-text">
-                <div class="playtime-item">
-                  <span class="playtime-label">{{ $t('gameInfo.timePlayed') }}</span>
-                  <span class="playtime-value">{{ formatTimePlayed(gameData.timePlayed) }}</span>
-                </div>
-                <div class="playtime-item">
-                  <span class="playtime-label">{{ $t('gameInfo.lastPlayed') }}</span>
-                  <span class="playtime-value">{{ gameData.lastPlayedDisplay }}</span>
-                </div>
+            <!-- Icon & Title Container -->
+            <div class="icon-title-container">
+              <div v-if="gameData.iconImageDisplay" class="game-icon-container">
+                <img :src="gameData.iconImageDisplay" alt="Game Icon" class="game-icon" />
               </div>
+              <div v-else class="game-icon-container">
+                <img :src="defaultIcon" alt="Default Icon" class="game-icon" />
+              </div>
+              <span class="game-title">{{ gameData.title }}</span>
             </div>
           </div>
-          <!-- Cover Container -->
-          <div class="game-cover">
-            <div v-if="gameData.coverImageDisplay">
-              <img :src="gameData.coverImageDisplay" alt="Game Cover">
-            </div>
-            <div v-else></div>
-          </div>
-        </div>
-        <!-- Detail Info & Description container -->
-        <div class="info-row-container">
-          <div class="detail-info-container">
-            <div class="custom-info-table">
-              <div class="info-row">
-                <div class="info-label">{{ $t('gameInfo.workingPath') }}</div>
-                <div class="info-content">
-                  <n-icon size="18" class="info-icon">
-                    <FolderOutlined />
-                  </n-icon>
-                  <span class="clickable-path" @click="openworkingDir" :title="gameData.workingDir">
-                    {{ gameData.workingDir }}
-                  </span>
-                </div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">{{ $t('gameInfo.folderSize') }}</div>
-                <div class="info-content">
-                  <n-icon size="18" class="info-icon">
-                    <SdStorageOutlined />
-                  </n-icon>
-                  <span style="font-weight: bold;">{{ formatFileSize(gameData.folderSize).value }}</span>
-                  <span class="size-unit">{{ formatFileSize(gameData.folderSize).unit }}</span>
-                </div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">{{ $t('gameInfo.genre') }}</div>
-                <div class="info-content">
-                  <div class="tags-flex-wrap">
-                    <template v-if="Array.isArray(gameData.genre)">
-                      <n-tag v-for="(item, index) in gameData.genre" :key="index" :color="tagColor">
-                        {{ item }}
-                      </n-tag>
-                    </template>
-                    <template v-else-if="gameData.genre">
-                      <n-tag :color="tagColor">
-                        {{ gameData.genre }}
-                      </n-tag>
-                    </template>
+          <!-- Main Info & Actions Container  -->
+          <div class="main-info-action-container">
+            <!-- Action Button Container -->
+            <div class="action-button-container">
+              <div class="button-group">
+                <n-button type="primary" size="large" class="action-bar-btn action-bar-btn--play"
+                  :disabled="isCurrentGamePlaying" @click="handlePlayGame">{{ isCurrentGamePlaying ?
+                    $t('gameInfo.playing') : $t('gameInfo.play') }}</n-button>
+                <n-button type="primary" size="large" class="action-bar-btn" @click="openEditWindow">{{
+                  $t('gameInfo.edit') }}</n-button>
+                <n-dropdown trigger="click" :options="dropdownOptions" @select="handleMenuCommand">
+                  <n-button type="primary" size="large" class="action-bar-btn">...</n-button>
+                </n-dropdown>
+                <div class="game-playtime-text">
+                  <div class="playtime-item">
+                    <span class="playtime-label">{{ $t('gameInfo.timePlayed') }}</span>
+                    <span class="playtime-value">{{ formatTimePlayed(gameData.timePlayed) }}</span>
                   </div>
-                </div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">{{ $t('gameInfo.developer') }}</div>
-                <div class="info-content">
-                  <div class="tags-flex-wrap">
-                    <template v-if="Array.isArray(gameData.developer)">
-                      <n-tag v-for="(item, index) in gameData.developer" :key="index" :color="tagColor">
-                        {{ item }}
-                      </n-tag>
-                    </template>
-                    <template v-else-if="gameData.developer">
-                      <n-tag :color="tagColor">
-                        {{ gameData.developer }}
-                      </n-tag>
-                    </template>
-                  </div>
-                </div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">{{ $t('gameInfo.publisher') }}</div>
-                <div class="info-content">
-                  <div class="tags-flex-wrap">
-                    <template v-if="Array.isArray(gameData.publisher)">
-                      <n-tag v-for="(item, index) in gameData.publisher" :key="index" :color="tagColor">
-                        {{ item }}
-                      </n-tag>
-                    </template>
-                    <template v-else-if="gameData.publisher">
-                      <n-tag :color="tagColor">
-                        {{ gameData.publisher }}
-                      </n-tag>
-                    </template>
-                  </div>
-                </div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">{{ $t('gameInfo.releaseDate') }}</div>
-                <div class="info-content">
-                  <n-icon size="18" class="info-icon">
-                    <CalendarTodayOutlined />
-                  </n-icon>
-                  {{ gameData.releaseDateDisplay }}
-                </div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">{{ $t('gameInfo.communityScore') }}</div>
-                <div class="info-content">
-                  <span :style="{ color: getScoreColor(gameData.communityScore), fontWeight: 'bold' }">
-                    {{ gameData.communityScore }}
-                  </span>
-                </div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">{{ $t('gameInfo.userScore') }}</div>
-                <div class="info-content">
-                  <span :style="{ color: getScoreColor(gameData.personalScore), fontWeight: 'bold' }">
-                    {{ gameData.personalScore }}
-                  </span>
-                </div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">{{ $t('gameInfo.links') }}</div>
-                <div class="info-content" style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
-                  <n-tooltip trigger="hover" v-for="(link, index) in gameData.links" :key="index">
-                    <template #trigger>
-                      <n-button size="tiny" secondary type="primary" @click="openExternalLink(link.url)">
-                        <template #icon>
-                          <n-icon>
-                            <OpenInNewOutlined />
-                          </n-icon>
-                        </template>
-                        {{ link.name }}
-                      </n-button>
-                    </template>
-                    {{ link.url }}
-                  </n-tooltip>
-                </div>
-              </div>
-              <div class="info-row-tags">
-                <div class="info-label-tags">{{ $t('gameInfo.tags') }}</div>
-                <div class="info-content-tags">
-                  <div class="tags-flex-wrap">
-                    <n-tag :color="tagColor" v-for="(tag, index) in gameData.tags" :key="index">
-                      {{ tag }}
-                    </n-tag>
+                  <div class="playtime-item">
+                    <span class="playtime-label">{{ $t('gameInfo.lastPlayed') }}</span>
+                    <span class="playtime-value">{{ gameData.lastPlayedDisplay }}</span>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div class="description-container">
-            <div class="description-card">
-              <div class="description-title">{{ $t('gameInfo.description') }}</div>
-              <p v-for="(line, index) in gameData.description" :key="index" class="description-text">{{ line }}</p>
+            <!-- Cover Container -->
+            <div class="game-cover">
+              <div v-if="gameData.coverImageDisplay">
+                <img :src="gameData.coverImageDisplay" alt="Game Cover">
+              </div>
+              <div v-else></div>
             </div>
           </div>
-        </div>
+          <!-- Detail Info & Description container -->
+          <div class="info-row-container">
+            <div class="detail-info-container">
+              <div class="custom-info-table">
+                <div class="info-row">
+                  <div class="info-label">{{ $t('gameInfo.workingPath') }}</div>
+                  <div class="info-content">
+                    <n-icon size="18" class="info-icon">
+                      <FolderOutlined />
+                    </n-icon>
+                    <n-tooltip trigger="hover">
+                      <template #trigger>
+                        <span class="clickable-path" @click="openworkingDir">
+                          {{ gameData.workingDir }}
+                        </span>
+                      </template>
+                      {{ gameData.workingDir }}
+                    </n-tooltip>
+                  </div>
+                </div>
+                <div class="info-row">
+                  <div class="info-label">{{ $t('gameInfo.folderSize') }}</div>
+                  <div class="info-content">
+                    <n-icon size="18" class="info-icon">
+                      <SdStorageOutlined />
+                    </n-icon>
+                    <span style="font-weight: bold;">{{ formatFileSize(gameData.folderSize).value }}</span>
+                    <span class="size-unit">{{ formatFileSize(gameData.folderSize).unit }}</span>
+                  </div>
+                </div>
+                <div class="info-row">
+                  <div class="info-label">{{ $t('gameInfo.genre') }}</div>
+                  <div class="info-content">
+                    <div class="tags-flex-wrap">
+                      <template v-if="Array.isArray(gameData.genre)">
+                        <n-tag v-for="(item, index) in gameData.genre" :key="index" :color="tagColor">
+                          {{ item }}
+                        </n-tag>
+                      </template>
+                      <template v-else-if="gameData.genre">
+                        <n-tag :color="tagColor">
+                          {{ gameData.genre }}
+                        </n-tag>
+                      </template>
+                    </div>
+                  </div>
+                </div>
+                <div class="info-row">
+                  <div class="info-label">{{ $t('gameInfo.developer') }}</div>
+                  <div class="info-content">
+                    <div class="tags-flex-wrap">
+                      <template v-if="Array.isArray(gameData.developer)">
+                        <n-tag v-for="(item, index) in gameData.developer" :key="index" :color="tagColor">
+                          {{ item }}
+                        </n-tag>
+                      </template>
+                      <template v-else-if="gameData.developer">
+                        <n-tag :color="tagColor">
+                          {{ gameData.developer }}
+                        </n-tag>
+                      </template>
+                    </div>
+                  </div>
+                </div>
+                <div class="info-row">
+                  <div class="info-label">{{ $t('gameInfo.publisher') }}</div>
+                  <div class="info-content">
+                    <div class="tags-flex-wrap">
+                      <template v-if="Array.isArray(gameData.publisher)">
+                        <n-tag v-for="(item, index) in gameData.publisher" :key="index" :color="tagColor">
+                          {{ item }}
+                        </n-tag>
+                      </template>
+                      <template v-else-if="gameData.publisher">
+                        <n-tag :color="tagColor">
+                          {{ gameData.publisher }}
+                        </n-tag>
+                      </template>
+                    </div>
+                  </div>
+                </div>
+                <div class="info-row">
+                  <div class="info-label">{{ $t('gameInfo.releaseDate') }}</div>
+                  <div class="info-content">
+                    <n-icon size="18" class="info-icon">
+                      <CalendarTodayOutlined />
+                    </n-icon>
+                    {{ gameData.releaseDateDisplay }}
+                  </div>
+                </div>
+                <div class="info-row">
+                  <div class="info-label">{{ $t('gameInfo.communityScore') }}</div>
+                  <div class="info-content">
+                    <span :style="{ color: getScoreColor(gameData.communityScore), fontWeight: 'bold' }">
+                      {{ gameData.communityScore }}
+                    </span>
+                  </div>
+                </div>
+                <div class="info-row">
+                  <div class="info-label">{{ $t('gameInfo.userScore') }}</div>
+                  <div class="info-content">
+                    <span :style="{ color: getScoreColor(gameData.personalScore), fontWeight: 'bold' }">
+                      {{ gameData.personalScore }}
+                    </span>
+                  </div>
+                </div>
+                <div class="info-row">
+                  <div class="info-label">{{ $t('gameInfo.links') }}</div>
+                  <div class="info-content" style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+                    <n-tooltip trigger="hover" v-for="(link, index) in gameData.links" :key="index">
+                      <template #trigger>
+                        <n-button size="tiny" secondary type="primary" @click="openExternalLink(link.url)">
+                          <template #icon>
+                            <n-icon>
+                              <OpenInNewOutlined />
+                            </n-icon>
+                          </template>
+                          {{ link.name }}
+                        </n-button>
+                      </template>
+                      {{ link.url }}
+                    </n-tooltip>
+                  </div>
+                </div>
+                <div class="info-row-tags">
+                  <div class="info-label-tags">{{ $t('gameInfo.tags') }}</div>
+                  <div class="info-content-tags">
+                    <div class="tags-flex-wrap">
+                      <n-tag :color="tagColor" v-for="(tag, index) in gameData.tags" :key="index">
+                        {{ tag }}
+                      </n-tag>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="description-container">
+              <div class="description-card" @click="handleDescriptionClick">
+                <div class="description-title">{{ $t('gameInfo.description') }}</div>
+                <!-- Lines are sanitized (whitelist) before v-html, see sanitizeHtml -->
+                <p v-for="(line, index) in descriptionHtml" :key="index" class="description-text" v-html="line"></p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </n-spin>
@@ -214,10 +225,11 @@
   import { useMessage, useDialog } from 'naive-ui'
   import type { DropdownOption } from 'naive-ui'
   import { NIcon } from 'naive-ui'
-  import { DeleteOutlined, FolderOutlined, LinkOutlined, InfoOutlined, DownloadOutlined, SdStorageOutlined, CalendarTodayOutlined, OpenInNewOutlined } from '@vicons/material'
+  import { DeleteOutlined, FolderOutlined, LinkOutlined, InfoOutlined, DownloadOutlined, SdStorageOutlined, CalendarTodayOutlined, OpenInNewOutlined, SportsEsportsOutlined } from '@vicons/material'
   import defaultBackground from '/default/ML-Maid-Background.png'
   import defaultIcon from '/default/ML-Maid-Icon-W.png'
   import { useI18n } from 'vue-i18n'
+  import { sanitizeHtml } from '@/utils/sanitizeHtml'
 
   const { t } = useI18n()
 
@@ -245,6 +257,23 @@
   const isCurrentGamePlaying = computed(() => {
     return currentGameUuid.value ? playingGameUuids.value.has(currentGameUuid.value) : false
   })
+
+  // Description lines support simple HTML styling; sanitize before v-html
+  const descriptionHtml = computed(() =>
+    (gameData.value?.description ?? []).map(line => sanitizeHtml(line))
+  )
+
+  // Delegate clicks on <a> inside the description to the system browser
+  // (a plain anchor click would navigate the whole webview away from the app)
+  function handleDescriptionClick(event: MouseEvent) {
+    const anchor = (event.target as HTMLElement | null)?.closest('a')
+    if (!anchor) return
+    event.preventDefault()
+    const href = anchor.getAttribute('href')
+    if (href && /^https?:\/\//i.test(href)) {
+      openExternalLink(href)
+    }
+  }
 
   // Listen for game-stopped events to reset playing state
   let unsubscribeGameStopped: (() => void) | null = null
@@ -552,7 +581,7 @@
   .background-title-container {
     position: relative;
     width: 100%;
-    height: 52vh;
+    height: 56vh;
     min-height: 320px;
     overflow: hidden;
   }
@@ -638,6 +667,7 @@
   }
 
   .action-bar-btn {
+    color: #fff;
     font-weight: bold;
     font-size: 15px;
     margin: 4px 5px;
@@ -736,8 +766,8 @@
   }
 
   .info-label {
-    width: 92px;
-    min-width: 92px;
+    width: 66px;
+    min-width: 66px;
     padding: 11px 14px;
     font-size: 12px;
     font-weight: 600;
@@ -848,19 +878,91 @@
     color: var(--color-info-content);
   }
 
+  /* ---- Rich text inside descriptions (injected via v-html, needs :deep) ---- */
+  .description-text :deep(a) {
+    color: var(--color-link);
+    text-decoration: none;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .description-text :deep(a:hover) {
+    color: var(--color-link-hover);
+    text-decoration: underline;
+  }
+
+  .description-text :deep(code) {
+    padding: 1px 5px;
+    border-radius: var(--radius-sm);
+    background: var(--primary-tint);
+    font-size: 0.9em;
+  }
+
+  .description-text :deep(blockquote) {
+    margin: 4px 0;
+    padding: 2px 12px;
+    border-left: 3px solid var(--primary-tint-strong);
+    color: var(--color-muted);
+  }
+
+  .description-text :deep(ul),
+  .description-text :deep(ol) {
+    margin: 4px 0;
+    padding-left: 22px;
+  }
+
+  .description-text :deep(h1),
+  .description-text :deep(h2),
+  .description-text :deep(h3),
+  .description-text :deep(h4),
+  .description-text :deep(h5),
+  .description-text :deep(h6) {
+    margin: 8px 0 4px;
+    line-height: 1.4;
+  }
+
+  .description-text :deep(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-sm);
+  }
+
+  .description-text :deep(hr) {
+    border: none;
+    border-top: 1px solid var(--border-info-row);
+    margin: 8px 0;
+  }
+
   /* ---- Empty state ---- */
   .no-game-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 300px;
+    height: calc(100vh - 50px);
     color: var(--color-muted);
     font-size: 16px;
+    user-select: none;
+    cursor: default;
   }
 
   .no-game-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     text-align: center;
     opacity: 0.7;
+  }
+
+  .no-game-icon-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 96px;
+    height: 96px;
+    margin-bottom: 18px;
+    border-radius: 50%;
+    background: var(--primary-tint);
+    color: var(--color-muted);
   }
 
   .no-game-text p {

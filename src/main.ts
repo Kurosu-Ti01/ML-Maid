@@ -57,6 +57,75 @@ async function applyTitlebarWindowControls(titlebar: HTMLElement) {
   titlebar.appendChild(controls)
 }
 
+// ---- Titlebar filter button ----
+// The button reflects both the saved filters (settings) and the live search
+// box; it re-renders in place so typing in the search box never rebuilds
+// (and un-focuses) the titlebar.
+let currentSearchQuery = ''
+let titlebarFiltering: Settings['filtering'] | null = null
+let titlebarFilterButton: HTMLButtonElement | null = null
+
+// icons/FilterAltOutlined.svg
+const FILTER_ICON = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"><path d="M7 6h10l-5.01 6.3L7 6zm-2.75-.39C6.27 8.2 10 13 10 13v6c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-6s3.72-4.8 5.74-7.39A.998.998 0 0 0 18.95 4H5.04c-.83 0-1.3.95-.79 1.61z" fill="currentColor"></path></svg>`
+// icons/FilterAltOffOutlined.svg
+const FILTER_OFF_ICON = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"><path d="M16.95 6l-3.57 4.55l1.43 1.43c1.03-1.31 4.98-6.37 4.98-6.37A.998.998 0 0 0 19 4H6.83l2 2h8.12zM2.81 2.81L1.39 4.22L10 13v6c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-2.17l5.78 5.78l1.41-1.41L2.81 2.81z" fill="currentColor"></path></svg>`
+// icons/CloseOutlined.svg
+const CLEAR_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41z" fill="currentColor"></path></svg>`
+
+function escapeHtml(text: string): string {
+  return text.replace(/[&<>"']/g, ch => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch] as string
+  ))
+}
+
+// Re-render the filter button from the cached filtering state + search query
+function renderFilterButton() {
+  const btn = titlebarFilterButton
+  if (!btn) return
+
+  // One tooltip line per active filter category (plus the search query)
+  const active: { label: string; values: string }[] = []
+  const f = titlebarFiltering
+  if (f?.genres?.length) active.push({ label: t('gameForm.fields.genre'), values: f.genres.join(', ') })
+  if (f?.developers?.length) active.push({ label: t('gameForm.fields.developer'), values: f.developers.join(', ') })
+  if (f?.publishers?.length) active.push({ label: t('gameForm.fields.publisher'), values: f.publishers.join(', ') })
+  if (f?.tags?.length) active.push({ label: t('gameForm.fields.tags'), values: f.tags.join(', ') })
+  const search = currentSearchQuery.trim()
+  if (search) active.push({ label: t('titlebar.search'), values: search })
+
+  if (active.length === 0) {
+    btn.className = 'titlebar-button'
+    btn.title = t('titlebar.filter')
+    btn.innerHTML = FILTER_ICON
+    return
+  }
+
+  btn.className = 'titlebar-button titlebar-button-active'
+  btn.removeAttribute('title') // replaced by the custom hover tooltip
+  const tooltipLines = active
+    .map(item => `<div class="filter-tooltip-line"><span class="filter-tooltip-label">${escapeHtml(item.label)}</span>${escapeHtml(item.values)}</div>`)
+    .join('')
+  btn.innerHTML = `
+    ${FILTER_OFF_ICON}
+    <span class="filter-badge">${escapeHtml(t('titlebar.activeFiltersLabel', { count: active.length }))}</span>
+    <span class="filter-clear-btn" role="button" title="${escapeHtml(t('titlebar.clearFilters'))}">${CLEAR_ICON}</span>
+    <div class="filter-tooltip">${tooltipLines}</div>
+  `
+
+  // The embedded ✕ clears everything instead of opening the dialog
+  btn.querySelector('.filter-clear-btn')?.addEventListener('click', (e) => {
+    e.stopPropagation()
+    // Clear the search box locally (programmatic .value changes fire no event)
+    currentSearchQuery = ''
+    const input = document.querySelector<HTMLInputElement>('.titlebar-search-input')
+    if (input) input.value = ''
+    window.dispatchEvent(new CustomEvent('search-games', { detail: '' }))
+    // Ask the app to wipe the saved filters; App.vue saves settings and then
+    // fires 'filters-updated', which rebuilds this titlebar in inactive state
+    window.dispatchEvent(new CustomEvent('clear-filters'))
+  })
+}
+
 // initialize the title bar based on the current route
 async function initTitlebar() {
   const titlebar = document.getElementById('titlebar')
@@ -103,42 +172,22 @@ async function initTitlebar() {
         }
         buttonsContainer.appendChild(addGameButton)
 
-        // Check if filters are active
-        let activeFilterCount = 0
+        // Cache the saved filtering state for the filter button + its tooltip
         try {
           const settings = await api.getSettings()
-          if (settings?.filtering) {
-            const { genres, developers, publishers, tags } = settings.filtering
-            if (genres?.length > 0) activeFilterCount++
-            if (developers?.length > 0) activeFilterCount++
-            if (publishers?.length > 0) activeFilterCount++
-            if (tags?.length > 0) activeFilterCount++
-          }
+          titlebarFiltering = settings?.filtering ?? null
         } catch (error) {
           console.error('Failed to get settings for filter status:', error)
+          titlebarFiltering = null
         }
 
-        // Add Filter button with dynamic state
+        // Add Filter button (click opens the dialog; the embedded ✕ clears)
         const filterButton = document.createElement('button')
-        filterButton.className = activeFilterCount > 0 ? 'titlebar-button titlebar-button-active' : 'titlebar-button'
-        filterButton.title = activeFilterCount > 0 ? t('titlebar.activeFilters', { count: activeFilterCount }) : t('titlebar.filter')
-
-        if (activeFilterCount > 0) {
-          // icons/FilterAltOffOutlined.svg
-          filterButton.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"><path d="M16.95 6l-3.57 4.55l1.43 1.43c1.03-1.31 4.98-6.37 4.98-6.37A.998.998 0 0 0 19 4H6.83l2 2h8.12zM2.81 2.81L1.39 4.22L10 13v6c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-2.17l5.78 5.78l1.41-1.41L2.81 2.81z" fill="currentColor"></path></svg>
-            <span class="filter-badge">${t('titlebar.activeFiltersLabel', { count: activeFilterCount })}</span>
-          `
-        } else {
-          // icons/FilterAltOutlined.svg
-          filterButton.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"><path d="M7 6h10l-5.01 6.3L7 6zm-2.75-.39C6.27 8.2 10 13 10 13v6c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-6s3.72-4.8 5.74-7.39A.998.998 0 0 0 18.95 4H5.04c-.83 0-1.3.95-.79 1.61z" fill="currentColor"></path></svg>
-          `
-        }
-
         filterButton.onclick = () => {
           window.dispatchEvent(new CustomEvent('open-filter-dialog'))
         }
+        titlebarFilterButton = filterButton
+        renderFilterButton()
         buttonsContainer.appendChild(filterButton)
 
         // Add Search box
@@ -156,11 +205,15 @@ async function initTitlebar() {
         searchInput.type = 'text'
         searchInput.className = 'titlebar-search-input'
         searchInput.placeholder = t('titlebar.searchPlaceholder')
+        // Titlebar rebuilds (e.g. 'filters-updated') must not wipe the query
+        searchInput.value = currentSearchQuery
 
         // Dispatch search event when input changes
         searchInput.addEventListener('input', (e) => {
           const query = (e.target as HTMLInputElement).value
+          currentSearchQuery = query
           window.dispatchEvent(new CustomEvent('search-games', { detail: query }))
+          renderFilterButton() // an active search lights the filter button too
         })
 
         searchContainer.appendChild(searchIcon)
@@ -177,6 +230,7 @@ async function initTitlebar() {
         // fallback for other routes
         titlebar.textContent = 'ML-Maid'
         titlebar.className = 'titlebar main-titlebar'
+        titlebarFilterButton = null
         break
     }
 

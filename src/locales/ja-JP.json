@@ -5,8 +5,9 @@
   "titlebar": {
     "add": "追加",
     "filter": "フィルター",
-    "activeFilters": "{count} 個のフィルターが有効",
     "activeFiltersLabel": "有効なフィルター: {count}",
+    "clearFilters": "フィルターと検索をクリア",
+    "search": "検索",
     "searchPlaceholder": "ゲームを検索...",
     "editGame": "ゲームを編集",
     "addGame": "ゲームを追加"
@@ -14,7 +15,10 @@
   "sidebar": {
     "loadingGames": "ゲームを読み込み中...",
     "error": "エラー: {message}",
-    "noGames": "ゲームがありません (x_x)"
+    "noGames": "まだゲームがありません",
+    "noGamesHint": "タイトルバーの + からゲームを追加しましょう",
+    "noMatchedGames": "条件に一致するゲームがありません",
+    "noMatchedGamesHint": "検索やフィルターを調整してみてください"
   },
   "gameInfo": {
     "loading": "ゲームデータを読み込み中...",
@@ -119,7 +123,7 @@
       "userScore": "ユーザースコア（0-100）",
       "selectTags": "タグを選択または作成（カンマ区切り）",
       "tags": "タグを選択または作成（カンマ区切り）",
-      "description": "各行が新しい段落になります",
+      "description": "各行が新しい段落になります（b、i、span などの簡単なHTMLタグに対応）",
       "uuid": "ゲームの一意識別子",
       "installPath": "ゲームのインストールパス",
       "installSize": "インストールサイズ（バイト）",
