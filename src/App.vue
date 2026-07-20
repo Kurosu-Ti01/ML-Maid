@@ -85,6 +85,21 @@
       const customEvent = e as CustomEvent
       gameStore.setSearchQuery(customEvent.detail || '')
     })
+
+    // Titlebar filter button '✕': wipe saved filters, keep every other setting
+    window.addEventListener('clear-filters', async () => {
+      const newSettings: Settings = JSON.parse(JSON.stringify(settingsStore.settings))
+      const f = newSettings.filtering
+      const hasFilters = !!f &&
+        (f.genres?.length || 0) + (f.developers?.length || 0) +
+        (f.publishers?.length || 0) + (f.tags?.length || 0) > 0
+      if (hasFilters) {
+        newSettings.filtering = { genres: [], developers: [], publishers: [], tags: [] }
+        await settingsStore.saveSettings(newSettings)
+      }
+      // Rebuild the titlebar so the filter button returns to inactive state
+      window.dispatchEvent(new CustomEvent('filters-updated'))
+    })
   })
 </script>
 

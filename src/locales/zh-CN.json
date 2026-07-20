@@ -5,8 +5,9 @@
   "titlebar": {
     "add": "添加",
     "filter": "筛选",
-    "activeFilters": "{count} 个筛选条件已激活",
     "activeFiltersLabel": "已激活筛选: {count}",
+    "clearFilters": "清除所有筛选与搜索",
+    "search": "搜索",
     "searchPlaceholder": "搜索游戏...",
     "editGame": "编辑游戏",
     "addGame": "添加游戏"
@@ -14,7 +15,10 @@
   "sidebar": {
     "loadingGames": "正在加载游戏列表...",
     "error": "错误: {message}",
-    "noGames": "这里没有游戏 (x_x)"
+    "noGames": "这里还没有游戏",
+    "noGamesHint": "点击标题栏的 + 添加游戏吧",
+    "noMatchedGames": "没有符合条件的游戏",
+    "noMatchedGamesHint": "试试调整搜索或筛选条件"
   },
   "gameInfo": {
     "loading": "正在加载游戏数据...",
@@ -119,7 +123,7 @@
       "userScore": "用户评分（0-100）",
       "selectTags": "选择或创建标签（逗号分隔）",
       "tags": "选择或创建标签（逗号分隔）",
-      "description": "每行为一个段落",
+      "description": "每行为一个段落，支持简单的 HTML 标签（b、i、span 等）",
       "uuid": "游戏的唯一标识符",
       "installPath": "游戏安装路径",
       "installSize": "安装大小（字节）",

@@ -5,8 +5,9 @@
   "titlebar": {
     "add": "Add",
     "filter": "Filter",
-    "activeFilters": "{count} active filter(s)",
     "activeFiltersLabel": "Active filters: {count}",
+    "clearFilters": "Clear all filters & search",
+    "search": "Search",
     "searchPlaceholder": "Search games...",
     "editGame": "Edit Game",
     "addGame": "Add Game"
@@ -14,7 +15,10 @@
   "sidebar": {
     "loadingGames": "Loading games...",
     "error": "Error: {message}",
-    "noGames": "No games here (x_x)"
+    "noGames": "No games yet",
+    "noGamesHint": "Click + in the titlebar to add one",
+    "noMatchedGames": "No matching games",
+    "noMatchedGamesHint": "Try adjusting the search or filters"
   },
   "gameInfo": {
     "loading": "Loading game data...",
@@ -119,7 +123,7 @@
       "userScore": "User score (0-100)",
       "selectTags": "Select or create tags (comma-separated)",
       "tags": "Select or create tags (comma-separated)",
-      "description": "Each line is a new paragraph",
+      "description": "Each line is a new paragraph; simple HTML tags (b, i, span, ...) are supported",
       "uuid": "Unique identifier for the game",
       "installPath": "Game installation path",
       "installSize": "Installation size in bytes",

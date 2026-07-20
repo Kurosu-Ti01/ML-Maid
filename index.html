@@ -124,6 +124,8 @@
       background: var(--primary-tint-strong, rgba(64, 128, 255, 0.18));
       width: auto;
       padding: 0 10px;
+      position: relative;
+      /* anchors the hover tooltip */
     }
 
     .filter-badge {
@@ -133,10 +135,78 @@
       white-space: nowrap;
     }
 
+    /* Small ✕ inside the active filter button: clears filters + search */
+    .filter-clear-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      margin-left: 2px;
+      border-radius: 50%;
+      color: var(--primary, #4080ff);
+      cursor: pointer;
+      transition: background-color var(--duration-fast, 150ms) var(--ease-standard, ease),
+        color var(--duration-fast, 150ms) var(--ease-standard, ease);
+    }
+
+    .filter-clear-btn:hover {
+      background: var(--primary, #4080ff);
+      color: #ffffff;
+    }
+
+    .titlebar-button .filter-clear-btn svg {
+      width: 12px;
+      height: 12px;
+      opacity: 1;
+    }
+
+    /* Hover tooltip listing the active filter categories, one per line */
+    .filter-tooltip {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      z-index: 1000;
+      max-width: 480px;
+      padding: 7px 12px;
+      border-radius: var(--radius-sm, 6px);
+      background: rgba(30, 30, 34, 0.92);
+      color: rgba(255, 255, 255, 0.92);
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: normal;
+      line-height: 1.8;
+      white-space: nowrap;
+      text-align: left;
+      pointer-events: none;
+      box-shadow: var(--shadow-md, 0 4px 16px rgba(0, 0, 0, 0.16));
+    }
+
+    .titlebar-button-active:hover .filter-tooltip {
+      display: block;
+    }
+
+    /* The ✕ explains itself via its own title — hide the summary over it */
+    .titlebar-button-active:has(.filter-clear-btn:hover) .filter-tooltip {
+      display: none;
+    }
+
+    .filter-tooltip-line {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .filter-tooltip-label {
+      margin-right: 8px;
+      font-weight: 600;
+      color: var(--primary-hover, #6699ff);
+    }
+
     .titlebar-search-container {
       display: flex;
       align-items: center;
-      margin-left: 10px;
+      margin-left: 15px;
       -webkit-app-region: no-drag;
       position: relative;
     }
@@ -156,7 +226,7 @@
     }
 
     .titlebar-search-input {
-      width: 300px;
+      width: 350px;
       height: 28px;
       padding: 4px 12px 4px 36px;
       font-size: 13px;

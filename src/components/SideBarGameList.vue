@@ -8,7 +8,15 @@
         <span>{{ $t('sidebar.error', { message: gameStore.error }) }}</span>
       </div>
       <div v-else-if="!gameStore.gamesForList || gameStore.gamesForList.length === 0" class="no-games-container">
-        <span>{{ $t('sidebar.noGames') }}</span>
+        <div class="empty-icon-circle">
+          <n-icon size="30">
+            <SearchOffOutlined v-if="isFilteredEmpty" />
+            <VideogameAssetOffOutlined v-else />
+          </n-icon>
+        </div>
+        <span class="empty-title">{{ isFilteredEmpty ? $t('sidebar.noMatchedGames') : $t('sidebar.noGames') }}</span>
+        <span class="empty-hint">{{ isFilteredEmpty ? $t('sidebar.noMatchedGamesHint') : $t('sidebar.noGamesHint')
+        }}</span>
       </div>
       <div v-else>
         <div v-for="game in gameStore.gamesForList" :key="game.uuid" class="game-item"
@@ -25,11 +33,16 @@
 </template>
 
 <script setup lang="ts" name="SideBarGameList">
-  import { NScrollbar } from 'naive-ui'
+  import { computed } from 'vue'
+  import { NScrollbar, NIcon } from 'naive-ui'
+  import { VideogameAssetOffOutlined, SearchOffOutlined } from '@vicons/material'
   import { useGameStore } from '@/stores/game'
   import defaultIcon from '/default/ML-Maid-Icon-W.png'
 
   const gameStore = useGameStore()
+
+  // Empty because of search/filters (library itself has games) vs truly empty
+  const isFilteredEmpty = computed(() => gameStore.gamesCount > 0)
 
   function getIconFin(imagePath: string) {
     if (!imagePath) {
@@ -54,7 +67,6 @@
 
 <style scoped>
   .sidebar-container {
-    background: var(--glass-bg);
     height: 100%;
   }
 
@@ -62,6 +74,7 @@
     flex: 1;
     padding: 8px;
     box-sizing: border-box;
+    background-color: var(--glass-strong);
   }
 
   .game-item {
@@ -74,7 +87,7 @@
     transition: background-color var(--duration-fast) var(--ease-standard);
   }
 
-  .game-item + .game-item {
+  .game-item+.game-item {
     margin-top: 1px;
   }
 
@@ -140,7 +153,35 @@
   }
 
   .no-games-container {
+    flex-direction: column;
+    gap: 4px;
+    padding: 44px 16px;
+    text-align: center;
     color: var(--color-muted-dark);
-    font-style: italic;
+    user-select: none;
+    cursor: default;
+  }
+
+  .empty-icon-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 8px;
+    border-radius: 50%;
+    background: var(--primary-tint);
+    color: var(--color-muted);
+  }
+
+  .empty-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-muted-dark);
+  }
+
+  .empty-hint {
+    font-size: 12px;
+    color: var(--color-muted-light);
   }
 </style>
