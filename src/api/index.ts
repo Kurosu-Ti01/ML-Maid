@@ -35,6 +35,17 @@ export interface ProcessGameImageParams {
   imageType: string
 }
 
+export interface CropGameImageParams {
+  sourcePath: string
+  gameUuid: string
+  imageType: 'background' | 'cover'
+  // Crop rect in natural-image pixels (integers)
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
 export interface ProcessGameImageResult {
   success: boolean
   tempPath?: string
@@ -82,6 +93,7 @@ export interface BackendApi {
 
   // images
   processGameImage(params: ProcessGameImageParams): Promise<ProcessGameImageResult>
+  cropGameImage(params: CropGameImageParams): Promise<ProcessGameImageResult>
   finalizeGameImages(gameUuid: string): Promise<{ success: boolean; movedFiles?: any[]; message?: string; error?: string }>
   cleanupTempImages(gameUuid: string): Promise<{ success: boolean; message?: string; error?: string }>
 

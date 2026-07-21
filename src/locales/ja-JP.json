@@ -156,7 +156,15 @@
       "noCover": "カバーが選択されていません",
       "selectFromPath": "パスから選択",
       "addFromUrl": "URLから追加",
-      "remove": "削除"
+      "remove": "削除",
+      "crop": "切り抜き"
+    },
+    "crop": {
+      "title": "画像を切り抜く",
+      "aspectRatio": "アスペクト比",
+      "displayRatio": "表示比率",
+      "free": "自由",
+      "apply": "適用"
     },
     "sections": {
       "gameLinks": "ゲームリンク",
@@ -205,6 +213,8 @@
       "failedProcessImage": "画像の処理に失敗しました",
       "imageApiUnavailable": "画像処理APIが利用できません",
       "imageRemoved": "{imageType}画像が削除されました",
+      "cropSuccess": "{imageType}画像を切り抜きました",
+      "cropFailed": "画像の切り抜きに失敗しました",
       "actionAdded": "アクションが追加されました",
       "actionRemoved": "アクションが削除されました",
       "executableUpdated": "実行可能パスが更新されました",

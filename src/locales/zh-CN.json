@@ -151,12 +151,20 @@
       "icon": "图标",
       "background": "背景",
       "cover": "封面",
-      "noIcon": "未选择图标",
-      "noBackground": "未选择背景",
-      "noCover": "未选择封面",
+      "noIcon": "仍未选择图标",
+      "noBackground": "仍未选择背景",
+      "noCover": "仍未选择封面",
       "selectFromPath": "从路径选择",
       "addFromUrl": "从 URL 添加",
-      "remove": "移除"
+      "remove": "移除",
+      "crop": "裁剪"
+    },
+    "crop": {
+      "title": "裁剪图片",
+      "aspectRatio": "宽高比",
+      "displayRatio": "显示比例",
+      "free": "自由",
+      "apply": "应用"
     },
     "sections": {
       "gameLinks": "游戏链接",
@@ -205,6 +213,8 @@
       "failedProcessImage": "处理图片失败",
       "imageApiUnavailable": "图片处理 API 不可用",
       "imageRemoved": "{imageType} 图片已移除",
+      "cropSuccess": "{imageType} 图片裁剪成功",
+      "cropFailed": "裁剪图片失败",
       "actionAdded": "动作已添加",
       "actionRemoved": "动作已移除",
       "executableUpdated": "可执行路径已更新",

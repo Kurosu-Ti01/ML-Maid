@@ -137,6 +137,7 @@ pub fn run() {
             game_manager::get_all_publishers,
             game_manager::get_all_tags,
             file_manager::process_game_image,
+            file_manager::crop_game_image,
             file_manager::finalize_game_images,
             file_manager::cleanup_temp_images,
             stats_manager::get_game_recent_daily_stats,
