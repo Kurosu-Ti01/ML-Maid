@@ -225,6 +225,16 @@
   background-color: var(--primary-tint);
 }
 
+.game-form .action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.game-form .action-btn:disabled:hover {
+  border-color: var(--fixed-bottom-border);
+  background-color: var(--action-btn-bg);
+}
+
 .game-form .btn-icon {
   width: 20px;
   height: 20px;

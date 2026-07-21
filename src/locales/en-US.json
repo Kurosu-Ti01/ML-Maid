@@ -156,7 +156,15 @@
       "noCover": "No cover selected",
       "selectFromPath": "Select from path",
       "addFromUrl": "Add from URL",
-      "remove": "Remove"
+      "remove": "Remove",
+      "crop": "Crop"
+    },
+    "crop": {
+      "title": "Crop Image",
+      "aspectRatio": "Aspect ratio",
+      "displayRatio": "Display ratio",
+      "free": "Free",
+      "apply": "Apply"
     },
     "sections": {
       "gameLinks": "Game Links",
@@ -205,6 +213,8 @@
       "failedProcessImage": "Failed to process image",
       "imageApiUnavailable": "Image processing API not available",
       "imageRemoved": "{imageType} image removed",
+      "cropSuccess": "{imageType} image cropped",
+      "cropFailed": "Failed to crop image",
       "actionAdded": "Action added",
       "actionRemoved": "Action removed",
       "executableUpdated": "Executable path updated",

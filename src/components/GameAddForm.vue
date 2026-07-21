@@ -243,6 +243,12 @@
                       <component :is="LinkOutlined" />
                     </n-icon>
                   </button>
+                  <button class="action-btn" :title="$t('gameForm.media.crop')" :disabled="!backgroundPreview"
+                    @click="openCropModal('background')">
+                    <n-icon size="20">
+                      <component :is="CropOutlined" />
+                    </n-icon>
+                  </button>
                   <button class="action-btn" :title="$t('gameForm.media.remove')" @click="removeImage('background')">
                     <n-icon size="20">
                       <component :is="DeleteOutlined" />
@@ -275,6 +281,12 @@
                   <button class="action-btn" :title="$t('gameForm.media.addFromUrl')">
                     <n-icon size="20">
                       <component :is="LinkOutlined" />
+                    </n-icon>
+                  </button>
+                  <button class="action-btn" :title="$t('gameForm.media.crop')" :disabled="!coverPreview"
+                    @click="openCropModal('cover')">
+                    <n-icon size="20">
+                      <component :is="CropOutlined" />
                     </n-icon>
                   </button>
                   <button class="action-btn" :title="$t('gameForm.media.remove')" @click="removeImage('cover')">
@@ -409,6 +421,10 @@
       <n-button quaternary @click="closeWindow">{{ $t('gameForm.buttons.cancel') }}</n-button>
       <n-button type="primary" @click="saveGame" :loading="saving">{{ $t('gameForm.buttons.save') }}</n-button>
     </div>
+
+    <!-- Crop dialog for background/cover images -->
+    <ImageCropperModal v-model:show="cropModalVisible" :image-url="cropImageUrl" :source-path="cropSourcePath"
+      :image-type="cropImageType" :game-uuid="gameForm.uuid" @cropped="onImageCropped" />
   </div>
 </template>
 
@@ -417,12 +433,14 @@
   import { useMessage } from 'naive-ui'
   import { NIcon } from 'naive-ui'
   import type { SelectOption } from 'naive-ui'
-  import { AddFilled, DeleteOutlined, InfoOutlined, FolderOpenOutlined, LinkOutlined } from '@vicons/material'
+  import { AddFilled, CropOutlined, DeleteOutlined, InfoOutlined, FolderOpenOutlined, LinkOutlined } from '@vicons/material'
   import { v4 as uuidv4 } from 'uuid'
   import { useGameStore } from '../stores/game'
   import { PROC_MON_MODE } from '../constants/procMonMode'
   import { useI18n } from 'vue-i18n'
   import { api } from '@/api'
+  import type { ProcessGameImageResult } from '@/api'
+  import ImageCropperModal from '@/components/ImageCropperModal.vue'
 
   const emit = defineEmits<{ close: [] }>()
 
@@ -508,6 +526,34 @@
   const backgroundPreview = ref('')
   const coverPreview = ref('')
 
+  // Crop modal state (background/cover only)
+  const cropModalVisible = ref(false)
+  const cropImageType = ref<'background' | 'cover'>('background')
+  const cropSourcePath = computed(() =>
+    cropImageType.value === 'background' ? gameForm.value.backgroundImage : gameForm.value.coverImage
+  )
+  const cropImageUrl = computed(() =>
+    cropImageType.value === 'background' ? backgroundPreview.value : coverPreview.value
+  )
+
+  function openCropModal(imageType: 'background' | 'cover') {
+    cropImageType.value = imageType
+    if (!cropSourcePath.value || !cropImageUrl.value) return
+    cropModalVisible.value = true
+  }
+
+  function onImageCropped(result: ProcessGameImageResult) {
+    if (!result.tempPath || !result.previewUrl) return
+    if (cropImageType.value === 'background') {
+      gameForm.value.backgroundImage = result.tempPath
+      backgroundPreview.value = result.previewUrl
+    } else {
+      gameForm.value.coverImage = result.tempPath
+      coverPreview.value = result.previewUrl
+    }
+    message.success(t('gameForm.messages.cropSuccess', { imageType: cropImageType.value }))
+  }
+
   // Refs for select components
   const genreSelectRef = ref()
   const developerSelectRef = ref()
@@ -552,12 +598,15 @@
             if (result.tempPath && result.previewUrl) {
               gameForm.value.backgroundImage = result.tempPath
               backgroundPreview.value = result.previewUrl
+              // Jump straight into cropping the fresh image
+              openCropModal('background')
             }
             break
           case 'cover':
             if (result.tempPath && result.previewUrl) {
               gameForm.value.coverImage = result.tempPath
               coverPreview.value = result.previewUrl
+              openCropModal('cover')
             }
             break
         }

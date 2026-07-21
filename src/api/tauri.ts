@@ -25,10 +25,12 @@ async function pickFile(filters?: { name: string; extensions: string[] }[], dire
 }
 
 // Convert a backend-returned absolute/temp image path into an asset URL the
-// webview can load; leave already-usable URLs untouched.
+// webview can load; leave already-usable URLs untouched. The cache-busting
+// query is needed because crop/replace reuse the same temp path, and both the
+// webview cache and Vue's same-string check would otherwise keep the old image.
 function toDisplayUrl(result: ProcessGameImageResult): ProcessGameImageResult {
   if (result.previewUrl && !result.previewUrl.includes('://')) {
-    result.previewUrl = convertFileSrc(result.previewUrl)
+    result.previewUrl = `${convertFileSrc(result.previewUrl)}?t=${Date.now()}`
   }
   return result
 }
@@ -48,19 +50,22 @@ function getAppDataPath(): Promise<string> {
   return appDataPathCache
 }
 
-function imageDisplayUrl(relPath: string | undefined, appDataPath: string): string {
+function imageDisplayUrl(relPath: string | undefined, appDataPath: string, bust = ''): string {
   if (!relPath) return ''
   if (relPath.includes('://')) return relPath
   const isAbsolute = /^[A-Za-z]:[\\/]/.test(relPath) || relPath.startsWith('/')
   const abs = isAbsolute ? relPath : `${appDataPath}/${relPath}`
-  return convertFileSrc(abs)
+  return `${convertFileSrc(abs)}${bust}`
 }
 
-async function enrichGameImages<T extends Partial<gameData>>(game: T): Promise<T> {
+async function enrichGameImages<T extends Partial<gameData>>(game: T, bustCache = false): Promise<T> {
   const base = await getAppDataPath()
-  game.iconImageDisplay = imageDisplayUrl(game.iconImage, base)
-  game.coverImageDisplay = imageDisplayUrl(game.coverImage, base)
-  game.backgroundImageDisplay = imageDisplayUrl(game.backgroundImage, base)
+  // Finalize overwrites library files in place (same path), so a changed game
+  // needs fresh URLs or <img> elements keep showing the old bitmap
+  const bust = bustCache ? `?t=${Date.now()}` : ''
+  game.iconImageDisplay = imageDisplayUrl(game.iconImage, base, bust)
+  game.coverImageDisplay = imageDisplayUrl(game.coverImage, base, bust)
+  game.backgroundImageDisplay = imageDisplayUrl(game.backgroundImage, base, bust)
   return game
 }
 
@@ -94,6 +99,7 @@ export const tauriApi: BackendApi = {
   openFolder: (folderPath) => openPath(folderPath),
 
   processGameImage: (params) => invoke<ProcessGameImageResult>('process_game_image', { params }).then(toDisplayUrl),
+  cropGameImage: (params) => invoke<ProcessGameImageResult>('crop_game_image', { params }).then(toDisplayUrl),
   finalizeGameImages: (gameUuid) => invoke('finalize_game_images', { gameUuid }),
   cleanupTempImages: (gameUuid) => invoke('cleanup_temp_images', { gameUuid }),
 
@@ -120,7 +126,7 @@ export const tauriApi: BackendApi = {
   onGameStoreChanged: (cb) => subscribe('game-store-changed', async (data) => {
     if (data?.game) {
       enrichGameDisplayFields(data.game)
-      await enrichGameImages(data.game)
+      await enrichGameImages(data.game, true)
     }
     cb(data)
   }),
