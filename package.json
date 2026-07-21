@@ -6,7 +6,7 @@
   "version": "0.5.0",
   "type": "module",
   "scripts": {
-    "dev": "tauri dev",
+    "dev": "tauri dev --config src-tauri/tauri.dev.conf.json",
     "dev:front": "vite",
     "build": "tauri build && node scripts/collect-artifacts.mjs",
     "build:front": "vue-tsc && vite build",
