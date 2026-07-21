@@ -51,6 +51,25 @@
     border-radius: var(--radius-lg);
   }
 
+  .game-form-card :deep(.n-card-header__main) {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: var(--primary);
+  }
+
+  .game-form-card :deep(.n-card-header__main)::before {
+    content: '';
+    width: 4px;
+    height: 1.1em;
+    border-radius: 2px;
+    background: linear-gradient(180deg, var(--primary-hover), var(--primary));
+    flex-shrink: 0;
+  }
+
   .game-form-card :deep(.n-card__content) {
     flex: 1;
     min-height: 0;

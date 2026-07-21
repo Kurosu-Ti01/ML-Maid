@@ -337,9 +337,14 @@
                 </div>
               </div>
 
-              <div v-else class="no-links">
-                <p>{{ $t('gameForm.empty.noLinks') }}</p>
-                <p class="hint-text">{{ $t('gameForm.empty.linksHint') }}</p>
+              <div v-else class="tab-empty-state">
+                <div class="tab-empty-icon">
+                  <n-icon :size="26">
+                    <LinkOutlined />
+                  </n-icon>
+                </div>
+                <p class="tab-empty-title">{{ $t('gameForm.empty.noLinks') }}</p>
+                <p class="tab-empty-hint">{{ $t('gameForm.empty.linksHint') }}</p>
               </div>
             </div>
           </n-form>
@@ -397,9 +402,14 @@
                 </div>
               </div>
 
-              <div v-else class="no-actions">
-                <n-empty :description="$t('gameForm.empty.noActions')" />
-                <p class="hint-text">{{ $t('gameForm.empty.actionsHint') }}</p>
+              <div v-else class="tab-empty-state">
+                <div class="tab-empty-icon">
+                  <n-icon :size="26">
+                    <BoltOutlined />
+                  </n-icon>
+                </div>
+                <p class="tab-empty-title">{{ $t('gameForm.empty.noActions') }}</p>
+                <p class="tab-empty-hint">{{ $t('gameForm.empty.actionsHint') }}</p>
               </div>
             </div>
           </n-form>
@@ -410,7 +420,15 @@
       <n-tab-pane name="script" :tab="$t('gameForm.tabs.script')">
         <n-scrollbar class="tab-scrollbar">
           <div class="placeholder-content">
-            <n-empty :description="$t('gameForm.empty.scriptComingSoon')" />
+            <div class="tab-empty-state">
+              <div class="tab-empty-icon">
+                <n-icon :size="26">
+                  <TerminalOutlined />
+                </n-icon>
+              </div>
+              <p class="tab-empty-title">{{ $t('gameForm.empty.scriptComingSoon') }}</p>
+              <p class="tab-empty-hint">{{ $t('gameForm.empty.scriptHint') }}</p>
+            </div>
           </div>
         </n-scrollbar>
       </n-tab-pane>
@@ -433,7 +451,7 @@
   import { useMessage } from 'naive-ui'
   import { NIcon } from 'naive-ui'
   import type { SelectOption } from 'naive-ui'
-  import { AddFilled, CropOutlined, DeleteOutlined, InfoOutlined, FolderOpenOutlined, LinkOutlined } from '@vicons/material'
+  import { AddFilled, BoltOutlined, CropOutlined, DeleteOutlined, InfoOutlined, FolderOpenOutlined, LinkOutlined, TerminalOutlined } from '@vicons/material'
   import { v4 as uuidv4 } from 'uuid'
   import { useGameStore } from '../stores/game'
   import { PROC_MON_MODE } from '../constants/procMonMode'
