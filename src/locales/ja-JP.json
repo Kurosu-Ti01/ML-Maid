@@ -40,6 +40,13 @@
     "links": "リンク",
     "tags": "タグ",
     "description": "説明",
+    "empty": {
+      "notSet": "未設定",
+      "notPlayed": "未プレイ",
+      "neverPlayed": "プレイ履歴なし",
+      "noDescription": "説明はまだありません",
+      "descriptionHint": "「編集」からゲームの説明を追加できます"
+    },
     "dropdown": {
       "openInstallPath": "インストールパスを開く",
       "createShortcut": "ショートカットを作成",
@@ -181,7 +188,8 @@
       "noProcessNames": "プロセス名がまだ追加されていません。「プロセスを追加」をクリックして監視するプロセス名を追加してください。",
       "processNames": "プロセス名がまだ追加されていません。「プロセスを追加」をクリックして監視するプロセス名を追加してください。",
       "processNamesHint": "監視するプロセス名を入力してください（例: game.exe, launcher.exe）",
-      "scriptComingSoon": "スクリプト設定は近日公開予定..."
+      "scriptComingSoon": "スクリプト設定は近日公開予定...",
+      "scriptHint": "ゲーム起動前後にカスタムスクリプトを実行する機能は、今後のアップデートで提供予定です。"
     },
     "tooltip": {
       "monitorModeInfo": "このオプションはゲーム統計の記録方法に影響します：",

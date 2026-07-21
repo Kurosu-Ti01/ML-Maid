@@ -49,11 +49,15 @@
                 <div class="game-playtime-text">
                   <div class="playtime-item">
                     <span class="playtime-label">{{ $t('gameInfo.timePlayed') }}</span>
-                    <span class="playtime-value">{{ formatTimePlayed(gameData.timePlayed) }}</span>
+                    <span class="playtime-value" :class="{ 'playtime-value--empty': !gameData.timePlayed }">
+                      {{ gameData.timePlayed ? formatTimePlayed(gameData.timePlayed) : $t('gameInfo.empty.notPlayed') }}
+                    </span>
                   </div>
                   <div class="playtime-item">
                     <span class="playtime-label">{{ $t('gameInfo.lastPlayed') }}</span>
-                    <span class="playtime-value">{{ gameData.lastPlayedDisplay }}</span>
+                    <span class="playtime-value" :class="{ 'playtime-value--empty': !gameData.lastPlayedDisplay }">
+                      {{ gameData.lastPlayedDisplay || $t('gameInfo.empty.neverPlayed') }}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -76,7 +80,7 @@
                     <n-icon size="18" class="info-icon">
                       <FolderOutlined />
                     </n-icon>
-                    <n-tooltip trigger="hover">
+                    <n-tooltip v-if="gameData.workingDir" trigger="hover">
                       <template #trigger>
                         <span class="clickable-path" @click="openworkingDir">
                           {{ gameData.workingDir }}
@@ -84,6 +88,7 @@
                       </template>
                       {{ gameData.workingDir }}
                     </n-tooltip>
+                    <span v-else class="info-empty">{{ $t('gameInfo.empty.notSet') }}</span>
                   </div>
                 </div>
                 <div class="info-row">
@@ -92,24 +97,28 @@
                     <n-icon size="18" class="info-icon">
                       <SdStorageOutlined />
                     </n-icon>
-                    <span style="font-weight: bold;">{{ formatFileSize(gameData.folderSize).value }}</span>
-                    <span class="size-unit">{{ formatFileSize(gameData.folderSize).unit }}</span>
+                    <template v-if="gameData.folderSize">
+                      <span style="font-weight: bold;">{{ formatFileSize(gameData.folderSize).value }}</span>
+                      <span class="size-unit">{{ formatFileSize(gameData.folderSize).unit }}</span>
+                    </template>
+                    <span v-else class="info-empty">{{ $t('gameInfo.empty.notSet') }}</span>
                   </div>
                 </div>
                 <div class="info-row">
                   <div class="info-label">{{ $t('gameInfo.genre') }}</div>
                   <div class="info-content">
                     <div class="tags-flex-wrap">
-                      <template v-if="Array.isArray(gameData.genre)">
+                      <template v-if="Array.isArray(gameData.genre) && gameData.genre.length">
                         <n-tag v-for="(item, index) in gameData.genre" :key="index" :color="tagColor">
                           {{ item }}
                         </n-tag>
                       </template>
-                      <template v-else-if="gameData.genre">
+                      <template v-else-if="gameData.genre && !Array.isArray(gameData.genre)">
                         <n-tag :color="tagColor">
                           {{ gameData.genre }}
                         </n-tag>
                       </template>
+                      <span v-else class="info-empty">{{ $t('gameInfo.empty.notSet') }}</span>
                     </div>
                   </div>
                 </div>
@@ -117,16 +126,17 @@
                   <div class="info-label">{{ $t('gameInfo.developer') }}</div>
                   <div class="info-content">
                     <div class="tags-flex-wrap">
-                      <template v-if="Array.isArray(gameData.developer)">
+                      <template v-if="Array.isArray(gameData.developer) && gameData.developer.length">
                         <n-tag v-for="(item, index) in gameData.developer" :key="index" :color="tagColor">
                           {{ item }}
                         </n-tag>
                       </template>
-                      <template v-else-if="gameData.developer">
+                      <template v-else-if="gameData.developer && !Array.isArray(gameData.developer)">
                         <n-tag :color="tagColor">
                           {{ gameData.developer }}
                         </n-tag>
                       </template>
+                      <span v-else class="info-empty">{{ $t('gameInfo.empty.notSet') }}</span>
                     </div>
                   </div>
                 </div>
@@ -134,16 +144,17 @@
                   <div class="info-label">{{ $t('gameInfo.publisher') }}</div>
                   <div class="info-content">
                     <div class="tags-flex-wrap">
-                      <template v-if="Array.isArray(gameData.publisher)">
+                      <template v-if="Array.isArray(gameData.publisher) && gameData.publisher.length">
                         <n-tag v-for="(item, index) in gameData.publisher" :key="index" :color="tagColor">
                           {{ item }}
                         </n-tag>
                       </template>
-                      <template v-else-if="gameData.publisher">
+                      <template v-else-if="gameData.publisher && !Array.isArray(gameData.publisher)">
                         <n-tag :color="tagColor">
                           {{ gameData.publisher }}
                         </n-tag>
                       </template>
+                      <span v-else class="info-empty">{{ $t('gameInfo.empty.notSet') }}</span>
                     </div>
                   </div>
                 </div>
@@ -153,51 +164,60 @@
                     <n-icon size="18" class="info-icon">
                       <CalendarTodayOutlined />
                     </n-icon>
-                    {{ gameData.releaseDateDisplay }}
+                    <span v-if="gameData.releaseDateDisplay">{{ gameData.releaseDateDisplay }}</span>
+                    <span v-else class="info-empty">{{ $t('gameInfo.empty.notSet') }}</span>
                   </div>
                 </div>
                 <div class="info-row">
                   <div class="info-label">{{ $t('gameInfo.communityScore') }}</div>
                   <div class="info-content">
-                    <span :style="{ color: getScoreColor(gameData.communityScore), fontWeight: 'bold' }">
+                    <span v-if="isSet(gameData.communityScore)"
+                      :style="{ color: getScoreColor(gameData.communityScore), fontWeight: 'bold' }">
                       {{ gameData.communityScore }}
                     </span>
+                    <span v-else class="info-empty">{{ $t('gameInfo.empty.notSet') }}</span>
                   </div>
                 </div>
                 <div class="info-row">
                   <div class="info-label">{{ $t('gameInfo.userScore') }}</div>
                   <div class="info-content">
-                    <span :style="{ color: getScoreColor(gameData.personalScore), fontWeight: 'bold' }">
+                    <span v-if="isSet(gameData.personalScore)"
+                      :style="{ color: getScoreColor(gameData.personalScore), fontWeight: 'bold' }">
                       {{ gameData.personalScore }}
                     </span>
+                    <span v-else class="info-empty">{{ $t('gameInfo.empty.notSet') }}</span>
                   </div>
                 </div>
                 <div class="info-row">
                   <div class="info-label">{{ $t('gameInfo.links') }}</div>
                   <div class="info-content" style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
-                    <n-tooltip trigger="hover" v-for="(link, index) in gameData.links" :key="index">
-                      <template #trigger>
-                        <n-button size="tiny" secondary type="primary" @click="openExternalLink(link.url)">
-                          <template #icon>
-                            <n-icon>
-                              <OpenInNewOutlined />
-                            </n-icon>
-                          </template>
-                          {{ link.name }}
-                        </n-button>
-                      </template>
-                      {{ link.url }}
-                    </n-tooltip>
+                    <template v-if="gameData.links && gameData.links.length">
+                      <n-tooltip trigger="hover" v-for="(link, index) in gameData.links" :key="index">
+                        <template #trigger>
+                          <n-button size="tiny" secondary type="primary" @click="openExternalLink(link.url)">
+                            <template #icon>
+                              <n-icon>
+                                <OpenInNewOutlined />
+                              </n-icon>
+                            </template>
+                            {{ link.name }}
+                          </n-button>
+                        </template>
+                        {{ link.url }}
+                      </n-tooltip>
+                    </template>
+                    <span v-else class="info-empty">{{ $t('gameInfo.empty.notSet') }}</span>
                   </div>
                 </div>
                 <div class="info-row-tags">
                   <div class="info-label-tags">{{ $t('gameInfo.tags') }}</div>
                   <div class="info-content-tags">
-                    <div class="tags-flex-wrap">
+                    <div v-if="gameData.tags && gameData.tags.length" class="tags-flex-wrap">
                       <n-tag :color="tagColor" v-for="(tag, index) in gameData.tags" :key="index">
                         {{ tag }}
                       </n-tag>
                     </div>
+                    <span v-else class="info-empty">{{ $t('gameInfo.empty.notSet') }}</span>
                   </div>
                 </div>
               </div>
@@ -206,7 +226,18 @@
               <div class="description-card" @click="handleDescriptionClick">
                 <div class="description-title">{{ $t('gameInfo.description') }}</div>
                 <!-- Lines are sanitized (whitelist) before v-html, see sanitizeHtml -->
-                <p v-for="(line, index) in descriptionHtml" :key="index" class="description-text" v-html="line"></p>
+                <template v-if="hasDescription">
+                  <p v-for="(line, index) in descriptionHtml" :key="index" class="description-text" v-html="line"></p>
+                </template>
+                <div v-else class="description-empty">
+                  <div class="description-empty-icon">
+                    <n-icon size="26">
+                      <NotesOutlined />
+                    </n-icon>
+                  </div>
+                  <p class="description-empty-title">{{ $t('gameInfo.empty.noDescription') }}</p>
+                  <span class="description-empty-hint">{{ $t('gameInfo.empty.descriptionHint') }}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -225,7 +256,7 @@
   import { useMessage, useDialog } from 'naive-ui'
   import type { DropdownOption } from 'naive-ui'
   import { NIcon } from 'naive-ui'
-  import { DeleteOutlined, FolderOutlined, LinkOutlined, InfoOutlined, DownloadOutlined, SdStorageOutlined, CalendarTodayOutlined, OpenInNewOutlined, SportsEsportsOutlined } from '@vicons/material'
+  import { DeleteOutlined, FolderOutlined, LinkOutlined, InfoOutlined, DownloadOutlined, SdStorageOutlined, CalendarTodayOutlined, OpenInNewOutlined, SportsEsportsOutlined, NotesOutlined } from '@vicons/material'
   import defaultBackground from '/default/ML-Maid-Background.png'
   import defaultIcon from '/default/ML-Maid-Icon-W.png'
   import { useI18n } from 'vue-i18n'
@@ -262,6 +293,16 @@
   const descriptionHtml = computed(() =>
     (gameData.value?.description ?? []).map(line => sanitizeHtml(line))
   )
+
+  // A description made of blank lines only counts as empty
+  const hasDescription = computed(() =>
+    descriptionHtml.value.some(line => line.trim() !== '')
+  )
+
+  // Distinguish "not set" from legitimate falsy values like a 0 score
+  function isSet(value: unknown): boolean {
+    return value !== undefined && value !== null && value !== ''
+  }
 
   // Delegate clicks on <a> inside the description to the system browser
   // (a plain anchor click would navigate the whole webview away from the app)
@@ -711,6 +752,11 @@
     font-variant-numeric: tabular-nums;
   }
 
+  .playtime-value--empty {
+    color: var(--color-muted-dark);
+    font-weight: 500;
+  }
+
   /* ---- Floating cover ---- */
   .game-cover {
     position: absolute;
@@ -805,6 +851,20 @@
     font-size: 12px;
     color: var(--color-muted);
     margin-left: 4px;
+  }
+
+  /* Dashed pill shown for any metadata value that hasn't been set */
+  .info-empty {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 10px;
+    border: 1px dashed var(--color-muted-light);
+    border-radius: 999px;
+    font-size: 12px;
+    letter-spacing: 0.2px;
+    color: var(--color-muted-dark);
+    user-select: none;
+    cursor: default;
   }
 
   .clickable-path {
@@ -938,6 +998,43 @@
     border: none;
     border-top: 1px solid var(--border-info-row);
     margin: 8px 0;
+  }
+
+  /* ---- Empty description (mirrors the app-level no-game state) ---- */
+  .description-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 46px 20px 42px;
+    user-select: none;
+    cursor: default;
+  }
+
+  .description-empty-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 14px;
+    border-radius: 50%;
+    background: var(--primary-tint);
+    color: var(--color-muted);
+  }
+
+  .description-empty-title {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-muted-dark);
+    letter-spacing: 0.3px;
+  }
+
+  .description-empty-hint {
+    font-size: 13px;
+    color: var(--color-muted-dark);
+    opacity: 0.75;
   }
 
   /* ---- Empty state ---- */

@@ -40,6 +40,13 @@
     "links": "链接",
     "tags": "标签",
     "description": "简介",
+    "empty": {
+      "notSet": "未设置",
+      "notPlayed": "尚未游玩",
+      "neverPlayed": "从未游玩",
+      "noDescription": "暂无简介",
+      "descriptionHint": "点击「编辑」为这款游戏添加简介"
+    },
     "dropdown": {
       "openInstallPath": "打开安装路径",
       "createShortcut": "创建快捷方式",
@@ -181,7 +188,8 @@
       "noProcessNames": "尚未添加进程名称。点击「添加进程」来添加要监控的进程名称。",
       "processNames": "尚未添加进程名称。点击「添加进程」来添加要监控的进程名称。",
       "processNamesHint": "输入要监控的进程名称（例如 game.exe, launcher.exe）",
-      "scriptComingSoon": "脚本配置即将推出..."
+      "scriptComingSoon": "脚本配置即将推出...",
+      "scriptHint": "在游戏启动前后自动运行自定义脚本的功能正在开发中，敬请期待。"
     },
     "tooltip": {
       "monitorModeInfo": "此选项影响游戏统计数据的记录方式：",

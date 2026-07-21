@@ -40,6 +40,13 @@
     "links": "Links",
     "tags": "Tags",
     "description": "Description",
+    "empty": {
+      "notSet": "Not set",
+      "notPlayed": "Not played yet",
+      "neverPlayed": "Never played",
+      "noDescription": "No description yet",
+      "descriptionHint": "Edit this game to add a description"
+    },
     "dropdown": {
       "openInstallPath": "Open Install Path",
       "createShortcut": "Create Shortcut",
@@ -181,7 +188,8 @@
       "noProcessNames": "No process names added yet. Click \"Add Process\" to add process names to monitor.",
       "processNames": "No process names added yet. Click \"Add Process\" to add process names to monitor.",
       "processNamesHint": "Enter process names to monitor (e.g., game.exe, launcher.exe)",
-      "scriptComingSoon": "Script configuration coming soon..."
+      "scriptComingSoon": "Script configuration coming soon...",
+      "scriptHint": "Run custom scripts before or after launching the game — planned for a future update."
     },
     "tooltip": {
       "monitorModeInfo": "This option affects how game statistics are recorded:",
