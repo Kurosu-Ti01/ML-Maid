@@ -15,6 +15,7 @@
   import { useGameStore } from './stores/game'
   import { useSettingsStore } from './stores/settings'
   import { useTheme } from '@/composables/useTheme'
+  import { useAppearance } from '@/composables/useAppearance'
   import FilterDialog from '@/components/FilterDialog.vue'
   import { darkTheme } from 'naive-ui'
   import type { GlobalThemeOverrides } from 'naive-ui'
@@ -24,6 +25,7 @@
   const gameStore = useGameStore()
   const settingsStore = useSettingsStore()
   const { isDark } = useTheme() // Custom composable to manage theme
+  useAppearance() // Inject user glass/ambient overrides, kept live via watcher
   const { locale } = useI18n()
 
   // Sync vue-i18n locale with settings store

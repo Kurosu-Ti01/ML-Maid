@@ -9,6 +9,9 @@ use serde::{Deserialize, Serialize};
 //   [general] theme=... language=... minimizeToTray=true
 //   [sorting] sortBy=... sortOrder=...
 //   [filtering] genres[]=A  genres[]=B  ... (empty arrays omitted)
+//   [appearance.light] / [appearance.dark] glassBg=rgba(...) glassBlur=12 ...
+//     (npm `ini` dotted-section nesting; only user-customized keys are written,
+//      absent keys fall back to the CSS defaults in the renderer)
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -46,6 +49,36 @@ pub struct LauncherSettings {
     pub locale_emulator_path: String,
 }
 
+/// Per-theme glass/ambient overrides. `None` = use the CSS default.
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct AppearanceTheme {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub glass_bg: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub glass_strong: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub glass_border: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub glass_blur: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ambient_opacity: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ambient_blur: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ambient_saturate: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ambient_brightness: Option<f64>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+pub struct AppearanceSettings {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub light: Option<AppearanceTheme>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dark: Option<AppearanceTheme>,
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Settings {
@@ -56,6 +89,8 @@ pub struct Settings {
     pub filtering: FilteringSettings,
     #[serde(default)]
     pub launcher: LauncherSettings,
+    #[serde(default)]
+    pub appearance: AppearanceSettings,
 }
 
 fn default_sorting() -> SortingSettings {
@@ -76,6 +111,7 @@ impl Default for Settings {
             sorting: default_sorting(),
             filtering: FilteringSettings::default(),
             launcher: LauncherSettings::default(),
+            appearance: AppearanceSettings::default(),
         }
     }
 }
@@ -153,11 +189,33 @@ fn parse_ini(content: &str) -> Settings {
             ("filtering", "publishers[]") => settings.filtering.publishers.push(value),
             ("filtering", "tags[]") => settings.filtering.tags.push(value),
             ("launcher", "localeEmulatorPath") => settings.launcher.locale_emulator_path = value,
+            ("appearance.light", k) => {
+                let theme = settings.appearance.light.get_or_insert_default();
+                apply_appearance_key(theme, k, &value);
+            }
+            ("appearance.dark", k) => {
+                let theme = settings.appearance.dark.get_or_insert_default();
+                apply_appearance_key(theme, k, &value);
+            }
             _ => {} // unknown keys are ignored
         }
     }
 
     settings
+}
+
+fn apply_appearance_key(theme: &mut AppearanceTheme, key: &str, value: &str) {
+    match key {
+        "glassBg" => theme.glass_bg = Some(value.to_string()),
+        "glassStrong" => theme.glass_strong = Some(value.to_string()),
+        "glassBorder" => theme.glass_border = Some(value.to_string()),
+        "glassBlur" => theme.glass_blur = value.parse().ok(),
+        "ambientOpacity" => theme.ambient_opacity = value.parse().ok(),
+        "ambientBlur" => theme.ambient_blur = value.parse().ok(),
+        "ambientSaturate" => theme.ambient_saturate = value.parse().ok(),
+        "ambientBrightness" => theme.ambient_brightness = value.parse().ok(),
+        _ => {} // unknown keys are ignored
+    }
 }
 
 fn to_ini(s: &Settings) -> String {
@@ -200,7 +258,45 @@ fn to_ini(s: &Settings) -> String {
         ));
     }
 
+    append_appearance_theme(&mut out, "appearance.light", &s.appearance.light);
+    append_appearance_theme(&mut out, "appearance.dark", &s.appearance.dark);
+
     out
+}
+
+// Only user-customized keys are written; a theme with nothing set is omitted
+fn append_appearance_theme(out: &mut String, section: &str, theme: &Option<AppearanceTheme>) {
+    let Some(t) = theme else { return };
+
+    let mut lines = String::new();
+    if let Some(v) = &t.glass_bg {
+        lines.push_str(&format!("glassBg={v}\n"));
+    }
+    if let Some(v) = &t.glass_strong {
+        lines.push_str(&format!("glassStrong={v}\n"));
+    }
+    if let Some(v) = &t.glass_border {
+        lines.push_str(&format!("glassBorder={v}\n"));
+    }
+    if let Some(v) = t.glass_blur {
+        lines.push_str(&format!("glassBlur={v}\n"));
+    }
+    if let Some(v) = t.ambient_opacity {
+        lines.push_str(&format!("ambientOpacity={v}\n"));
+    }
+    if let Some(v) = t.ambient_blur {
+        lines.push_str(&format!("ambientBlur={v}\n"));
+    }
+    if let Some(v) = t.ambient_saturate {
+        lines.push_str(&format!("ambientSaturate={v}\n"));
+    }
+    if let Some(v) = t.ambient_brightness {
+        lines.push_str(&format!("ambientBrightness={v}\n"));
+    }
+
+    if !lines.is_empty() {
+        out.push_str(&format!("\n[{section}]\n{lines}"));
+    }
 }
 
 // ==========================================
@@ -271,5 +367,48 @@ mod tests {
         let parsed = parse_ini(&ini);
         assert_eq!(parsed.filtering.genres, vec!["ADV", "RPG"]);
         assert_eq!(parsed.filtering.tags, vec!["fan disc"]);
+    }
+
+    /// Appearance sections round-trip: set keys survive (including rgba values
+    /// containing commas and spaces), unset keys stay `None`.
+    #[test]
+    fn ini_appearance_round_trip() {
+        let mut s = Settings::default();
+        s.appearance.light = Some(AppearanceTheme {
+            glass_bg: Some("rgba(255, 255, 255, 0.35)".into()),
+            glass_blur: Some(12.0),
+            ambient_opacity: Some(0.2),
+            ..Default::default()
+        });
+        s.appearance.dark = Some(AppearanceTheme {
+            glass_strong: Some("rgba(24, 24, 27, 0.7)".into()),
+            ambient_brightness: Some(1.3),
+            ..Default::default()
+        });
+
+        let ini = to_ini(&s);
+        assert!(ini.contains("[appearance.light]\nglassBg=rgba(255, 255, 255, 0.35)\n"));
+        assert!(ini.contains("[appearance.dark]\nglassStrong=rgba(24, 24, 27, 0.7)\n"));
+
+        let parsed = parse_ini(&ini);
+        let light = parsed.appearance.light.as_ref().unwrap();
+        assert_eq!(light.glass_bg.as_deref(), Some("rgba(255, 255, 255, 0.35)"));
+        assert_eq!(light.glass_blur, Some(12.0));
+        assert_eq!(light.ambient_opacity, Some(0.2));
+        assert_eq!(light.glass_strong, None); // unset stays unset
+        let dark = parsed.appearance.dark.as_ref().unwrap();
+        assert_eq!(dark.glass_strong.as_deref(), Some("rgba(24, 24, 27, 0.7)"));
+        assert_eq!(dark.ambient_brightness, Some(1.3));
+        assert_eq!(dark.glass_bg, None);
+    }
+
+    /// Configs from before the appearance feature parse with no themes set,
+    /// and defaults serialize without any appearance section.
+    #[test]
+    fn ini_appearance_absent() {
+        let parsed = parse_ini("[general]\ntheme=auto\nlanguage=en-US\nminimizeToTray=true\n");
+        assert!(parsed.appearance.light.is_none());
+        assert!(parsed.appearance.dark.is_none());
+        assert!(!to_ini(&parsed).contains("[appearance"));
     }
 }

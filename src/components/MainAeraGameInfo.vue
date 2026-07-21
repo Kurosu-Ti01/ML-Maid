@@ -648,6 +648,10 @@
     bottom: 100%;
     height: 48px;
     background: linear-gradient(to bottom, transparent 0%, var(--glass-strong) 100%);
+    /* Progressive frost: the mask fades the backdrop blur in along the gradient */
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, #000 100%);
     pointer-events: none;
   }
 
@@ -657,6 +661,7 @@
     align-items: center;
     padding: 14px 20px;
     background: var(--glass-strong);
+    backdrop-filter: blur(var(--glass-blur));
     box-shadow: var(--shadow-action-bar);
   }
 
@@ -752,6 +757,7 @@
     overflow: hidden;
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
+    backdrop-filter: blur(var(--glass-blur));
     box-shadow: var(--glass-shadow);
   }
 
@@ -857,6 +863,7 @@
     border-radius: var(--radius-md);
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
+    backdrop-filter: blur(var(--glass-blur));
     box-shadow: var(--glass-shadow);
   }
 

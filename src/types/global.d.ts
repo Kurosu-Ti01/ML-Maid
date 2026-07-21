@@ -1,5 +1,18 @@
 // Global type definitions for the application
 
+// Per-theme glass/ambient overrides; a missing key falls back to the CSS
+// default (see APPEARANCE_DEFAULTS in src/composables/useAppearance.ts)
+interface AppearanceTheme {
+  glassBg?: string        // --glass-bg
+  glassStrong?: string    // --glass-strong
+  glassBorder?: string    // --glass-border
+  glassBlur?: number      // px, backdrop-filter frost (0 = off)
+  ambientOpacity?: number // 0..1
+  ambientBlur?: number    // px, blur() part of --ambient-filter
+  ambientSaturate?: number
+  ambientBrightness?: number
+}
+
 interface Settings {
   general: {
     theme?: 'light' | 'dark' | 'auto'
@@ -18,6 +31,10 @@ interface Settings {
   }
   launcher?: {
     localeEmulatorPath?: string
+  }
+  appearance?: {
+    light?: AppearanceTheme
+    dark?: AppearanceTheme
   }
 }
 
