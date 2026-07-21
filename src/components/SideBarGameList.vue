@@ -75,6 +75,7 @@
     padding: 8px;
     box-sizing: border-box;
     background-color: var(--glass-strong);
+    backdrop-filter: blur(var(--glass-blur));
   }
 
   .game-item {
