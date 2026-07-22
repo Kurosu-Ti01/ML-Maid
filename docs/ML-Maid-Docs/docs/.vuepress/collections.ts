@@ -26,7 +26,7 @@
  */
 import { defineCollection, defineCollections } from 'vuepress-theme-plume'
 
-const userSidebar = ['', 'getting-started', 'library', 'launching', 'statistics-settings']
+const userSidebar = ['', 'getting-started', 'library', 'launching', 'plugins', 'statistics-settings']
 const developerSidebar = ['', 'architecture', 'frontend', 'backend', 'plugin-system', 'plugin-development', 'storage-release', 'api-maintenance']
 
 /* =================== locale: en-US ======================= */

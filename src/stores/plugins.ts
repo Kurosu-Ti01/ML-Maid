@@ -72,6 +72,16 @@ export const usePluginStore = defineStore('plugins', () => {
     return installed
   }
 
+  async function uninstall(plugin: InstalledPluginInfo) {
+    disposePluginWorker(plugin.manifest.id)
+    await api.uninstallPlugin(plugin.dirName)
+    // Drop a stale disabled entry so a future reinstall starts enabled
+    if (!isEnabled(plugin.manifest.id)) {
+      await setEnabled(plugin.manifest.id, true)
+    }
+    await refresh()
+  }
+
   return {
     plugins,
     loading,
@@ -83,6 +93,7 @@ export const usePluginStore = defineStore('plugins', () => {
     ensureLoaded,
     setEnabled,
     openPluginsFolder,
-    installFromArchive
+    installFromArchive,
+    uninstall
   }
 })

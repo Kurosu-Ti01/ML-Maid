@@ -142,6 +142,7 @@ export interface BackendApi {
   getPluginsPath(): Promise<string>
   selectPluginArchive(): Promise<FileDialogResult>
   installPluginArchive(archivePath: string): Promise<InstalledPluginInfo>
+  uninstallPlugin(dirName: string): Promise<void>
 
   // statistics
   getGameRecentDailyStats(gameUuid: string, days?: number): Promise<DailyStatsItem[]>

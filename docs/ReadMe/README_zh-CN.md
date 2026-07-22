@@ -31,6 +31,7 @@
 - **游戏库管理**：有基本的添加、编辑和删除游戏的功能，提供一个暂且以简明好看为目的的游戏信息页面。
 - **游戏启动器**：直接从应用内启动游戏，并追踪游戏进程。支持通过 [Locale Emulator](https://github.com/xupefei/Locale-Emulator) 转区启动日文游戏。
 - **游戏记录统计**：记录每次游戏进程时间，提供多种统计视图。或许有些鸡肋，但可以没用而不能没有。
+- **插件化元数据刮削**：在添加/编辑表单中一键从 [VNDB](https://vndb.org) 等网站抓取标题、开发商、标签、简介、封面和背景图。插件是沙箱化的 JavaScript，导入 zip 即可安装——官方插件见 [ML-Maid_Plugins](https://github.com/Kurosu-Ti01/ML-Maid_Plugins)，也欢迎为任意网站编写你自己的插件。
 
 ## ⬆️ 从 0.4.x（Electron 版）升级
 

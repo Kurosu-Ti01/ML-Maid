@@ -221,9 +221,24 @@
                 </div>
                 <p v-if="plugin.manifest.description" class="plugin-desc">{{ plugin.manifest.description }}</p>
               </div>
-              <n-switch :value="pluginStore.isEnabled(plugin.manifest.id)"
-                :disabled="!pluginStore.isSupported(plugin.manifest)"
-                @update:value="(v: boolean) => pluginStore.setEnabled(plugin.manifest.id, v)" />
+              <div class="plugin-row-actions">
+                <n-switch :value="pluginStore.isEnabled(plugin.manifest.id)"
+                  :disabled="!pluginStore.isSupported(plugin.manifest)"
+                  @update:value="(v: boolean) => pluginStore.setEnabled(plugin.manifest.id, v)" />
+                <n-popconfirm @positive-click="uninstallPlugin(plugin)">
+                  <template #trigger>
+                    <n-button size="small" type="error" quaternary circle
+                      :title="$t('settings.plugins.uninstall')">
+                      <template #icon>
+                        <n-icon>
+                          <component :is="DeleteOutlined" />
+                        </n-icon>
+                      </template>
+                    </n-button>
+                  </template>
+                  {{ $t('settings.plugins.uninstallConfirm', { name: plugin.manifest.name }) }}
+                </n-popconfirm>
+              </div>
             </div>
           </div>
           <p class="setting-hint plugin-hint">{{ $t('settings.plugins.installHint') }}</p>
@@ -242,10 +257,11 @@
   import { usePluginStore } from '../stores/plugins'
   import { useTheme } from '@/composables/useTheme'
   import { APPEARANCE_DEFAULTS, resolveAppearanceTheme, buildAmbientFilter } from '@/composables/useAppearance'
-  import { SettingsOutlined, DesktopWindowsOutlined, RocketLaunchOutlined, ColorLensOutlined, ExtensionOutlined } from '@vicons/material'
+  import { SettingsOutlined, DesktopWindowsOutlined, RocketLaunchOutlined, ColorLensOutlined, ExtensionOutlined, DeleteOutlined } from '@vicons/material'
   import { Wrench16Regular, WeatherSunny16Regular, WeatherMoon16Regular } from '@vicons/fluent'
   import { useI18n } from 'vue-i18n'
   import { api } from '@/api'
+  import type { InstalledPluginInfo } from '@/api'
   import defaultBackground from '/default/ML-Maid-Background.png'
 
   const settingsStore = useSettingsStore()
@@ -280,6 +296,17 @@
       message.error(t('settings.plugins.importFailed', { error: text }))
     } finally {
       importing.value = false
+    }
+  }
+
+  async function uninstallPlugin(plugin: InstalledPluginInfo) {
+    try {
+      await pluginStore.uninstall(plugin)
+      message.success(t('settings.plugins.uninstalled', { name: plugin.manifest.name }))
+    } catch (error) {
+      console.error('Plugin uninstall failed:', error)
+      const text = error instanceof Error ? error.message : String(error)
+      message.error(t('settings.plugins.uninstallFailed', { error: text }))
     }
   }
 
@@ -549,6 +576,13 @@
 
   .plugin-row:last-child {
     border-bottom: none;
+  }
+
+  .plugin-row-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: none;
   }
 
   .plugin-info {

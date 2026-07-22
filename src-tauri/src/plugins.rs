@@ -135,6 +135,20 @@ pub fn plugin_read_entry(paths: tauri::State<AppPaths>, dir_name: String) -> Cmd
     fs::read_to_string(plugin_dir.join(&manifest.entry)).map_err(e("read plugin entry"))
 }
 
+/// Uninstall a plugin by removing its folder. Any stale disabled-state entry
+/// is cleaned up by the frontend settings store.
+#[tauri::command]
+pub fn plugin_uninstall(paths: tauri::State<AppPaths>, dir_name: String) -> CmdResult<()> {
+    if !is_safe_name(&dir_name) {
+        return Err(format!("invalid plugin directory name: {dir_name}"));
+    }
+    let target = paths.plugins_path.join(&dir_name);
+    if !target.exists() {
+        return Ok(());
+    }
+    fs::remove_dir_all(&target).map_err(e("remove plugin"))
+}
+
 /// Plugins are hand-installed (the trust decision happens at install time),
 /// but the proxy still refuses obvious non-web targets: only http(s), and no
 /// loopback / private / link-local IP literals. Full SSRF hardening (DNS

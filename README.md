@@ -31,6 +31,7 @@ Some basic functionality is currently implemented:
 - **Game library management**: Basic functions for adding, editing and deleting games, and provides a game information page that is tentatively intended to be concise and good-looking.
 - **Game Launcher**: Launching games directly from within the app and tracks game progress. Supports Japanese locale-emulation launch via [Locale Emulator](https://github.com/xupefei/Locale-Emulator).
 - **Game logging statistics**: Logging the time of each game process, providing multiple statistical views. Maybe a little redundant, but better to have it and not need it.
+- **Plugin-powered metadata scraping**: Fill game details — title, developer, tags, description, cover and background — automatically from sites like [VNDB](https://vndb.org) with one click in the add/edit form. Plugins are sandboxed JavaScript installed from a zip; grab official ones from [ML-Maid_Plugins](https://github.com/Kurosu-Ti01/ML-Maid_Plugins) or write your own for any website.
 
 ## ⬆️ Upgrading from 0.4.x (Electron)
 
