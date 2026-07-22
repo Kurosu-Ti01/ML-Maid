@@ -163,6 +163,8 @@
       "noCover": "カバーが選択されていません",
       "selectFromPath": "パスから選択",
       "addFromUrl": "URLから追加",
+      "urlDialogTitle": "URL から画像を追加",
+      "urlDialogPlaceholder": "https://example.com/image.jpg",
       "remove": "削除",
       "crop": "切り抜き"
     },
@@ -289,6 +291,23 @@
       "sortingSaved": "ソート設定が保存されました"
     }
   },
+  "scraper": {
+    "open": "取得",
+    "title": "メタデータ取得",
+    "searchPlaceholder": "タイトルを入力して検索…",
+    "search": "検索",
+    "noPlugins": "有効なスクレイパープラグインがありません。設定で有効にしてください",
+    "noResults": "結果が見つかりません",
+    "back": "戻る",
+    "apply": "適用",
+    "applied": "メタデータをフォームに適用しました",
+    "fieldsTitle": "適用するフィールドを選択",
+    "errors": {
+      "searchFailed": "検索に失敗しました：{error}",
+      "detailFailed": "詳細の取得に失敗しました：{error}",
+      "imageFailed": "画像のダウンロードに失敗しました：{error}"
+    }
+  },
   "settings": {
     "title": "設定",
     "generalSettings": "一般設定",
@@ -329,7 +348,19 @@
     "detect": "自動検出",
     "localeEmulatorFound": "LEProc.exe が見つかりました：{path}",
     "localeEmulatorNotFound": "一般的な場所に Locale Emulator が見つかりません。LEProc.exe を手動で選択してください",
-    "localeEmulatorHint": "ゲームごとの「Locale Emulator」起動モードで使用され、日本語ロケールで日本語ゲームを実行します。Locale Emulator をインストールし、LEProc.exe を選択するか自動検出をクリックしてください。"
+    "localeEmulatorHint": "ゲームごとの「Locale Emulator」起動モードで使用され、日本語ロケールで日本語ゲームを実行します。Locale Emulator をインストールし、LEProc.exe を選択するか自動検出をクリックしてください。",
+    "plugins": {
+      "title": "プラグイン",
+      "refresh": "更新",
+      "refreshed": "プラグイン一覧を更新しました",
+      "openFolder": "プラグインフォルダを開く",
+      "empty": "プラグインがありません。plugins フォルダにプラグインを配置して更新してください。",
+      "unsupported": "非対応",
+      "installHint": "プラグインは manifest.json とエントリースクリプトを含むフォルダです。plugins フォルダに配置して更新をクリックしてください。",
+      "type": {
+        "metadataScraper": "メタデータスクレイパー"
+      }
+    }
   },
   "statistics": {
     "tabs": {

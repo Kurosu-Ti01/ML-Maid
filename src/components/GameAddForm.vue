@@ -7,7 +7,17 @@
         <n-scrollbar class="tab-scrollbar">
           <n-form :model="gameForm" label-width="120" class="tab-form">
             <n-form-item :label="$t('gameForm.fields.title')">
-              <n-input v-model:value="gameForm.title" :placeholder="$t('gameForm.placeholders.enterTitle')" />
+              <n-input-group>
+                <n-input v-model:value="gameForm.title" :placeholder="$t('gameForm.placeholders.enterTitle')" />
+                <n-button type="primary" ghost @click="scraperVisible = true">
+                  <template #icon>
+                    <n-icon>
+                      <component :is="TravelExploreOutlined" />
+                    </n-icon>
+                  </template>
+                  {{ $t('scraper.open') }}
+                </n-button>
+              </n-input-group>
             </n-form-item>
 
             <n-form-item :label="$t('gameForm.fields.genre')">
@@ -207,7 +217,7 @@
                       <component :is="FolderOpenOutlined" />
                     </n-icon>
                   </button>
-                  <button class="action-btn" :title="$t('gameForm.media.addFromUrl')">
+                  <button class="action-btn" :title="$t('gameForm.media.addFromUrl')" @click="openUrlDialog('icon')">
                     <n-icon size="20">
                       <component :is="LinkOutlined" />
                     </n-icon>
@@ -238,7 +248,8 @@
                       <component :is="FolderOpenOutlined" />
                     </n-icon>
                   </button>
-                  <button class="action-btn" :title="$t('gameForm.media.addFromUrl')">
+                  <button class="action-btn" :title="$t('gameForm.media.addFromUrl')"
+                    @click="openUrlDialog('background')">
                     <n-icon size="20">
                       <component :is="LinkOutlined" />
                     </n-icon>
@@ -278,7 +289,7 @@
                       <component :is="FolderOpenOutlined" />
                     </n-icon>
                   </button>
-                  <button class="action-btn" :title="$t('gameForm.media.addFromUrl')">
+                  <button class="action-btn" :title="$t('gameForm.media.addFromUrl')" @click="openUrlDialog('cover')">
                     <n-icon size="20">
                       <component :is="LinkOutlined" />
                     </n-icon>
@@ -443,6 +454,14 @@
     <!-- Crop dialog for background/cover images -->
     <ImageCropperModal v-model:show="cropModalVisible" :image-url="cropImageUrl" :source-path="cropSourcePath"
       :image-type="cropImageType" :game-uuid="gameForm.uuid" @cropped="onImageCropped" />
+
+    <!-- Metadata scraper (plugin-powered) -->
+    <ScraperModal v-model:show="scraperVisible" :game-uuid="gameForm.uuid" :initial-query="gameForm.title"
+      @apply="onScrapeApplied" />
+
+    <!-- Add image from URL -->
+    <ImageUrlDialog v-model:show="urlDialogVisible" :game-uuid="gameForm.uuid" :image-type="urlDialogType"
+      @downloaded="(r: ProcessGameImageResult) => applyImageResult(r, urlDialogType)" />
   </div>
 </template>
 
@@ -451,7 +470,7 @@
   import { useMessage } from 'naive-ui'
   import { NIcon } from 'naive-ui'
   import type { SelectOption } from 'naive-ui'
-  import { AddFilled, BoltOutlined, CropOutlined, DeleteOutlined, InfoOutlined, FolderOpenOutlined, LinkOutlined, TerminalOutlined } from '@vicons/material'
+  import { AddFilled, BoltOutlined, CropOutlined, DeleteOutlined, InfoOutlined, FolderOpenOutlined, LinkOutlined, TerminalOutlined, TravelExploreOutlined } from '@vicons/material'
   import { v4 as uuidv4 } from 'uuid'
   import { useGameStore } from '../stores/game'
   import { PROC_MON_MODE } from '../constants/procMonMode'
@@ -459,6 +478,10 @@
   import { api } from '@/api'
   import type { ProcessGameImageResult } from '@/api'
   import ImageCropperModal from '@/components/ImageCropperModal.vue'
+  import ScraperModal from '@/components/ScraperModal.vue'
+  import ImageUrlDialog from '@/components/ImageUrlDialog.vue'
+  import { applyScrapedFields } from '@/plugins/apply'
+  import type { ScrapeApplyPayload } from '@/plugins/apply'
 
   const emit = defineEmits<{ close: [] }>()
 
@@ -572,6 +595,25 @@
     message.success(t('gameForm.messages.cropSuccess', { imageType: cropImageType.value }))
   }
 
+  // ---- Metadata scraper (plugin-powered) ----
+  const scraperVisible = ref(false)
+
+  function onScrapeApplied(payload: ScrapeApplyPayload) {
+    applyScrapedFields(gameForm.value, payload.fields)
+    // Downloaded artwork lands in the same temp slots the file picker uses.
+    // No auto-crop: applying two images would chain two crop dialogs; the
+    // Media tab's Crop button still works on the new files.
+    if (payload.cover?.tempPath && payload.cover.previewUrl) {
+      gameForm.value.coverImage = payload.cover.tempPath
+      coverPreview.value = payload.cover.previewUrl
+    }
+    if (payload.background?.tempPath && payload.background.previewUrl) {
+      gameForm.value.backgroundImage = payload.background.tempPath
+      backgroundPreview.value = payload.background.previewUrl
+    }
+    message.success(t('scraper.applied'))
+  }
+
   // Refs for select components
   const genreSelectRef = ref()
   const developerSelectRef = ref()
@@ -604,32 +646,7 @@
       })
 
       if (result.success) {
-        // Update gameForm with temp image path
-        switch (imageType) {
-          case 'icon':
-            if (result.tempPath && result.previewUrl) {
-              gameForm.value.iconImage = result.tempPath
-              iconPreview.value = result.previewUrl
-            }
-            break
-          case 'background':
-            if (result.tempPath && result.previewUrl) {
-              gameForm.value.backgroundImage = result.tempPath
-              backgroundPreview.value = result.previewUrl
-              // Jump straight into cropping the fresh image
-              openCropModal('background')
-            }
-            break
-          case 'cover':
-            if (result.tempPath && result.previewUrl) {
-              gameForm.value.coverImage = result.tempPath
-              coverPreview.value = result.previewUrl
-              openCropModal('cover')
-            }
-            break
-        }
-
-        message.success(t('gameForm.messages.imageUpdated', { imageType }))
+        applyImageResult(result, imageType)
       } else {
         message.error(result.error || t('gameForm.messages.failedProcessImage'))
       }
@@ -637,6 +654,38 @@
       console.error('Error processing image:', error)
       message.error(t('gameForm.messages.failedProcessImage'))
     }
+  }
+
+  // Put a freshly produced temp image (file pick or URL download) into the
+  // form; background/cover jump straight into cropping the fresh image
+  function applyImageResult(result: ProcessGameImageResult, imageType: 'icon' | 'background' | 'cover') {
+    if (!result.tempPath || !result.previewUrl) return
+    switch (imageType) {
+      case 'icon':
+        gameForm.value.iconImage = result.tempPath
+        iconPreview.value = result.previewUrl
+        break
+      case 'background':
+        gameForm.value.backgroundImage = result.tempPath
+        backgroundPreview.value = result.previewUrl
+        openCropModal('background')
+        break
+      case 'cover':
+        gameForm.value.coverImage = result.tempPath
+        coverPreview.value = result.previewUrl
+        openCropModal('cover')
+        break
+    }
+    message.success(t('gameForm.messages.imageUpdated', { imageType }))
+  }
+
+  // ---- Add image from URL ----
+  const urlDialogVisible = ref(false)
+  const urlDialogType = ref<'icon' | 'background' | 'cover'>('icon')
+
+  function openUrlDialog(imageType: 'icon' | 'background' | 'cover') {
+    urlDialogType.value = imageType
+    urlDialogVisible.value = true
   }
 
   // Remove image
