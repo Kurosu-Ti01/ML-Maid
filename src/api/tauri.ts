@@ -103,6 +103,12 @@ export const tauriApi: BackendApi = {
   finalizeGameImages: (gameUuid) => invoke('finalize_game_images', { gameUuid }),
   cleanupTempImages: (gameUuid) => invoke('cleanup_temp_images', { gameUuid }),
 
+  listPlugins: () => invoke('plugins_list'),
+  readPluginEntry: (dirName) => invoke('plugin_read_entry', { dirName }),
+  pluginHttpRequest: (params) => invoke('plugin_http_request', { params }),
+  downloadGameImage: (params) => invoke<ProcessGameImageResult>('download_game_image', { params }).then(toDisplayUrl),
+  getPluginsPath: () => invoke<{ pluginsPath: string }>('get_app_paths').then(p => p.pluginsPath),
+
   getGameRecentDailyStats: (gameUuid, days) => invoke('get_game_recent_daily_stats', { gameUuid, days }),
   getGameDailyStatsRange: (gameUuid, startDate, endDate) => invoke('get_game_daily_stats_range', { gameUuid, startDate, endDate }),
   getWeeklyStatsByDate: (dateString) => invoke('get_weekly_stats_by_date', { dateString }),

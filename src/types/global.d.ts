@@ -36,6 +36,10 @@ interface Settings {
     light?: AppearanceTheme
     dark?: AppearanceTheme
   }
+  plugins?: {
+    // Disabled plugin ids; absent = enabled, so new plugins work out of the box
+    disabled: string[]
+  }
 }
 
 interface gameData {
