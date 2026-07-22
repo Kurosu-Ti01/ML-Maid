@@ -163,6 +163,8 @@
       "noCover": "仍未选择封面",
       "selectFromPath": "从路径选择",
       "addFromUrl": "从 URL 添加",
+      "urlDialogTitle": "从 URL 添加图片",
+      "urlDialogPlaceholder": "https://example.com/image.jpg",
       "remove": "移除",
       "crop": "裁剪"
     },
@@ -289,6 +291,23 @@
       "sortingSaved": "排序偏好已保存"
     }
   },
+  "scraper": {
+    "open": "刮削",
+    "title": "获取元数据",
+    "searchPlaceholder": "输入标题进行搜索…",
+    "search": "搜索",
+    "noPlugins": "没有启用的刮削插件，请到设置中启用",
+    "noResults": "未找到结果",
+    "back": "返回",
+    "apply": "应用",
+    "applied": "已将元数据应用到表单",
+    "fieldsTitle": "选择要应用的字段",
+    "errors": {
+      "searchFailed": "搜索失败：{error}",
+      "detailFailed": "获取详情失败：{error}",
+      "imageFailed": "图片下载失败：{error}"
+    }
+  },
   "settings": {
     "title": "设置",
     "generalSettings": "常规设置",
@@ -329,7 +348,19 @@
     "detect": "自动检测",
     "localeEmulatorHint": "供游戏的「Locale Emulator」转区启动模式使用，以日文区域运行日文游戏。安装 Locale Emulator 后选择 LEProc.exe 或点击自动检测。",
     "localeEmulatorFound": "已找到 LEProc.exe：{path}",
-    "localeEmulatorNotFound": "未在常见位置找到 Locale Emulator，请手动选择 LEProc.exe"
+    "localeEmulatorNotFound": "未在常见位置找到 Locale Emulator，请手动选择 LEProc.exe",
+    "plugins": {
+      "title": "插件",
+      "refresh": "刷新",
+      "refreshed": "插件列表已刷新",
+      "openFolder": "打开插件目录",
+      "empty": "尚未安装插件。将插件文件夹放入 plugins 目录后点击刷新。",
+      "unsupported": "不支持",
+      "installHint": "插件是包含 manifest.json 与入口脚本的文件夹，放入 plugins 目录后点击刷新即可。",
+      "type": {
+        "metadataScraper": "元数据刮削"
+      }
+    }
   },
   "statistics": {
     "tabs": {

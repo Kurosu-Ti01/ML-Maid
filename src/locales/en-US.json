@@ -163,6 +163,8 @@
       "noCover": "No cover selected",
       "selectFromPath": "Select from path",
       "addFromUrl": "Add from URL",
+      "urlDialogTitle": "Add Image from URL",
+      "urlDialogPlaceholder": "https://example.com/image.jpg",
       "remove": "Remove",
       "crop": "Crop"
     },
@@ -289,6 +291,23 @@
       "sortingSaved": "Sorting preferences saved"
     }
   },
+  "scraper": {
+    "open": "Scrape",
+    "title": "Scrape Metadata",
+    "searchPlaceholder": "Enter a title to search...",
+    "search": "Search",
+    "noPlugins": "No scraper plugins enabled. Enable one in Settings.",
+    "noResults": "No results found",
+    "back": "Back",
+    "apply": "Apply",
+    "applied": "Metadata applied to the form",
+    "fieldsTitle": "Select fields to apply",
+    "errors": {
+      "searchFailed": "Search failed: {error}",
+      "detailFailed": "Failed to fetch details: {error}",
+      "imageFailed": "Image download failed: {error}"
+    }
+  },
   "settings": {
     "title": "Settings",
     "generalSettings": "General Settings",
@@ -329,7 +348,19 @@
     "detect": "Detect",
     "localeEmulatorHint": "Used by the per-game \"Locale Emulator\" launch mode to run Japanese games with a Japanese locale. Install Locale Emulator, then browse to LEProc.exe or click Detect.",
     "localeEmulatorFound": "Found LEProc.exe: {path}",
-    "localeEmulatorNotFound": "Locale Emulator not found in common locations; please browse to LEProc.exe manually"
+    "localeEmulatorNotFound": "Locale Emulator not found in common locations; please browse to LEProc.exe manually",
+    "plugins": {
+      "title": "Plugins",
+      "refresh": "Refresh",
+      "refreshed": "Plugin list refreshed",
+      "openFolder": "Open Plugins Folder",
+      "empty": "No plugins installed. Put a plugin folder into the plugins directory, then refresh.",
+      "unsupported": "Unsupported",
+      "installHint": "A plugin is a folder containing manifest.json and its entry script. Drop it into the plugins directory and click Refresh.",
+      "type": {
+        "metadataScraper": "Metadata Scraper"
+      }
+    }
   },
   "statistics": {
     "tabs": {
