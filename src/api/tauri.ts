@@ -110,6 +110,7 @@ export const tauriApi: BackendApi = {
   getPluginsPath: () => invoke<{ pluginsPath: string }>('get_app_paths').then(p => p.pluginsPath),
   selectPluginArchive: () => pickFile([{ name: 'Plugin Archive', extensions: ['zip'] }]),
   installPluginArchive: (archivePath) => invoke('plugin_install_archive', { archivePath }),
+  uninstallPlugin: (dirName) => invoke('plugin_uninstall', { dirName }),
 
   getGameRecentDailyStats: (gameUuid, days) => invoke('get_game_recent_daily_stats', { gameUuid, days }),
   getGameDailyStatsRange: (gameUuid, startDate, endDate) => invoke('get_game_daily_stats_range', { gameUuid, startDate, endDate }),

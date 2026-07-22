@@ -149,6 +149,7 @@ pub fn run() {
             plugins::plugin_http_request,
             plugins::download_game_image,
             plugins::plugin_install_archive,
+            plugins::plugin_uninstall,
             stats_manager::get_game_recent_daily_stats,
             stats_manager::get_game_daily_stats_range,
             stats_manager::get_weekly_stats_by_date,
