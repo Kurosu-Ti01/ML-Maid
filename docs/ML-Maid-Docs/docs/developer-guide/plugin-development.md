@@ -237,5 +237,5 @@ const coverUrl = new URL(relativeSrc, res.finalUrl).href;
 
 - **Respect the target site.** Searches are user-triggered, so v1 has no built-in rate limiter — keep request counts per action low (one for `search`, few for `getDetails`) and honor documented API limits (VNDB: 200 requests / 5 min).
 - **Fail loud, not wrong.** Prefer throwing a clear error over returning half-guessed data.
-- **Distribute** by publishing your plugin folder (a repo or a zip); users drop it into `plugins/` and refresh. Official plugins are collected in [ML-Maid_Plugins](https://github.com/Kurosu-Ti01/ML-Maid_Plugins) — PRs welcome.
+- **Distribute as a zip.** Zip your plugin folder (or its contents — both layouts are accepted) and users install it via **Settings → Plugins → Import Plugin**. The target folder is named after the manifest `id`, and importing an archive with the same `id` upgrades the existing installation. Manually dropping the folder into `plugins/` still works. Official plugins are collected in [ML-Maid_Plugins](https://github.com/Kurosu-Ti01/ML-Maid_Plugins) — PRs welcome.
 - Remember users are trusting your code: keep `main.js` readable and unminified so it can be reviewed.

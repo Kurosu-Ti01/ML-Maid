@@ -36,6 +36,8 @@ image = { version = "0.25", default-features = false, features = ["png", "jpeg",
 # HTTP proxy for scraper plugins + remote image download (rustls avoids openssl)
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "gzip"] }
 base64 = "0.22"
+# Plugin archive import (deflate covers zips produced by common tools)
+zip = { version = "2", default-features = false, features = ["deflate"] }
 
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.58", features = [

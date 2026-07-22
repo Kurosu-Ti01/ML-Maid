@@ -237,5 +237,5 @@ const coverUrl = new URL(relativeSrc, res.finalUrl).href;
 
 - **尊重目标网站。** 搜索由用户手动触发,v1 没有内置限流器 —— 每个动作的请求数要克制(`search` 一次、`getDetails` 少数几次),遵守 API 的公开限额(VNDB:200 次 / 5 分钟)。
 - **宁可报错,不要出错。** 与其返回半猜的数据,不如抛出清晰的错误。
-- **分发**:发布你的插件文件夹(仓库或 zip),用户放进 `plugins/` 刷新即可。官方插件集中在 [ML-Maid_Plugins](https://github.com/Kurosu-Ti01/ML-Maid_Plugins) —— 欢迎 PR。
+- **以 zip 分发。** 把插件文件夹(或其内容 —— 两种布局都支持)打成 zip,用户通过**设置 → 插件 → 导入插件**安装。目标目录以 manifest 的 `id` 命名,导入同 `id` 的压缩包即为升级覆盖。手动把文件夹放进 `plugins/` 的方式依然有效。官方插件集中在 [ML-Maid_Plugins](https://github.com/Kurosu-Ti01/ML-Maid_Plugins) —— 欢迎 PR。
 - 用户安装即是信任你的代码:保持 `main.js` 可读、不压缩,便于审阅。

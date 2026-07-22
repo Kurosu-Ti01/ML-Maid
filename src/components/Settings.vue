@@ -192,6 +192,9 @@
           </template>
           <template #header-extra>
             <div class="plugin-actions">
+              <n-button size="small" type="primary" ghost :loading="importing" @click="importPlugin">
+                {{ $t('settings.plugins.import') }}
+              </n-button>
               <n-button size="small" @click="openPluginsFolder">
                 {{ $t('settings.plugins.openFolder') }}
               </n-button>
@@ -260,6 +263,24 @@
 
   function openPluginsFolder() {
     void pluginStore.openPluginsFolder()
+  }
+
+  const importing = ref(false)
+
+  async function importPlugin() {
+    importing.value = true
+    try {
+      const installed = await pluginStore.installFromArchive()
+      if (installed) {
+        message.success(t('settings.plugins.imported', { name: installed.manifest.name }))
+      }
+    } catch (error) {
+      console.error('Plugin import failed:', error)
+      const text = error instanceof Error ? error.message : String(error)
+      message.error(t('settings.plugins.importFailed', { error: text }))
+    } finally {
+      importing.value = false
+    }
   }
 
   // Two-way proxy so the optional launcher section always exists when edited
