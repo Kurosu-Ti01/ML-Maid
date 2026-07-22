@@ -69,6 +69,43 @@ export interface GameSessionEndedData {
   endTime: number
 }
 
+export interface PluginManifestInfo {
+  id: string
+  name: string
+  version: string
+  type: string
+  apiVersion: number
+  entry: string
+  description?: string
+  author?: string
+  homepage?: string
+}
+
+export interface InstalledPluginInfo {
+  dirName: string
+  manifest: PluginManifestInfo
+}
+
+export interface PluginHttpRequestParams {
+  url: string
+  method?: 'GET' | 'POST' | 'HEAD'
+  headers?: Record<string, string>
+  body?: string
+}
+
+export interface PluginHttpResponse {
+  status: number
+  headers: Record<string, string>
+  bodyBase64: string
+  finalUrl: string
+}
+
+export interface DownloadGameImageParams {
+  url: string
+  gameUuid: string
+  imageType: 'icon' | 'background' | 'cover'
+}
+
 export interface BackendApi {
   // game database operations
   getGameById(uuid: string): Promise<gameData | null>
@@ -96,6 +133,13 @@ export interface BackendApi {
   cropGameImage(params: CropGameImageParams): Promise<ProcessGameImageResult>
   finalizeGameImages(gameUuid: string): Promise<{ success: boolean; movedFiles?: any[]; message?: string; error?: string }>
   cleanupTempImages(gameUuid: string): Promise<{ success: boolean; message?: string; error?: string }>
+
+  // plugins
+  listPlugins(): Promise<InstalledPluginInfo[]>
+  readPluginEntry(dirName: string): Promise<string>
+  pluginHttpRequest(params: PluginHttpRequestParams): Promise<PluginHttpResponse>
+  downloadGameImage(params: DownloadGameImageParams): Promise<ProcessGameImageResult>
+  getPluginsPath(): Promise<string>
 
   // statistics
   getGameRecentDailyStats(gameUuid: string, days?: number): Promise<DailyStatsItem[]>
