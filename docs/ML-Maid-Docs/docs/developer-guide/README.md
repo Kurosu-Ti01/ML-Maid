@@ -11,8 +11,10 @@ This guide documents how the implemented features of ML-Maid 0.5.0 work and how 
 1. [Development and Architecture](./architecture.md)
 2. [Frontend Implementation](./frontend.md)
 3. [Backend Implementation](./backend.md)
-4. [Storage, Migration, and Release](./storage-release.md)
-5. [API Reference and Maintenance](./api-maintenance.md)
+4. [Plugin System](./plugin-system.md)
+5. [Plugin Development](./plugin-development.md)
+6. [Storage, Migration, and Release](./storage-release.md)
+7. [API Reference and Maintenance](./api-maintenance.md)
 
 The application combines a Vue 3 webview frontend with a Rust/Tauri backend. Frontend code reaches native functionality only through the `BackendApi` adapter in `src/api`; Rust commands own SQLite, files, processes, and operating-system integration.
 
