@@ -211,21 +211,7 @@ fn crop_image_inner(paths: &AppPaths, params: &CropImageParams) -> CmdResult<Pro
     let temp_dir = paths.temp_path.join("images").join(&params.game_uuid);
     fs::create_dir_all(&temp_dir).map_err(e("create temp dir"))?;
 
-    // Drop stale same-stem files first (e.g. background.jpg replaced by
-    // background.png): finalize/apply_moved_image_paths match by stem, so
-    // leftovers would make the resulting field value nondeterministic
-    if let Ok(entries) = fs::read_dir(&temp_dir) {
-        for entry in entries.flatten() {
-            let same_stem = entry
-                .path()
-                .file_stem()
-                .and_then(|s| s.to_str())
-                .is_some_and(|stem| stem == params.image_type);
-            if same_stem {
-                let _ = fs::remove_file(entry.path());
-            }
-        }
-    }
+    clear_same_stem_files(&temp_dir, &params.image_type);
 
     let dest = temp_dir.join(format!("{}.{}", params.image_type, out_ext));
     fs::write(&dest, &buf).map_err(e("write cropped image"))?;
@@ -237,6 +223,25 @@ fn crop_image_inner(paths: &AppPaths, params: &CropImageParams) -> CmdResult<Pro
         preview_url: Some(path_str),
         error: None,
     })
+}
+
+/// Drop stale same-stem files (e.g. background.jpg about to be replaced by
+/// background.png): finalize/apply_moved_image_paths match by stem, so
+/// leftovers would make the resulting field value nondeterministic.
+/// Shared by crop and the plugin image download.
+pub(crate) fn clear_same_stem_files(dir: &Path, stem: &str) {
+    if let Ok(entries) = fs::read_dir(dir) {
+        for entry in entries.flatten() {
+            let same_stem = entry
+                .path()
+                .file_stem()
+                .and_then(|s| s.to_str())
+                .is_some_and(|s| s == stem);
+            if same_stem {
+                let _ = fs::remove_file(entry.path());
+            }
+        }
+    }
 }
 
 /// Clamp a requested crop rect to the image bounds; error if nothing is left.
@@ -450,6 +455,7 @@ mod tests {
             temp_path: root.join("temp"),
             img_path_game: root.join("library").join("images"),
             config_path: root.join("config"),
+            plugins_path: root.join("plugins"),
         }
     }
 

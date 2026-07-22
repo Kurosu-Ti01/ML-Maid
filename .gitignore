@@ -33,6 +33,7 @@ docs/ML-Maid-Docs/docs/.vuepress/dist/
 library
 config
 temp
+/plugins/
 
 # TODO
 TODO.md

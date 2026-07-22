@@ -19,6 +19,7 @@ pub struct AppPaths {
     pub temp_path: PathBuf,
     pub img_path_game: PathBuf,
     pub config_path: PathBuf,
+    pub plugins_path: PathBuf,
 }
 
 /// Installed vs portable detection. Installed means data goes to
@@ -76,6 +77,7 @@ pub fn resolve() -> AppPaths {
         temp_path: app_data_path.join("temp"),
         img_path_game: app_data_path.join("library").join("images"),
         config_path: app_data_path.join("config"),
+        plugins_path: app_data_path.join("plugins"),
         app_data_path,
     }
 }
