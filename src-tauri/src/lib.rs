@@ -3,6 +3,7 @@ mod file_manager;
 mod game_launcher;
 mod game_manager;
 mod paths;
+mod plugins;
 mod process_monitor;
 mod settings;
 mod stats_manager;
@@ -74,6 +75,9 @@ pub fn run() {
             // Grant asset protocol access to the (runtime-resolved) data dir
             file_manager::allow_asset_scope(app.handle(), &app_paths);
 
+            // Make the drop-a-folder plugin install target visible from day one
+            let _ = std::fs::create_dir_all(&app_paths.plugins_path);
+
             // Settings (config/settings.conf)
             let settings_state = settings::SettingsState::load(&app_paths.config_path)?;
             let language = settings_state.get().general.language;
@@ -140,6 +144,10 @@ pub fn run() {
             file_manager::crop_game_image,
             file_manager::finalize_game_images,
             file_manager::cleanup_temp_images,
+            plugins::plugins_list,
+            plugins::plugin_read_entry,
+            plugins::plugin_http_request,
+            plugins::download_game_image,
             stats_manager::get_game_recent_daily_stats,
             stats_manager::get_game_daily_stats_range,
             stats_manager::get_weekly_stats_by_date,
