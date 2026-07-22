@@ -63,6 +63,15 @@ export const usePluginStore = defineStore('plugins', () => {
     await api.openFolder(await api.getPluginsPath())
   }
 
+  /** Pick a distributed .zip and install it; null if the dialog was canceled */
+  async function installFromArchive(): Promise<InstalledPluginInfo | null> {
+    const picked = await api.selectPluginArchive()
+    if (picked.canceled || picked.filePaths.length === 0) return null
+    const installed = await api.installPluginArchive(picked.filePaths[0])
+    await refresh()
+    return installed
+  }
+
   return {
     plugins,
     loading,
@@ -73,6 +82,7 @@ export const usePluginStore = defineStore('plugins', () => {
     refresh,
     ensureLoaded,
     setEnabled,
-    openPluginsFolder
+    openPluginsFolder,
+    installFromArchive
   }
 })

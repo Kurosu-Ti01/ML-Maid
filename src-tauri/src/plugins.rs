@@ -351,6 +351,139 @@ async fn download_image_inner(
     })
 }
 
+// ==========================================
+//  Plugin archive import
+// ==========================================
+
+/// Total uncompressed size cap for an imported plugin archive
+const MAX_ARCHIVE_TOTAL_BYTES: usize = 20 * 1024 * 1024;
+
+/// Install a plugin from a distributed .zip archive. The manifest may sit at
+/// the archive root or inside a single top-level folder (the natural result
+/// of zipping the plugin directory). The target folder is named after the
+/// manifest id; an existing installation is replaced (upgrade path).
+///
+/// Everything is read and validated in memory first — a rejected archive
+/// leaves the plugins directory untouched.
+#[tauri::command]
+pub fn plugin_install_archive(
+    paths: tauri::State<AppPaths>,
+    archive_path: String,
+) -> CmdResult<InstalledPlugin> {
+    install_archive_inner(&paths.plugins_path, &archive_path)
+}
+
+fn install_archive_inner(plugins_path: &Path, archive_path: &str) -> CmdResult<InstalledPlugin> {
+    let file = fs::File::open(archive_path).map_err(e("open archive"))?;
+    let mut archive = zip::ZipArchive::new(file).map_err(e("read archive"))?;
+
+    let names: Vec<String> = (0..archive.len())
+        .filter_map(|i| {
+            archive
+                .by_index(i)
+                .ok()
+                .map(|f| f.name().replace('\\', "/"))
+        })
+        .collect();
+    let prefix = find_manifest_prefix(&names)
+        .ok_or("no manifest.json found at the archive root or in a single top-level folder")?;
+
+    // Collect (relative path, bytes) with traversal and size checks
+    use std::io::Read;
+    let mut files: Vec<(String, Vec<u8>)> = Vec::new();
+    let mut total = 0usize;
+    for i in 0..archive.len() {
+        let mut entry = archive.by_index(i).map_err(e("read archive entry"))?;
+        if entry.is_dir() {
+            continue;
+        }
+        // enclosed_name rejects absolute paths and `..` components (zip-slip)
+        let Some(safe) = entry.enclosed_name() else {
+            return Err(format!("unsafe path in archive: {}", entry.name()));
+        };
+        let name = safe.to_string_lossy().replace('\\', "/");
+        let Some(rel) = name.strip_prefix(&prefix) else {
+            continue; // stray file outside the plugin folder (e.g. __MACOSX)
+        };
+        if rel.is_empty() {
+            continue;
+        }
+        let mut buf = Vec::new();
+        let remaining = (MAX_ARCHIVE_TOTAL_BYTES - total) as u64;
+        (&mut entry)
+            .take(remaining + 1)
+            .read_to_end(&mut buf)
+            .map_err(e("extract archive entry"))?;
+        total += buf.len();
+        if total > MAX_ARCHIVE_TOTAL_BYTES {
+            return Err(format!(
+                "archive exceeds the {} MB limit",
+                MAX_ARCHIVE_TOTAL_BYTES / (1024 * 1024)
+            ));
+        }
+        files.push((rel.to_string(), buf));
+    }
+
+    let manifest_bytes = &files
+        .iter()
+        .find(|(rel, _)| rel == "manifest.json")
+        .ok_or("archive has no manifest.json")?
+        .1;
+    let manifest_text = String::from_utf8(manifest_bytes.clone()).map_err(e("decode manifest"))?;
+    let manifest: PluginManifest =
+        serde_json::from_str(&manifest_text).map_err(e("parse manifest"))?;
+    if !is_safe_name(manifest.id.trim()) {
+        return Err(format!(
+            "manifest id is not a valid folder name: {}",
+            manifest.id
+        ));
+    }
+    if !is_safe_name(&manifest.entry) {
+        return Err(format!("invalid plugin entry: {}", manifest.entry));
+    }
+    if !files.iter().any(|(rel, _)| rel == &manifest.entry) {
+        return Err(format!(
+            "entry script '{}' is missing from the archive",
+            manifest.entry
+        ));
+    }
+
+    // Validated: replace any existing installation and write everything out
+    let dir_name = manifest.id.trim().to_string();
+    let target = plugins_path.join(&dir_name);
+    if target.exists() {
+        fs::remove_dir_all(&target).map_err(e("remove old plugin"))?;
+    }
+    for (rel, bytes) in &files {
+        let dest = target.join(rel.replace('/', std::path::MAIN_SEPARATOR_STR));
+        if let Some(parent) = dest.parent() {
+            fs::create_dir_all(parent).map_err(e("create plugin dir"))?;
+        }
+        fs::write(&dest, bytes).map_err(e("write plugin file"))?;
+    }
+
+    Ok(InstalledPlugin { dir_name, manifest })
+}
+
+/// "" when manifest.json is at the root, "<dir>/" when it sits in exactly one
+/// top-level folder, None otherwise.
+fn find_manifest_prefix(names: &[String]) -> Option<String> {
+    if names.iter().any(|n| n == "manifest.json") {
+        return Some(String::new());
+    }
+    let mut prefixes: Vec<&str> = names
+        .iter()
+        .filter_map(|n| n.strip_suffix("/manifest.json"))
+        .filter(|p| !p.contains('/'))
+        .collect();
+    prefixes.sort();
+    prefixes.dedup();
+    match prefixes[..] {
+        [only] => Some(format!("{only}/")),
+        _ => None,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -444,5 +577,102 @@ mod tests {
             .unwrap();
         assert_eq!(sniffed_ext(&png).unwrap(), "png");
         assert!(sniffed_ext(b"<html>not an image</html>").is_err());
+    }
+
+    // ---- archive import ----
+
+    fn build_zip(entries: &[(&str, &str)]) -> Vec<u8> {
+        use std::io::Write;
+        let mut buf = std::io::Cursor::new(Vec::new());
+        let mut w = zip::ZipWriter::new(&mut buf);
+        let opts = zip::write::SimpleFileOptions::default();
+        for (name, content) in entries {
+            w.start_file(*name, opts).unwrap();
+            w.write_all(content.as_bytes()).unwrap();
+        }
+        w.finish().unwrap();
+        buf.into_inner()
+    }
+
+    fn temp_zip(tag: &str, bytes: &[u8]) -> std::path::PathBuf {
+        let path = std::env::temp_dir().join(format!(
+            "ml-maid-plugin-zip-{tag}-{}.zip",
+            std::process::id()
+        ));
+        fs::write(&path, bytes).unwrap();
+        path
+    }
+
+    const MANIFEST: &str = r#"{ "id": "demo", "name": "Demo", "version": "1.0.0",
+        "type": "metadata-scraper", "apiVersion": 1 }"#;
+
+    #[test]
+    fn manifest_prefix_detection() {
+        let root = vec!["manifest.json".to_string(), "main.js".to_string()];
+        assert_eq!(find_manifest_prefix(&root), Some(String::new()));
+
+        let nested = vec!["demo/manifest.json".to_string(), "demo/main.js".to_string()];
+        assert_eq!(find_manifest_prefix(&nested), Some("demo/".to_string()));
+
+        let too_deep = vec!["a/b/manifest.json".to_string()];
+        assert_eq!(find_manifest_prefix(&too_deep), None);
+
+        let ambiguous = vec!["a/manifest.json".to_string(), "b/manifest.json".to_string()];
+        assert_eq!(find_manifest_prefix(&ambiguous), None);
+    }
+
+    #[test]
+    fn archive_install_root_and_nested_layouts() {
+        let plugins_dir =
+            std::env::temp_dir().join(format!("ml-maid-plugin-install-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&plugins_dir);
+
+        // Nested layout (zipped folder), replaces a previous install
+        let zip = temp_zip(
+            "nested",
+            &build_zip(&[
+                ("demo/manifest.json", MANIFEST),
+                ("demo/main.js", "MLMaid.register({})"),
+                ("__MACOSX/junk", "ignored"),
+            ]),
+        );
+        let installed = install_archive_inner(&plugins_dir, zip.to_str().unwrap()).unwrap();
+        assert_eq!(installed.dir_name, "demo");
+        assert!(plugins_dir.join("demo").join("main.js").exists());
+        assert!(!plugins_dir.join("demo").join("junk").exists());
+
+        // Root layout upgrade overwrites the folder
+        let zip2 = temp_zip(
+            "root",
+            &build_zip(&[("manifest.json", MANIFEST), ("main.js", "// v2")]),
+        );
+        install_archive_inner(&plugins_dir, zip2.to_str().unwrap()).unwrap();
+        let code = fs::read_to_string(plugins_dir.join("demo").join("main.js")).unwrap();
+        assert_eq!(code, "// v2");
+
+        let _ = fs::remove_dir_all(&plugins_dir);
+        let _ = fs::remove_file(&zip);
+        let _ = fs::remove_file(&zip2);
+    }
+
+    #[test]
+    fn archive_install_rejects_bad_archives() {
+        let plugins_dir =
+            std::env::temp_dir().join(format!("ml-maid-plugin-badzip-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&plugins_dir);
+
+        // No manifest anywhere
+        let no_manifest = temp_zip("nomanifest", &build_zip(&[("main.js", "x")]));
+        assert!(install_archive_inner(&plugins_dir, no_manifest.to_str().unwrap()).is_err());
+
+        // Entry script named in the manifest is missing
+        let no_entry = temp_zip("noentry", &build_zip(&[("manifest.json", MANIFEST)]));
+        assert!(install_archive_inner(&plugins_dir, no_entry.to_str().unwrap()).is_err());
+
+        // Nothing was written for either
+        assert!(!plugins_dir.exists());
+
+        let _ = fs::remove_file(&no_manifest);
+        let _ = fs::remove_file(&no_entry);
     }
 }

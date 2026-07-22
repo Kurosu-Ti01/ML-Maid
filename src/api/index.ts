@@ -140,6 +140,8 @@ export interface BackendApi {
   pluginHttpRequest(params: PluginHttpRequestParams): Promise<PluginHttpResponse>
   downloadGameImage(params: DownloadGameImageParams): Promise<ProcessGameImageResult>
   getPluginsPath(): Promise<string>
+  selectPluginArchive(): Promise<FileDialogResult>
+  installPluginArchive(archivePath: string): Promise<InstalledPluginInfo>
 
   // statistics
   getGameRecentDailyStats(gameUuid: string, days?: number): Promise<DailyStatsItem[]>
