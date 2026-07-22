@@ -180,29 +180,87 @@
             <p class="setting-hint">{{ $t('settings.localeEmulatorHint') }}</p>
           </n-form>
         </n-card>
+
+        <n-card class="settings-card" hoverable style="margin-top: 16px;">
+          <template #header>
+            <div class="card-header">
+              <n-icon size="20">
+                <component :is="ExtensionOutlined" />
+              </n-icon>
+              <span>{{ $t('settings.plugins.title') }}</span>
+            </div>
+          </template>
+          <template #header-extra>
+            <div class="plugin-actions">
+              <n-button size="small" @click="openPluginsFolder">
+                {{ $t('settings.plugins.openFolder') }}
+              </n-button>
+              <n-button size="small" :loading="pluginStore.loading" @click="refreshPlugins">
+                {{ $t('settings.plugins.refresh') }}
+              </n-button>
+            </div>
+          </template>
+
+          <n-empty v-if="pluginStore.plugins.length === 0" :description="$t('settings.plugins.empty')"
+            style="padding: 24px 0" />
+          <div v-else class="plugin-list">
+            <div v-for="plugin in pluginStore.plugins" :key="plugin.manifest.id" class="plugin-row">
+              <div class="plugin-info">
+                <div class="plugin-name-row">
+                  <span class="plugin-name">{{ plugin.manifest.name }}</span>
+                  <n-tag size="small" :bordered="false">v{{ plugin.manifest.version }}</n-tag>
+                  <n-tag v-if="pluginStore.isSupported(plugin.manifest)" size="small" type="info" :bordered="false">
+                    {{ $t('settings.plugins.type.metadataScraper') }}
+                  </n-tag>
+                  <n-tag v-else size="small" type="warning" :bordered="false">
+                    {{ $t('settings.plugins.unsupported') }}
+                  </n-tag>
+                </div>
+                <p v-if="plugin.manifest.description" class="plugin-desc">{{ plugin.manifest.description }}</p>
+              </div>
+              <n-switch :value="pluginStore.isEnabled(plugin.manifest.id)"
+                :disabled="!pluginStore.isSupported(plugin.manifest)"
+                @update:value="(v: boolean) => pluginStore.setEnabled(plugin.manifest.id, v)" />
+            </div>
+          </div>
+          <p class="setting-hint plugin-hint">{{ $t('settings.plugins.installHint') }}</p>
+        </n-card>
       </div>
     </n-scrollbar>
   </div>
 </template>
 
 <script setup lang="ts" name="Settings">
-  import { h, computed, ref, onBeforeUnmount } from 'vue'
+  import { h, computed, ref, onBeforeUnmount, onMounted } from 'vue'
   import { NIcon, useMessage } from 'naive-ui'
   import type { SelectOption, SelectRenderLabel } from 'naive-ui'
   import { useDebounceFn } from '@vueuse/core'
   import { useSettingsStore } from '../stores/settings'
+  import { usePluginStore } from '../stores/plugins'
   import { useTheme } from '@/composables/useTheme'
   import { APPEARANCE_DEFAULTS, resolveAppearanceTheme, buildAmbientFilter } from '@/composables/useAppearance'
-  import { SettingsOutlined, DesktopWindowsOutlined, RocketLaunchOutlined, ColorLensOutlined } from '@vicons/material'
+  import { SettingsOutlined, DesktopWindowsOutlined, RocketLaunchOutlined, ColorLensOutlined, ExtensionOutlined } from '@vicons/material'
   import { Wrench16Regular, WeatherSunny16Regular, WeatherMoon16Regular } from '@vicons/fluent'
   import { useI18n } from 'vue-i18n'
   import { api } from '@/api'
   import defaultBackground from '/default/ML-Maid-Background.png'
 
   const settingsStore = useSettingsStore()
+  const pluginStore = usePluginStore()
   const message = useMessage()
   const { t } = useI18n()
   const detecting = ref(false)
+
+  onMounted(() => { void pluginStore.ensureLoaded() })
+
+  async function refreshPlugins() {
+    await pluginStore.refresh()
+    message.success(t('settings.plugins.refreshed'))
+  }
+
+  function openPluginsFolder() {
+    void pluginStore.openPluginsFolder()
+  }
 
   // Two-way proxy so the optional launcher section always exists when edited
   const localeEmulatorPath = computed({
@@ -447,6 +505,54 @@
 
   .le-path-row .n-input {
     flex: 1;
+  }
+
+  .plugin-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .plugin-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .plugin-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--game-item-border);
+  }
+
+  .plugin-row:last-child {
+    border-bottom: none;
+  }
+
+  .plugin-info {
+    min-width: 0;
+  }
+
+  .plugin-name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .plugin-name {
+    font-weight: 600;
+  }
+
+  .plugin-desc {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: var(--color-muted-dark);
+  }
+
+  .plugin-hint {
+    margin-top: 10px;
   }
 
   .setting-hint {

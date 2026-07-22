@@ -49,6 +49,15 @@ pub struct LauncherSettings {
     pub locale_emulator_path: String,
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct PluginsSettings {
+    /// Disabled plugin ids; absent = enabled, so new plugins work out of
+    /// the box and uninstalled ones leave no meaningful residue
+    #[serde(default)]
+    pub disabled: Vec<String>,
+}
+
 /// Per-theme glass/ambient overrides. `None` = use the CSS default.
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
@@ -91,6 +100,8 @@ pub struct Settings {
     pub launcher: LauncherSettings,
     #[serde(default)]
     pub appearance: AppearanceSettings,
+    #[serde(default)]
+    pub plugins: PluginsSettings,
 }
 
 fn default_sorting() -> SortingSettings {
@@ -112,6 +123,7 @@ impl Default for Settings {
             filtering: FilteringSettings::default(),
             launcher: LauncherSettings::default(),
             appearance: AppearanceSettings::default(),
+            plugins: PluginsSettings::default(),
         }
     }
 }
@@ -189,6 +201,7 @@ fn parse_ini(content: &str) -> Settings {
             ("filtering", "publishers[]") => settings.filtering.publishers.push(value),
             ("filtering", "tags[]") => settings.filtering.tags.push(value),
             ("launcher", "localeEmulatorPath") => settings.launcher.locale_emulator_path = value,
+            ("plugins", "disabled[]") => settings.plugins.disabled.push(value),
             ("appearance.light", k) => {
                 let theme = settings.appearance.light.get_or_insert_default();
                 apply_appearance_key(theme, k, &value);
@@ -256,6 +269,13 @@ fn to_ini(s: &Settings) -> String {
             "localeEmulatorPath={}\n",
             s.launcher.locale_emulator_path
         ));
+    }
+
+    if !s.plugins.disabled.is_empty() {
+        out.push_str("\n[plugins]\n");
+        for id in &s.plugins.disabled {
+            out.push_str(&format!("disabled[]={id}\n"));
+        }
     }
 
     append_appearance_theme(&mut out, "appearance.light", &s.appearance.light);
@@ -410,5 +430,23 @@ mod tests {
         assert!(parsed.appearance.light.is_none());
         assert!(parsed.appearance.dark.is_none());
         assert!(!to_ini(&parsed).contains("[appearance"));
+    }
+
+    /// Disabled plugin ids round-trip; an empty list writes no section.
+    #[test]
+    fn ini_plugins_round_trip() {
+        let mut s = Settings::default();
+        assert!(!to_ini(&s).contains("[plugins]"));
+
+        s.plugins.disabled = vec!["vndb-scraper".into(), "other one".into()];
+        let ini = to_ini(&s);
+        assert!(ini.contains("[plugins]\ndisabled[]=vndb-scraper\ndisabled[]=other one\n"));
+
+        let parsed = parse_ini(&ini);
+        assert_eq!(parsed.plugins.disabled, vec!["vndb-scraper", "other one"]);
+
+        // Configs from before the plugin feature parse as "all enabled"
+        let old = parse_ini("[general]\ntheme=auto\nlanguage=en-US\nminimizeToTray=true\n");
+        assert!(old.plugins.disabled.is_empty());
     }
 }
