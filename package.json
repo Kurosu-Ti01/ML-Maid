@@ -3,7 +3,7 @@
   "description": "A Visual Novel Manager",
   "author": "Kurosu-Ti01",
   "private": true,
-  "version": "0.5.0",
+  "version": "0.5.1",
   "type": "module",
   "scripts": {
     "dev": "tauri dev --config src-tauri/tauri.dev.conf.json",
